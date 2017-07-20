@@ -109,7 +109,8 @@ function print_help() {
 }
 
 function check_message_for_command(bot, metadata, message) {
-  var cmd = message.toLowerCase();
+  var ex = message.split(" ");
+  var cmd = ex[0].toLowerCase();
   if (cmd == "help") {
     console.log("Printing requested help from user: " + metadata.user);
     bot.sendMessage({
@@ -119,7 +120,7 @@ function check_message_for_command(bot, metadata, message) {
   }
   else if (cmds.hasOwnProperty(cmd)) {
       console.log("Handle command: %s \tUser: %s", cmd, metadata.user);
-      cmds[cmd](bot, metadata, message);
+      cmds[cmd](bot, metadata, message.substring(cmd.length));
   }
 }
 
