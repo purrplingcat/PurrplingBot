@@ -96,10 +96,11 @@ function load_plugins(pluginDir, bot) {
 
 function print_help() {
     //TODO: Rewrite to StringBuilder
+    var prefix = config.cmdPrefix;
     var help_text = "Availaible commands: ";
     var iteration = 0;
     for (cmd_name in cmds) {
-      help_text += cmd_name;
+      help_text += prefix + cmd_name;
       if (iteration != Object.keys(cmds).length - 1) {
         help_text += ", ";
       }
@@ -110,7 +111,13 @@ function print_help() {
 
 function check_message_for_command(bot, metadata, message) {
   var ex = message.split(" ");
+  var prefix = config.cmdPrefix;
   var cmd = ex[0].toLowerCase();
+  if (!cmd.startsWith(prefix)) {
+    return;
+  }
+  cmd = cmd.substring(prefix.length);
+  message = message.substring(cmd.length + prefix.length + 1);
   if (cmd == "help") {
     console.log("Printing requested help from user: " + metadata.user);
     bot.sendMessage({
@@ -120,7 +127,11 @@ function check_message_for_command(bot, metadata, message) {
   }
   else if (cmds.hasOwnProperty(cmd)) {
       console.log("Handle command: %s \tUser: %s", cmd, metadata.user);
-      cmds[cmd](bot, metadata, message.substring(cmd.length));
+      cmds[cmd](bot, metadata, message);
+  } else {
+    if (prefix.length > 0) {
+      console.log("Unknown command: %s \tUser: %s", cmd, metadata.user);
+    }
   }
 }
 
