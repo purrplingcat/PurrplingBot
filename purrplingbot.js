@@ -1,7 +1,11 @@
+const EventEmmiter = require('events');
 var Discord = require('discord.io');
 
 const VERSION = "1.1.0-beta";
 const CODENAME = "Chiara";
+
+class BotEventBus extends EventEmmiter {}
+const eventBus = new BotEventBus;
 
 require('console-stamp')(console, 'dd.mm.yyyy HH:MM:ss.l');
 console.log("Starting PurrplingBot version " + VERSION + " '" + CODENAME + "'");
@@ -69,7 +73,7 @@ function load_plugins(pluginDir, bot) {
         plugin = require(pluginDir + "/" + file);
         console.log("Loaded plugin '" + file + "'");
         if ("init" in plugin) {
-          plugin.init(bot);
+          plugin.init(bot, eventBus);
           console.log("Triggered init for plugin '" + file + "'");
         }
         if ("commands" in plugin) {
@@ -128,6 +132,7 @@ function check_message_for_command(bot, metadata, message) {
   else if (cmds.hasOwnProperty(cmd)) {
       console.log("Handle command: %s \tUser: %s", cmd, metadata.user);
       cmds[cmd](bot, metadata, message);
+      eventBus.emit("commandHandled", cmd, message, bot);
   } else {
     if (prefix.length > 0) {
       console.log("Unknown command: %s \tUser: %s", cmd, metadata.user);
@@ -138,6 +143,7 @@ function check_message_for_command(bot, metadata, message) {
 bot.on('ready', function() {
     console.log('Logged in as %s - %s', bot.username, bot.id);
     load_plugins(config.pluginDir, bot);
+    eventBus.emit("botReady");
     console.info("PurrplingBot READY!");
 });
 
@@ -148,4 +154,5 @@ bot.on('message', function(user, userID, channelID, message, event) {
       channelID: channelID
   };
   check_message_for_command(bot, metadata, message); //check and handle cmd
+  eventBus.emit("message", bot, metadata, message, event);
 });
