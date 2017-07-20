@@ -37,7 +37,7 @@ var cmds = {
     },
     "say": function(bot, metadata, message) {
         if ("admins" in config) {
-          if (metadata.user in config.admins) {
+          if (config.admins.indexOf(metadata.user) > -1) {
             bot.sendMessage({
                 to: metadata.channelID,
                 message: message
@@ -45,6 +45,7 @@ var cmds = {
             console.log("I said '%s' requested by '%s'", message, metadata.user);
           } else {
             console.log("User '%s' has no permissions for command 'say'!", metadata.user);
+            console.log("Permited users: %s", config.admins);
           }
         } else {
           console.warn("Node 'admins' is not defined in configuration!");
