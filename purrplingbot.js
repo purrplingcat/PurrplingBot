@@ -7,6 +7,8 @@ const CODENAME = "Chiara";
 class BotEventBus extends EventEmmiter {}
 const eventBus = new BotEventBus;
 
+var plugins = {};
+
 require('console-stamp')(console, 'dd.mm.yyyy HH:MM:ss.l');
 console.log("Starting PurrplingBot version " + VERSION + " '" + CODENAME + "'");
 
@@ -86,6 +88,7 @@ function load_plugins(pluginDir, bot) {
               console.error(err);
             }
           })
+          plugins[file] = plugin; //Add plugin to plugin registry
         }
       } catch (err) {
         console.error("Error while loading plugin ''" + file + "'' ");
@@ -156,3 +159,11 @@ bot.on('message', function(user, userID, channelID, message, event) {
   check_message_for_command(bot, metadata, message); //check and handle cmd
   eventBus.emit("message", bot, metadata, message, event);
 });
+
+exports.getPluginRegistry = function () {
+  return plugins;
+}
+
+exports.getCommandRegistry = function () {
+  return cmds;
+}
