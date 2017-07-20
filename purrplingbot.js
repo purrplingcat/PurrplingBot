@@ -4,7 +4,7 @@ const VERSION = "1.1.0-beta";
 const CODENAME = "Chiara";
 
 require('console-stamp')(console, 'dd.mm.yyyy HH:MM:ss.l');
-console.log("Starting PurrplingBot version " + VERSION + " " + CODENAME);
+console.log("Starting PurrplingBot version " + VERSION + " '" + CODENAME + "'");
 
 try {
   const config = require("./config.json");
@@ -54,7 +54,7 @@ var cmds = {
     "version": function(bot, metadata) {
         bot.sendMessage({
             to: metadata.channelID,
-            message: "PurrplingBot version " + VERSION + " " + CODENAME
+            message: "PurrplingBot version " + VERSION + " '" + CODENAME + "'"
         });
         console.log("Version info sent to %s in %s", metadata.user, metadata.channelID);
     }
