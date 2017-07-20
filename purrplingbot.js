@@ -87,7 +87,7 @@ function load_plugins(pluginDir, bot) {
               console.error("<" + file + "> Can't register command: " + cmd);
               console.error(err);
             }
-          })
+          });
           plugins[file] = plugin; //Add plugin to plugin registry
         }
       } catch (err) {
