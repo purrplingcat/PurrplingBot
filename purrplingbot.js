@@ -35,6 +35,21 @@ var cmds = {
         });
         console.log("Greeting %s in %s", metadata.user, metadata.channelID);
     },
+    "say": function(bot, metadata, message) {
+        if ("admins" in config) {
+          if (metadata.user in config.admins) {
+            bot.sendMessage({
+                to: metadata.channelID,
+                message: message
+            });
+            console.log("I said '%s' requested by '%s'", message, metadata.user);
+          } else {
+            console.log("User '%s' has no permissions for command 'say'!", metadata.user);
+          }
+        } else {
+          console.warn("Node 'admins' is not defined in configuration!");
+        }
+    },
     "version": function(bot, metadata) {
         bot.sendMessage({
             to: metadata.channelID,
