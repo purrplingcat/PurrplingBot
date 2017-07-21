@@ -4,8 +4,7 @@ var Discord = require('discord.io');
 const VERSION = "1.1.0-beta";
 const CODENAME = "Chiara";
 
-class BotEventBus extends EventEmmiter {}
-const eventBus = new BotEventBus;
+const eventBus = new EventEmmiter();
 
 var plugins = {};
 
@@ -87,13 +86,15 @@ function load_plugins(pluginDir, bot) {
               console.error("<" + file + "> Can't register command: " + cmd);
               console.error(err);
             }
+            eventBus.emit("commandRegister", cmd);
           });
           plugins[file] = plugin; //Add plugin to plugin registry
+          eventBus.emit("pluginLoaded", plugin, file);
         }
       } catch (err) {
         console.error("Error while loading plugin ''" + file + "'' ");
-        console.error(err);
-        process.exit(10);
+        console.error(err.stack);
+        process.exit(10); // PLUGIN FAILURE! Kill the bot
       }
     })
   } catch (err) {
@@ -131,6 +132,7 @@ function check_message_for_command(bot, metadata, message) {
         to: metadata.channelID,
         message: print_help()
     });
+    eventBus.emit("commandHandled", cmd, message, bot);
   }
   else if (cmds.hasOwnProperty(cmd)) {
       console.log("Handle command: %s \tUser: %s", cmd, metadata.user);
@@ -146,7 +148,7 @@ function check_message_for_command(bot, metadata, message) {
 bot.on('ready', function() {
     console.log('Logged in as %s - %s', bot.username, bot.id);
     load_plugins(config.pluginDir, bot);
-    eventBus.emit("botReady");
+    eventBus.emit("ready");
     console.info("PurrplingBot READY!");
 });
 
@@ -157,7 +159,7 @@ bot.on('message', function(user, userID, channelID, message, event) {
       channelID: channelID
   };
   check_message_for_command(bot, metadata, message); //check and handle cmd
-  eventBus.emit("message", bot, metadata, message, event);
+  eventBus.emit("message", bot, metadata, message);
 });
 
 exports.getPluginRegistry = function () {
@@ -166,4 +168,8 @@ exports.getPluginRegistry = function () {
 
 exports.getCommandRegistry = function () {
   return cmds;
+}
+
+exports.getEventBus = function () {
+  return eventBus;
 }
