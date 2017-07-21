@@ -44,8 +44,11 @@ var cmds = {
             });
             console.log("I said '%s' requested by '%s'", message, metadata.user);
           } else {
+            bot.sendMessage({
+                to: metadata.channelID,
+                message: "Mňaaaau!! Ty mi nemáš co poroučet, co mám nebo nemám říkat :P"
+            });
             console.log("User '%s' has no permissions for command 'say'!", metadata.user);
-            console.log("Permited users: %s", config.admins);
           }
         } else {
           console.warn("Node 'admins' is not defined in configuration!");
