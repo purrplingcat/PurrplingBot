@@ -1,7 +1,12 @@
+const EventEmmiter = require('events');
 var Discord = require('discord.io');
 
 const VERSION = "1.1.0-beta";
 const CODENAME = "Chiara";
+
+const eventBus = new EventEmmiter();
+
+var plugins = {};
 
 require('console-stamp')(console, 'dd.mm.yyyy HH:MM:ss.l');
 console.log("Starting PurrplingBot version " + VERSION + " '" + CODENAME + "'");
@@ -72,7 +77,7 @@ function load_plugins(pluginDir, bot) {
         plugin = require(pluginDir + "/" + file);
         console.log("Loaded plugin '" + file + "'");
         if ("init" in plugin) {
-          plugin.init(bot);
+          plugin.init(bot, eventBus);
           console.log("Triggered init for plugin '" + file + "'");
         }
         if ("commands" in plugin) {
@@ -84,12 +89,15 @@ function load_plugins(pluginDir, bot) {
               console.error("<" + file + "> Can't register command: " + cmd);
               console.error(err);
             }
-          })
+            eventBus.emit("commandRegister", cmd);
+          });
+          plugins[file] = plugin; //Add plugin to plugin registry
+          eventBus.emit("pluginLoaded", plugin, file);
         }
       } catch (err) {
         console.error("Error while loading plugin ''" + file + "'' ");
-        console.error(err);
-        process.exit(10);
+        console.error(err.stack);
+        process.exit(10); // PLUGIN FAILURE! Kill the bot
       }
     })
   } catch (err) {
@@ -127,10 +135,12 @@ function check_message_for_command(bot, metadata, message) {
         to: metadata.channelID,
         message: print_help()
     });
+    eventBus.emit("commandHandled", cmd, message, bot);
   }
   else if (cmds.hasOwnProperty(cmd)) {
       console.log("Handle command: %s \tUser: %s", cmd, metadata.user);
       cmds[cmd](bot, metadata, message);
+      eventBus.emit("commandHandled", cmd, message, bot);
   } else {
     if (prefix.length > 0) {
       console.log("Unknown command: %s \tUser: %s", cmd, metadata.user);
@@ -141,6 +151,7 @@ function check_message_for_command(bot, metadata, message) {
 bot.on('ready', function() {
     console.log('Logged in as %s - %s', bot.username, bot.id);
     load_plugins(config.pluginDir, bot);
+    eventBus.emit("ready");
     console.info("PurrplingBot READY!");
 });
 
@@ -151,4 +162,17 @@ bot.on('message', function(user, userID, channelID, message, event) {
       channelID: channelID
   };
   check_message_for_command(bot, metadata, message); //check and handle cmd
+  eventBus.emit("message", bot, metadata, message);
 });
+
+exports.getPluginRegistry = function () {
+  return plugins;
+}
+
+exports.getCommandRegistry = function () {
+  return cmds;
+}
+
+exports.getEventBus = function () {
+  return eventBus;
+}
