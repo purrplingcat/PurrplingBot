@@ -20,52 +20,65 @@ try {
 }
 
 var bot = new Discord.Client({
-    token: config.discord.token,
-    autorun: true
+  token: config.discord.token,
+  autorun: true
 });
 
 // Basic commands definition
 var cmds = {
-    "ping": function(bot, metadata) {
-         bot.sendMessage({
-            to: metadata.channelID,
-            message: "pong"
-        });
-        console.log("Pong sent to %s in %s", metadata.user, metadata.channelID);
-    },
-    "hello": function(bot, metadata) {
-        bot.sendMessage({
-            to: metadata.channelID,
-            message: "Hello " + metadata.user
-        });
-        console.log("Greeting %s in %s", metadata.user, metadata.channelID);
-    },
-    "say": function(bot, metadata, message) {
-        if ("admins" in config) {
-          if (config.admins.indexOf(metadata.user) > -1) {
-            bot.sendMessage({
-                to: metadata.channelID,
-                message: message
-            });
-            console.log("I said '%s' requested by '%s'", message, metadata.user);
-          } else {
-            bot.sendMessage({
-                to: metadata.channelID,
-                message: "Mňaaaau!! Ty mi nemáš co poroučet, co mám nebo nemám říkat :P"
-            });
-            console.log("User '%s' has no permissions for command 'say'!", metadata.user);
-          }
-        } else {
-          console.warn("Node 'admins' is not defined in configuration!");
-        }
-    },
-    "version": function(bot, metadata) {
-        bot.sendMessage({
-            to: metadata.channelID,
-            message: "PurrplingBot version " + VERSION + " '" + CODENAME + "'"
-        });
-        console.log("Version info sent to %s in %s", metadata.user, metadata.channelID);
+  "ping": {
+    "description": "Ping the bot and get pong.",
+    "exec": function(bot, metadata) {
+      bot.sendMessage({
+        to: metadata.channelID,
+        message: "pong"
+      });
+      console.log("Pong sent to %s in %s", metadata.user, metadata.channelID);
     }
+  },
+  "hello": {
+    "description": "Greeting the bot and get greeting back!",
+    "exec": function(bot, metadata) {
+      bot.sendMessage({
+        to: metadata.channelID,
+        message: "Hello " + metadata.user
+      });
+      console.log("Greeting %s in %s", metadata.user, metadata.channelID);
+    }
+  },
+  "say": {
+    "description": "Tell the bot words, where bot say (require admin perms to bot).",
+    "usage": "<message>",
+    "exec": function(bot, metadata, message) {
+      if ("admins" in config) {
+        if (config.admins.indexOf(metadata.user) > -1) {
+          bot.sendMessage({
+            to: metadata.channelID,
+            message: message
+          });
+          console.log("I said '%s' requested by '%s'", message, metadata.user);
+        } else {
+          bot.sendMessage({
+            to: metadata.channelID,
+            message: "Mňaaaau!! Ty mi nemáš co poroučet, co mám nebo nemám říkat :P"
+          });
+          console.log("User '%s' has no permissions for command 'say'!", metadata.user);
+        }
+      } else {
+        console.warn("Node 'admins' is not defined in configuration!");
+      }
+    }
+  },
+  "version": {
+    "description": "PurrplingBot version and codename",
+    "exec": function(bot, metadata) {
+      bot.sendMessage({
+        to: metadata.channelID,
+        message: "PurrplingBot version " + VERSION + " '" + CODENAME + "'"
+      });
+      console.log("Version info sent to %s in %s", metadata.user, metadata.channelID);
+    }
+  }
 };
 
 function load_plugins(pluginDir, bot) {
@@ -83,11 +96,16 @@ function load_plugins(pluginDir, bot) {
         if ("commands" in plugin) {
           plugin.commands.forEach(cmd => {
             try {
-              cmds[cmd] = plugin[cmd];
-              console.log("<" + file + "> Registered command: " + cmd);
+              if ("exec" in plugin[cmd]) {
+                cmds[cmd] = plugin[cmd];
+                console.log("<" + file + "> Registered command: " + cmd);
+              } else {
+                throw new Error("Command '" + cmd + "' is invalid! Missing exec() function.");
+              }
             } catch (err) {
-              console.error("<" + file + "> Can't register command: " + cmd);
-              console.error(err);
+              console.error("<" + file + "> Can't register command: '%s'", cmd);
+              console.error(err.stack);
+              process.exit(12);
             }
             eventBus.emit("commandRegister", cmd);
           });
@@ -106,18 +124,18 @@ function load_plugins(pluginDir, bot) {
 }
 
 function print_help() {
-    //TODO: Rewrite to StringBuilder
-    var prefix = config.cmdPrefix;
-    var help_text = "Availaible commands: ";
-    var iteration = 0;
-    for (cmd_name in cmds) {
-      help_text += prefix + cmd_name;
-      if (iteration != Object.keys(cmds).length - 1) {
-        help_text += ", ";
-      }
-      iteration++;
+  //TODO: Rewrite to StringBuilder
+  var prefix = config.cmdPrefix;
+  var help_text = "Availaible commands: ";
+  var iteration = 0;
+  for (cmd_name in cmds) {
+    help_text += prefix + cmd_name;
+    if (iteration != Object.keys(cmds).length - 1) {
+      help_text += ", ";
     }
-    return help_text;
+    iteration++;
+  }
+  return help_text;
 }
 
 function check_message_for_command(bot, metadata, message) {
@@ -132,15 +150,15 @@ function check_message_for_command(bot, metadata, message) {
   if (cmd == "help") {
     console.log("Printing requested help from user: " + metadata.user);
     bot.sendMessage({
-        to: metadata.channelID,
-        message: print_help()
+      to: metadata.channelID,
+      message: print_help()
     });
     eventBus.emit("commandHandled", cmd, message, bot);
   }
   else if (cmds.hasOwnProperty(cmd)) {
-      console.log("Handle command: %s \tUser: %s", cmd, metadata.user);
-      cmds[cmd](bot, metadata, message);
-      eventBus.emit("commandHandled", cmd, message, bot);
+    console.log("Handle command: %s \tUser: %s", cmd, metadata.user);
+    cmds[cmd].exec(bot, metadata, message);
+    eventBus.emit("commandHandled", cmd, message, bot);
   } else {
     if (prefix.length > 0) {
       console.log("Unknown command: %s \tUser: %s", cmd, metadata.user);
@@ -149,17 +167,17 @@ function check_message_for_command(bot, metadata, message) {
 }
 
 bot.on('ready', function() {
-    console.log('Logged in as %s - %s', bot.username, bot.id);
-    load_plugins(config.pluginDir, bot);
-    eventBus.emit("ready");
-    console.info("PurrplingBot READY!");
+  console.log('Logged in as %s - %s', bot.username, bot.id);
+  load_plugins(config.pluginDir, bot);
+  eventBus.emit("ready");
+  console.info("PurrplingBot READY!");
 });
 
 bot.on('message', function(user, userID, channelID, message, event) {
   var metadata = {
-      user: user,
-      userID: userID,
-      channelID: channelID
+    user: user,
+    userID: userID,
+    channelID: channelID
   };
   check_message_for_command(bot, metadata, message); //check and handle cmd
   eventBus.emit("message", bot, metadata, message);
