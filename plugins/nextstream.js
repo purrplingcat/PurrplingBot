@@ -8,8 +8,6 @@ exports.commands = [
 var twitch_token = config.nextstream.twitch_token;
 var twitch_channel_name = config.nextstream.twitch_channel_name;
 
-console.log(config);
-
 exports.nextstream = {
   "description": "Streaming cat now? Or when will next stream?",
   "exec": function(bot, metadata) {
