@@ -69,6 +69,25 @@ var cmds = {
       }
     }
   },
+  "plugins": {
+    "description": "Get list of loaded plugins",
+    "exec": function(bot, metadata) {
+      var iteration = 0;
+      var plugin_list = "Loaded plugins: ";
+      for (pluginName in plugins) {
+        plugin_list += pluginName;
+        if (iteration != Object.keys(plugins).length - 1) {
+          plugin_list += ", ";
+        }
+        iteration++;
+      }
+      bot.sendMessage({
+        to: metadata.channelID,
+        message: plugin_list
+      });
+      console.log("Plugin list sent! %s", plugin_list);
+    }
+  },
   "version": {
     "description": "PurrplingBot version and codename",
     "exec": function(bot, metadata) {
@@ -81,7 +100,7 @@ var cmds = {
   }
 };
 
-function load_plugins(pluginDir, bot) {
+function load_plugins(pluginDir) {
   try {
     const fs = require("fs");
     const path = require("path");
