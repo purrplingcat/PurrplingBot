@@ -1,11 +1,14 @@
 var request = require("request");
+var config = require("../config.json");
 
 exports.commands = [
   "nextstream"
 ]
 
-var twitch_token = "l3d809cqz3r28buu2d603ayyg83g32";
-var twitch_channel_name = "purrplingcat";
+var twitch_token = config.nextstream.twitch_token;
+var twitch_channel_name = config.nextstream.twitch_channel_name;
+
+console.log(config);
 
 exports.nextstream = {
   "description": "Streaming cat now? Or when will next stream?",

@@ -7,5 +7,9 @@
 	"admins": [
 		"PurrplingCat",
 		"CallMeFoxie"
-	]
+	],
+	"nextstream": {
+		"twitch_token": "l3d809cqz3r28buu2d603ayyg83g32",
+		"twitch_channel_name": "purrplingcat"
+	}
 }
