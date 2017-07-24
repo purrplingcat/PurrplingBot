@@ -204,6 +204,11 @@ function check_message_for_command(bot, metadata, message) {
   }
   cmd = cmd.substring(prefix.length);
   message = message.substring(cmd.length + prefix.length + 1);
+  //Block the bot to react own commands
+  if (metadata.userID === bot.id) {
+    console.log("Command '%s%s' was sent by me! I ignore it! Args: %s", prefix, cmd, message);
+    return;
+  }
   if (cmd == "help") {
     console.log("Printing requested help from user: " + metadata.user);
     bot.sendMessage({
