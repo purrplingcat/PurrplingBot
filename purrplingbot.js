@@ -123,7 +123,31 @@ function load_plugins(pluginDir, bot) {
   }
 }
 
-function print_help() {
+function print_cmd_help(cmd) {
+  var prefix = config.cmdPrefix;
+  if (cmd.startsWith(prefix)) {
+    cmd = cmd.substring(prefix.length); //Strip a prefix for command, if was set in arg
+  }
+  if (!cmds.hasOwnProperty(cmd)) {
+    console.log("Requested help for UNKNOWN command: " + prefix + cmd);
+    return "Unknown command: " + prefix + cmd + ". Type " + prefix + "help to list availaible commands.";
+  }
+  var help_text = "Command: " + prefix + cmd;
+  var cmd_context = cmds[cmd];
+  if ("description" in cmd_context) {
+    help_text += "\nDescription: " + cmd_context["description"];
+  }
+  if ("usage" in cmd_context) {
+    help_text += "\nUsage: " + cmd_context["usage"];
+  }
+  console.log("Requested help for command: " + prefix + cmd);
+  return help_text;
+}
+
+function print_help(cmd) {
+  if (cmd.trim().length > 0 && cmd != null) { //cmd is NOT empty and NOT null
+    return print_cmd_help(cmd);
+  }
   //TODO: Rewrite to StringBuilder
   var prefix = config.cmdPrefix;
   var help_text = "Availaible commands: ";
@@ -151,7 +175,7 @@ function check_message_for_command(bot, metadata, message) {
     console.log("Printing requested help from user: " + metadata.user);
     bot.sendMessage({
       to: metadata.channelID,
-      message: print_help()
+      message: print_help(message)
     });
     eventBus.emit("commandHandled", cmd, message, bot);
   }
