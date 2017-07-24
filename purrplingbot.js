@@ -83,37 +83,41 @@ var cmds = {
 
 function load_plugins(pluginDir, bot) {
   try {
-    var fs = require("fs");
-    fs.readdirSync(pluginDir).forEach(file => {
+    const fs = require("fs");
+    const path = require("path");
+    fs.readdirSync(pluginDir)
+    .filter(file => fs.lstatSync(path.join(pluginDir, file)).isDirectory())
+    .forEach(pluginName => {
       var plugin;
       try {
-        plugin = require(pluginDir + "/" + file);
-        console.log("Loaded plugin '" + file + "'");
+        var pluginPath = pluginDir + "/" + pluginName + "/" + pluginName.toLowerCase() + ".js";
+        plugin = require(pluginPath);
+        console.log("<" + pluginName + "> Plugin loaded! Source: %s", pluginPath);
         if ("init" in plugin) {
-          plugin.init(bot, eventBus);
-          console.log("Triggered init for plugin '" + file + "'");
+          plugin.init(pluginName);
+          console.log("<" + pluginName + "> Triggered init for plugin");
         }
         if ("commands" in plugin) {
           plugin.commands.forEach(cmd => {
             try {
               if ("exec" in plugin[cmd]) {
                 cmds[cmd] = plugin[cmd];
-                console.log("<" + file + "> Registered command: " + cmd);
+                console.log("<" + pluginName + "> Registered command: %s", cmd);
               } else {
-                throw new Error("Command '" + cmd + "' is invalid! Missing exec() function.");
+                throw new Error("<" + pluginName + "> Command '%s' is invalid! Missing exec() function.", cmd);
               }
             } catch (err) {
-              console.error("<" + file + "> Can't register command: '%s'", cmd);
+              console.error("<" + pluginName + "> Can't register command: '%s'", cmd);
               console.error(err.stack);
               process.exit(12);
             }
             eventBus.emit("commandRegister", cmd);
           });
-          plugins[file] = plugin; //Add plugin to plugin registry
-          eventBus.emit("pluginLoaded", plugin, file);
+          plugins[pluginName] = plugin; //Add plugin to plugin registry
+          eventBus.emit("pluginLoaded", plugin, pluginName);
         }
       } catch (err) {
-        console.error("Error while loading plugin '" + file + "' ");
+        console.error("<" + pluginName + "> Error while loading plugin! Source: %s", pluginName);
         console.error(err.stack);
         process.exit(10); // PLUGIN FAILURE! Kill the bot
       }
@@ -217,4 +221,8 @@ exports.getCommandRegistry = function () {
 
 exports.getEventBus = function () {
   return eventBus;
+}
+
+exports.getDiscordClient = function() {
+  return bot;
 }
