@@ -113,7 +113,7 @@ function load_plugins(pluginDir, bot) {
           eventBus.emit("pluginLoaded", plugin, file);
         }
       } catch (err) {
-        console.error("Error while loading plugin ''" + file + "'' ");
+        console.error("Error while loading plugin '" + file + "' ");
         console.error(err.stack);
         process.exit(10); // PLUGIN FAILURE! Kill the bot
       }
