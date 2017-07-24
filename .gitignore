@@ -1,4 +1,4 @@
 node_modules/*
 purrplingbot.log
 config.json
-plugins/disabled_plugins.json
+plugins/plugins_disabled.json

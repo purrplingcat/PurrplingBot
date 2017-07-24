@@ -7,6 +7,7 @@ const CODENAME = "Chiara";
 const eventBus = new EventEmmiter();
 
 var plugins = {};
+var plugins_disabled = [];
 
 require('console-stamp')(console, 'dd.mm.yyyy HH:MM:ss.l');
 console.log("Starting PurrplingBot version " + VERSION + " '" + CODENAME + "'");
@@ -104,43 +105,52 @@ function load_plugins(pluginDir) {
   try {
     const fs = require("fs");
     const path = require("path");
+    const pluginDisabledDefinitionFile = pluginDir + "/plugins_disabled.json";
+    if (fs.existsSync(pluginDisabledDefinitionFile)) {
+      plugins_disabled = require(pluginDisabledDefinitionFile);
+    }
+    console.log("Disabled plugins: %s", plugins_disabled);
     fs.readdirSync(pluginDir)
     .filter(file => fs.lstatSync(path.join(pluginDir, file)).isDirectory())
     .forEach(pluginName => {
       var plugin;
-      try {
-        var pluginPath = pluginDir + "/" + pluginName + "/" + pluginName.toLowerCase() + ".js";
-        plugin = require(pluginPath);
-        console.log("<" + pluginName + "> Plugin loaded! Source: %s", pluginPath);
-        if ("init" in plugin) {
-          plugin.init(pluginName);
-          console.log("<" + pluginName + "> Triggered init for plugin");
-        }
-        if ("commands" in plugin) {
-          plugin.commands.forEach(cmd => {
-            try {
-              if ("exec" in plugin[cmd]) {
-                cmds[cmd] = plugin[cmd];
-                console.log("<" + pluginName + "> Registered command: %s", cmd);
-              } else {
-                throw new Error("<" + pluginName + "> Command '%s' is invalid! Missing exec() function.", cmd);
+      if (plugins_disabled.indexOf(pluginName) < 0) {
+        try {
+          const pluginPath = pluginDir + "/" + pluginName + "/" + pluginName.toLowerCase() + ".js";
+          plugin = require(pluginPath);
+          console.log("<" + pluginName + "> Plugin loaded! Source: %s", pluginPath);
+          if ("init" in plugin) {
+            plugin.init(pluginName);
+            console.log("<" + pluginName + "> Triggered init for plugin");
+          }
+          if ("commands" in plugin) {
+            plugin.commands.forEach(cmd => {
+              try {
+                if ("exec" in plugin[cmd]) {
+                  cmds[cmd] = plugin[cmd];
+                  console.log("<" + pluginName + "> Registered command: %s", cmd);
+                } else {
+                  throw new Error("<" + pluginName + "> Command '%s' is invalid! Missing exec() function.", cmd);
+                }
+              } catch (err) {
+                console.error("<" + pluginName + "> Can't register command: '%s'", cmd);
+                console.error(err.stack);
+                process.exit(12);
               }
-            } catch (err) {
-              console.error("<" + pluginName + "> Can't register command: '%s'", cmd);
-              console.error(err.stack);
-              process.exit(12);
-            }
-            eventBus.emit("commandRegister", cmd);
-          });
-          plugins[pluginName] = plugin; //Add plugin to plugin registry
-          eventBus.emit("pluginLoaded", plugin, pluginName);
+              eventBus.emit("commandRegister", cmd);
+            });
+            plugins[pluginName] = plugin; //Add plugin to plugin registry
+            eventBus.emit("pluginLoaded", plugin, pluginName);
+          }
+        } catch (err) {
+          console.error("<" + pluginName + "> Error while loading plugin! Source: %s", pluginName);
+          console.error(err.stack);
+          process.exit(10); // PLUGIN FAILURE! Kill the bot
         }
-      } catch (err) {
-        console.error("<" + pluginName + "> Error while loading plugin! Source: %s", pluginName);
-        console.error(err.stack);
-        process.exit(10); // PLUGIN FAILURE! Kill the bot
+      } else {
+        console.log("<%s> Plugin DISABLED - Skip loading", pluginName);
       }
-    })
+    });
   } catch (err) {
     console.warn("Plugins can't be loaded! " + err)
   }
