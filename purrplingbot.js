@@ -12,10 +12,11 @@ var plugins_disabled = [];
 require('console-stamp')(console, 'dd.mm.yyyy HH:MM:ss.l');
 console.log("Starting PurrplingBot version " + VERSION + " '" + CODENAME + "'");
 
+var config = {};
 try {
-  const config = require("./config.json");
+  config = require("./config.json");
 } catch (err) {
-  console.error("Configuration failed to load! Check the file config.json ");
+  console.error("Configuration failed to load! Check the file config.json");
   console.error(err);
   process.exit(6);
 }
