@@ -4,7 +4,7 @@ LABEL com.purrplingcat.name="PurrplingBot"
 LABEL com.purrplingcat.version="1.0.0"
 LABEL com.purrplingcat.vendor="PurrplingCat"
 LABEL com.purrplingcat.email="dev@purrplingcat.com"
-LABEL com.purrplingcat.github="https://github.com/chalda/DiscordBot"
+LABEL com.purrplingcat.github="https://github.com/EllenFawkes"
 
 ENV APP_DIR="/opt/PurrplingBot"
 ENV APP_LOGS="/var/log/purrplingbot.log"
