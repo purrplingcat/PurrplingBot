@@ -1,8 +1,9 @@
+const PKG = require("./package.json");
 const EventEmmiter = require('events');
 var Discord = require('discord.io');
 
-const VERSION = "1.2.0-dev";
-const CODENAME = "Chiara";
+const VERSION = PKG.version;
+const CODENAME = PKG.codename;
 
 const eventBus = new EventEmmiter();
 
