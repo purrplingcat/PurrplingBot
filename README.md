@@ -27,6 +27,14 @@ You can disable plugins, where you don't want. Create file `plugins/plugins_disa
 
 ## Docker Quickstart
 
+### Pull image from DockerHub
+
+```bash
+docker pull purrplingcat/purrplingbot
+docker run -ti purrplingcat/purrplingbot
+```
+### Build your own Docker image
+
 1. Create a config file `mv config.example.json config.json`
 2. Build your Docker image `docker build -t <yourname>/purrplingbot .`
 3. Run your container `docker run -ti <yourname>/purrplingbot`
