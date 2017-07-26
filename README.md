@@ -1,7 +1,7 @@
 # PurrplingBot
 A discordbot written primary for server PurrplingCat
 
-**BETA version - This project is under development!**
+**This project is under development!**
 
 ## Get PurrplingBot
 
