@@ -7,14 +7,14 @@ A discordbot written primary for server PurrplingCat
 
 ### Regular download
 
-* Stable version 1.1.0: [Release v1.1.0 'Chiara'](https://github.com/EllenFawkes/PurrplingBot/releases/tag/v1.1.0)
+* Stable version 1.1.1: [Release v1.1.1 'Chiara'](https://github.com/EllenFawkes/PurrplingBot/releases/tag/v1.1.1)
 * Develop version 1.2.0-dev: `git clone https://github.com/EllenFawkes/PurrplingBot.git`
 * Legacy version 1.0.8: [Gist purrplingbot.js](https://gist.github.com/EllenFawkes/db76540a8d4aa124114f9b7bc649e605)
 
 ### Get image from DockerHub
 
 ```bash
-docker pull purrplingcat/purrplingbot:1.1.0 # Stable version 1.1.0 'Chiara'
+docker pull purrplingcat/purrplingbot:1.1.1 # Stable version 1.1.1 'Chiara'
 docker pull purrplingcat/purrplingbot:latest # Latest development version
 ```
 
