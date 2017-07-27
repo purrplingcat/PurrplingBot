@@ -29,6 +29,7 @@
   "dependencies": {
     "console-stamp": "^0.2.5",
     "discord.io": "^2.5.1",
+    "moment": "^2.18.1",
     "request": "^2.81.0",
     "stringbuilder": "0.0.11"
   },
