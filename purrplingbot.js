@@ -1,6 +1,7 @@
 const PKG = require("./package.json");
 const EventEmmiter = require('events');
 var Discord = require('discord.io');
+var moment = require('moment');
 
 const VERSION = PKG.version;
 const CODENAME = PKG.codename;
@@ -9,6 +10,12 @@ const eventBus = new EventEmmiter();
 
 var plugins = {};
 var plugins_disabled = [];
+
+var stats = {
+  onlineSinceTime: null,
+  commandsHandled: 0,
+  numberOfReconnection: 0
+}
 
 require('console-stamp')(console, 'dd.mm.yyyy HH:MM:ss.l');
 console.log("Starting PurrplingBot version " + VERSION + " '" + CODENAME + "'");
@@ -89,6 +96,64 @@ var cmds = {
         message: plugin_list
       });
       console.log("Plugin list sent! %s", plugin_list);
+    }
+  },
+  "status": {
+    "description": "Get a status info about bot",
+    "exec": function (bot, metadata) {
+      var stat_info = "BEGIN OF status >>\n" +
+          "Connected on: " + Object.keys(bot.servers).length + " servers\n" +
+          "My username is: " + bot.username + " <" + bot.email + ">\n" +
+          "Presence status: " + bot.presenceStatus.toUpperCase() + "\n" +
+          "Discriminator: " + bot.discriminator + "\n" +
+          "Count of reconnections: " + stats.numberOfReconnection + "\n" +
+          "Count of handled commands: " + stats.commandsHandled + "\n" +
+          "Registered commands: " + Object.keys(cmds).length + "\n" +
+          "Loaded plugins: " + Object.keys(plugins).length + "\n" +
+          "Disabled plugins: " + Object.keys(plugins_disabled).length + "\n" +
+          "Admins: " + config.admins + "\n" +
+          "Online since: " + moment(stats.onlineSinceTime).format("DD.MM.YYYY HH:MM:ss") + "\n" +
+          "<< END OF status"
+          bot.sendMessage({
+            to: metadata.channelID,
+            message: stat_info
+          });
+          console.log("Printed status information to '%s' on channelID '%s'", metadata.user, metadata.channelID);
+    }
+  },
+  "whois": {
+    "description": "Prints info about user",
+    "usage": "<user>",
+    "exec": function(bot, metadata, message) {
+      if (!message.length && message != null) {
+        message = metadata.user;
+      }
+      var user;
+      for (uid in bot.users) {
+        if (message === bot.users[uid].username) {
+          user = bot.users[uid];
+          break;
+        }
+      }
+      if (!user) {
+        bot.sendMessage({
+          to: metadata.channelID,
+          message: "Takovýho uživatele tady neznám :("
+        });
+        console.log("Unknown user: %s - Can't print info about it!", message);
+        return;
+      }
+      var user_info = "WHOIS " + message + "\n" +
+          "User ID: " + user.id + "\n" +
+          "Username: " + user.username + "\n" +
+          "Discriminator: " + user.discriminator + "\n" +
+          "Is bot: " + (user.bot ? "Yes" : "No") + "\n" +
+          "Game: " + (user.game ? user.game.name : "Not playing/streaming now!");
+      bot.sendMessage({
+        to: metadata.channelID,
+        message: user_info
+      });
+      console.log("Printing user's '%s' info to channelID '%s', requested by '%s'", message, metadata.channelID, metadata.user);
     }
   },
   "version": {
@@ -216,11 +281,13 @@ function check_message_for_command(bot, metadata, message) {
       to: metadata.channelID,
       message: print_help(message)
     });
+    stats.commandsHandled++;
     eventBus.emit("commandHandled", cmd, message, bot);
   }
   else if (cmds.hasOwnProperty(cmd)) {
     console.log("Handle command: %s \tUser: %s", cmd, metadata.user);
     cmds[cmd].exec(bot, metadata, message);
+    stats.commandsHandled++;
     eventBus.emit("commandHandled", cmd, message, bot);
   } else {
     if (prefix.length > 0) {
@@ -231,6 +298,8 @@ function check_message_for_command(bot, metadata, message) {
 
 bot.on('ready', function() {
   console.log('Logged in as %s - %s', bot.username, bot.id);
+  stats.numberOfReconnection++;
+  stats.onlineSinceTime = new Date();
   load_plugins(config.pluginDir, bot);
   eventBus.emit("ready");
   console.info("PurrplingBot READY!");
