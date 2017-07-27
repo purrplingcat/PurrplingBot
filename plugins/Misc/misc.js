@@ -6,7 +6,8 @@ exports.commands = [
   "hello",
   "say",
   "whois",
-  "status"
+  "status",
+  "users"
 ]
 
 function findUser(username, users) {
@@ -26,6 +27,15 @@ function findMemberByChannelAndUserId(userID, channelID, servers) {
           return server.members[memberID];
         }
       }
+    }
+  }
+}
+
+function getMembersOnServerByChannelID(channelID, servers) {
+  for (id in servers) {
+    var server = servers[id];
+    if (channelID in server.channels) {
+      return server.members;
     }
   }
 }
@@ -125,5 +135,23 @@ exports.status = {
           message: stat_info
         });
         console.log("Printed status information to '%s' on channelID '%s'", metadata.user, metadata.channelID);
+  }
+}
+
+exports.users = {
+  "description": "Get a user list on this server",
+  "exec": function(bot, metadata) {
+    var members = getMembersOnServerByChannelID(metadata.channelID, bot.servers);
+    var memberlist = "Members joined on this server: \n";
+    for (memberID in members) {
+      var member = members[memberID];
+      var user = bot.users[memberID];
+      memberlist += user.username + (member.nick ? "(" + member.nick + "" : "") + " [" + ( member.status ? member.status.toUpperCase() : "OFFLINE") + "]" + ", In game: " + (user.game ? "Yes": "No") + "\n";
+    }
+    bot.sendMessage({
+      to: metadata.channelID,
+      message: memberlist
+    });
+    console.log("Requested user list sent! List length: %s\tUser: %s\t Channel: %s", Object.keys(members).length, metadata.user, metadata.channelID);
   }
 }
