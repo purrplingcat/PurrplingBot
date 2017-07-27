@@ -46,39 +46,6 @@ var cmds = {
       console.log("Pong sent to %s in %s", metadata.user, metadata.channelID);
     }
   },
-  "hello": {
-    "description": "Greeting the bot and get greeting back!",
-    "exec": function(bot, metadata) {
-      bot.sendMessage({
-        to: metadata.channelID,
-        message: "Hello " + metadata.user
-      });
-      console.log("Greeting %s in %s", metadata.user, metadata.channelID);
-    }
-  },
-  "say": {
-    "description": "Tell the bot words, where bot say (require admin perms to bot).",
-    "usage": "<message>",
-    "exec": function(bot, metadata, message) {
-      if ("admins" in config) {
-        if (config.admins.indexOf(metadata.user) > -1) {
-          bot.sendMessage({
-            to: metadata.channelID,
-            message: message
-          });
-          console.log("I said '%s' requested by '%s'", message, metadata.user);
-        } else {
-          bot.sendMessage({
-            to: metadata.channelID,
-            message: "Mňaaaau!! Ty mi nemáš co poroučet, co mám nebo nemám říkat :P"
-          });
-          console.log("User '%s' has no permissions for command 'say'!", metadata.user);
-        }
-      } else {
-        console.warn("Node 'admins' is not defined in configuration!");
-      }
-    }
-  },
   "plugins": {
     "description": "Get list of loaded plugins",
     "exec": function(bot, metadata) {
@@ -96,64 +63,6 @@ var cmds = {
         message: plugin_list
       });
       console.log("Plugin list sent! %s", plugin_list);
-    }
-  },
-  "status": {
-    "description": "Get a status info about bot",
-    "exec": function (bot, metadata) {
-      var stat_info = "BEGIN OF status >>\n" +
-          "Connected on: " + Object.keys(bot.servers).length + " servers\n" +
-          "My username is: " + bot.username + " <" + bot.email + ">\n" +
-          "Presence status: " + bot.presenceStatus.toUpperCase() + "\n" +
-          "Discriminator: " + bot.discriminator + "\n" +
-          "Count of reconnections: " + stats.numberOfReconnection + "\n" +
-          "Count of handled commands: " + stats.commandsHandled + "\n" +
-          "Registered commands: " + Object.keys(cmds).length + "\n" +
-          "Loaded plugins: " + Object.keys(plugins).length + "\n" +
-          "Disabled plugins: " + Object.keys(plugins_disabled).length + "\n" +
-          "Admins: " + config.admins + "\n" +
-          "Online since: " + moment(stats.onlineSinceTime).format("DD.MM.YYYY HH:MM:ss") + "\n" +
-          "<< END OF status"
-          bot.sendMessage({
-            to: metadata.channelID,
-            message: stat_info
-          });
-          console.log("Printed status information to '%s' on channelID '%s'", metadata.user, metadata.channelID);
-    }
-  },
-  "whois": {
-    "description": "Prints info about user",
-    "usage": "<user>",
-    "exec": function(bot, metadata, message) {
-      if (!message.length && message != null) {
-        message = metadata.user;
-      }
-      var user;
-      for (uid in bot.users) {
-        if (message === bot.users[uid].username) {
-          user = bot.users[uid];
-          break;
-        }
-      }
-      if (!user) {
-        bot.sendMessage({
-          to: metadata.channelID,
-          message: "Takovýho uživatele tady neznám :("
-        });
-        console.log("Unknown user: %s - Can't print info about it!", message);
-        return;
-      }
-      var user_info = "WHOIS " + message + "\n" +
-          "User ID: " + user.id + "\n" +
-          "Username: " + user.username + "\n" +
-          "Discriminator: " + user.discriminator + "\n" +
-          "Is bot: " + (user.bot ? "Yes" : "No") + "\n" +
-          "Game: " + (user.game ? user.game.name : "Not playing/streaming now!");
-      bot.sendMessage({
-        to: metadata.channelID,
-        message: user_info
-      });
-      console.log("Printing user's '%s' info to channelID '%s', requested by '%s'", message, metadata.channelID, metadata.user);
     }
   },
   "version": {
@@ -210,7 +119,7 @@ function load_plugins(pluginDir) {
             eventBus.emit("pluginLoaded", plugin, pluginName);
           }
         } catch (err) {
-          console.error("<" + pluginName + "> Error while loading plugin! Source: %s", pluginName);
+          console.error("<" + pluginName + "> Error while loading plugin! Source: %s", pluginPath);
           console.error(err.stack);
           process.exit(10); // PLUGIN FAILURE! Kill the bot
         }
@@ -238,7 +147,7 @@ function print_cmd_help(cmd) {
     help_text += "\nDescription: " + cmd_context["description"];
   }
   if ("usage" in cmd_context) {
-    help_text += "\nUsage: " + cmd_context["usage"];
+    help_text += "\nUsage: " + prefix + cmd + " " + cmd_context["usage"];
   }
   console.log("Requested help for command: " + prefix + cmd);
   return help_text;
@@ -332,6 +241,10 @@ exports.getPluginRegistry = function () {
   return plugins;
 }
 
+exports.getDisabledPlugins = function() {
+  return plugins_disabled;
+}
+
 exports.getCommandRegistry = function () {
   return cmds;
 }
@@ -342,4 +255,8 @@ exports.getEventBus = function () {
 
 exports.getDiscordClient = function() {
   return bot;
+}
+
+exports.getStats = function() {
+  return stats;
 }
