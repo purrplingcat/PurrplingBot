@@ -245,6 +245,19 @@ bot.on('message', function(user, userID, channelID, message, event) {
   eventBus.emit("message", bot, metadata, message);
 });
 
+bot.on('disconnect', function(errMsg, code) {
+  console.warn("PurrplingBot disconnected from Discord service!")
+  console.warn("#%s - %s", code, errMsg);
+  console.log("*** Trying to reconnect");
+  try {
+    bot.connect();
+  } catch (err) {
+    console.error("Can't connect to discord!");
+    console.error(err);
+    process.exit(100);
+  }
+});
+
 exports.getPluginRegistry = function () {
   return plugins;
 }
