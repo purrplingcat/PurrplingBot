@@ -1,7 +1,7 @@
 const EventEmmiter = require('events');
 var Discord = require('discord.io');
 
-const VERSION = "1.1.0";
+const VERSION = "1.1.1";
 const CODENAME = "Chiara";
 
 const eventBus = new EventEmmiter();
@@ -144,7 +144,7 @@ function load_plugins(pluginDir) {
             eventBus.emit("pluginLoaded", plugin, pluginName);
           }
         } catch (err) {
-          console.error("<" + pluginName + "> Error while loading plugin! Source: %s", pluginName);
+          console.error("<" + pluginName + "> Error while loading plugin! Source: %s", pluginPath);
           console.error(err.stack);
           process.exit(10); // PLUGIN FAILURE! Kill the bot
         }
@@ -172,7 +172,7 @@ function print_cmd_help(cmd) {
     help_text += "\nDescription: " + cmd_context["description"];
   }
   if ("usage" in cmd_context) {
-    help_text += "\nUsage: " + cmd_context["usage"];
+    help_text += "\nUsage: " + prefix + cmd + " " + cmd_context["usage"];
   }
   console.log("Requested help for command: " + prefix + cmd);
   return help_text;
