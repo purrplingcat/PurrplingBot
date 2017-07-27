@@ -23,6 +23,8 @@ COPY . .
 # Redirect logs to /var/log
 RUN rm -rf purrplingbot.log && \
     ln -s $APP_LOGS purrplingbot.log
+    
+VOLUME ./config.json
 
 # Start PurrplingBot
 CMD ["npm", "start"]
