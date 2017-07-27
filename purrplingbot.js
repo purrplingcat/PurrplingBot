@@ -85,7 +85,9 @@ function load_plugins(pluginDir) {
     if (fs.existsSync(pluginDisabledDefinitionFile)) {
       plugins_disabled = require(pluginDisabledDefinitionFile);
     }
-    console.log("Disabled plugins: %s", plugins_disabled);
+    if (plugins_disabled.length) {
+      console.log("Disabled plugins: %s", plugins_disabled);
+    }
     fs.readdirSync(pluginDir)
     .filter(file => fs.lstatSync(path.join(pluginDir, file)).isDirectory())
     .forEach(pluginName => {
@@ -212,6 +214,7 @@ bot.on('ready', function() {
   load_plugins(config.pluginDir, bot);
   eventBus.emit("ready");
   console.info("PurrplingBot READY!");
+  console.log("----------------------------------------------------------------");
 });
 
 bot.on('message', function(user, userID, channelID, message, event) {
