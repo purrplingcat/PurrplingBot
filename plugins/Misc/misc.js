@@ -195,3 +195,9 @@ exports.uptime = {
     .catch(console.error);
   }
 }
+
+// Avoid plugin run standalone
+if (require.main === module) {
+  console.error("This plugin cannot be run standalone! Run 'node purrplingbot.js' instead.");
+  process.exit(1);
+}
