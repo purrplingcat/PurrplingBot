@@ -118,7 +118,7 @@ exports.users = {
     var memberlist = "Members joined on this server: \n";
     members.forEach(member => {
       var user = member.user;
-      memberlist += user.username + (member.nickname ? "(" + member.nickname + "" : "") + " [" + ( member.presence.status ? member.presence.status.toUpperCase() : "OFFLINE") + "]" + ", In game: " + (user.game ? "Yes": "No") + "\n";
+      memberlist += user.username + (member.nickname ? "(" + member.nickname + "" : "") + " [" + ( member.presence.status ? member.presence.status.toUpperCase() : "OFFLINE") + "]" + ", In game: " + (user.presence.game ? "Yes": "No") + "\n";
     });
     message.channel.send(memberlist)
     .then(console.log(`Requested user list sent! List length: ${members.array().length}\t User: ${message.author.username}\t Channel: #${message.channel.name}`))
