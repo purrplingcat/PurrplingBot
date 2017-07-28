@@ -5,7 +5,7 @@ exports.commands = [
   "hwaii"
 ];
 
-function fetchAndSendMyGif(bot, metadata, tag) {
+function fetchAndSendMyGif(message, tag) {
   var request_url = "http://api.giphy.com/v1/gifs/random?api_key=dc6zaTOxFJmzC&tag=" + tag;
   console.log("Request url: " + request_url + "\ttag: " + tag);
   request({
@@ -20,24 +20,22 @@ function fetchAndSendMyGif(bot, metadata, tag) {
       result = "Je mi líto, ale něco se rozbilo. Zkus to prosím později.";
       console.warn("An error occured while get request. Status code: " + response.statusCode);
     }
-    bot.sendMessage({
-      to: metadata.channelID,
-      message: result
-    });
-    console.log("GIF SENT! result: " + result + "\ttag: " + tag);
+    message.channel.send(result)
+    .then(console.log(`GIF SENT! result: ${result}\ttag: ${tag}`))
+    .catch(console.error);
   });
 }
 
 exports.meow = {
   "description": "Get a funny cat!",
-  "exec": function(bot, metadata) {
-    fetchAndSendMyGif(bot, metadata, "cat");
+  "exec": function(message) {
+    fetchAndSendMyGif(message, "cat");
   }
 };
 
 exports.hwaii = {
   "description": "Get a funny fox!",
-  "exec": function(bot, metadata) {
-    fetchAndSendMyGif(bot, metadata, "cute+fox");
+  "exec": function(message) {
+    fetchAndSendMyGif(message, "cute+fox");
   }
 };
