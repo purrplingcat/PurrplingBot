@@ -28,14 +28,13 @@
   "homepage": "https://github.com/EllenFawkes/PurrplingBot#readme",
   "dependencies": {
     "console-stamp": "^0.2.5",
-    "discord.io": "^2.5.1",
+    "discord.js": "^11.1.0",
     "moment": "^2.18.1",
     "request": "^2.81.0",
-    "stringbuilder": "0.0.11"
+    "stringbuilder": "0.0.11",
+    "twix": "^1.2.0"
   },
   "devDependencies": {
-    "cross-env": "^5.0.1",
-    "ava": "^0.15.2",
-    "nyc": "^6.4.4"
+    "cross-env": "^5.0.1"
   }
 }

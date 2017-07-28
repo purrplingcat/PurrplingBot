@@ -1,6 +1,6 @@
 const PKG = require("./package.json");
 const EventEmmiter = require('events');
-var Discord = require('discord.io');
+var Discord = require('discord.js');
 var moment = require('moment');
 
 const VERSION = PKG.version;
@@ -12,13 +12,14 @@ var plugins = {};
 var plugins_disabled = [];
 
 var stats = {
-  onlineSinceTime: null,
   commandsHandled: 0,
   numberOfReconnection: 0
 }
 
 require('console-stamp')(console, 'dd.mm.yyyy HH:MM:ss.l');
 console.log("Starting PurrplingBot version " + VERSION + " '" + CODENAME + "'");
+console.log("Runtime: Node " + process.version + "(" + process.platform + ") Pid: " + process.pid);
+console.log("Argv: " + process.argv);
 
 var config = {};
 try {
@@ -29,26 +30,26 @@ try {
   process.exit(6);
 }
 
-var bot = new Discord.Client({
-  token: config.discord.token,
-  autorun: true
-});
+var bot = new Discord.Client();
 
-// Basic commands definition
+/*
+ * @note Basic commands definition
+ * @property description
+ * @property usage (optional)
+ * @function exec @args Message message, String tail
+ */
 var cmds = {
   "ping": {
     "description": "Ping the bot and get pong.",
-    "exec": function(bot, metadata) {
-      bot.sendMessage({
-        to: metadata.channelID,
-        message: "pong"
-      });
-      console.log("Pong sent to %s in %s", metadata.user, metadata.channelID);
+    "exec": function(message) {
+      message.reply("pong")
+      .then(msg => console.log(`Pong sent to ${msg.author.username} in #${msg.channel.name}`))
+      .catch(console.error);
     }
   },
   "plugins": {
     "description": "Get list of loaded plugins",
-    "exec": function(bot, metadata) {
+    "exec": function(message) {
       var iteration = 0;
       var plugin_list = "Loaded plugins: ";
       for (pluginName in plugins) {
@@ -58,27 +59,24 @@ var cmds = {
         }
         iteration++;
       }
-      bot.sendMessage({
-        to: metadata.channelID,
-        message: plugin_list
-      });
-      console.log("Plugin list sent! %s", plugin_list);
+      message.channel.send(plugin_list)
+      .then(console.log(`Plugin list sent to: #${message.channel.name}\t Requested by: ${message.author.username}`))
+      .catch(console.error);
     }
   },
   "version": {
     "description": "PurrplingBot version and codename",
-    "exec": function(bot, metadata) {
-      bot.sendMessage({
-        to: metadata.channelID,
-        message: "PurrplingBot version " + VERSION + " '" + CODENAME + "'"
-      });
-      console.log("Version info sent to %s in %s", metadata.user, metadata.channelID);
+    "exec": function(message) {
+      message.channel.send("PurrplingBot version " + VERSION + " '" + CODENAME + "'")
+      .then(console.log(`Version info sent to ${message.author.username} in ${message.channel.name}`))
+      .catch(console.error);
     }
   }
 };
 
 function load_plugins(pluginDir) {
   try {
+    console.log("Plugin loader process started!");
     const fs = require("fs");
     const path = require("path");
     const pluginDisabledDefinitionFile = pluginDir + "/plugins_disabled.json";
@@ -129,6 +127,8 @@ function load_plugins(pluginDir) {
         console.log("<%s> Plugin DISABLED - Skip loading", pluginName);
       }
     });
+    eventBus.emit("pluginsLoaded", plugins);
+    console.log("Plugin loader process was SUCCESFULL!");
   } catch (err) {
     console.warn("Plugins can't be loaded! " + err)
   }
@@ -173,58 +173,58 @@ function print_help(cmd) {
   return help_text;
 }
 
-function check_message_for_command(bot, metadata, message) {
-  var ex = message.split(" ");
+/**
+* @param message - Channel message driver
+*/
+function check_message_for_command(message) {
+  var ex = message.content.split(" ");
   var prefix = config.cmdPrefix;
   var cmd = ex[0].toLowerCase();
   if (!cmd.startsWith(prefix)) {
     return;
   }
   cmd = cmd.substring(prefix.length);
-  message = message.substring(cmd.length + prefix.length + 1);
+  tail = message.content.substring(cmd.length + prefix.length + 1);
   //Block the bot to react own commands
-  if (metadata.userID === bot.id) {
+  if (message.author.id === bot.user.id) {
     return;
   }
   if (cmd == "help") {
-    console.log("Printing requested help from user: " + metadata.user);
-    bot.sendMessage({
-      to: metadata.channelID,
-      message: print_help(message)
-    });
+    console.log(`Printing requested help from user: ${message.author.username}\t Channel: #${message.channel.name}`);
+    message.channel.send(print_help(tail));
     stats.commandsHandled++;
-    eventBus.emit("commandHandled", cmd, message, bot);
+    eventBus.emit("commandHandled", cmd, tail, message);
   }
   else if (cmds.hasOwnProperty(cmd)) {
-    console.log("Handle command: %s \tUser: %s", cmd, metadata.user);
-    cmds[cmd].exec(bot, metadata, message);
+    console.log(`Handle command: ${cmd} \tUser: ${message.author.username}\t Channel: #${message.channel.name}`);
+    cmds[cmd].exec(message, tail);
     stats.commandsHandled++;
-    eventBus.emit("commandHandled", cmd, message, bot);
+    eventBus.emit("commandHandled", cmd, tail, message);
   } else {
     if (prefix.length > 0) {
-      console.log("Unknown command: %s \tUser: %s", cmd, metadata.user);
+      message.channel.send(`Unknown command: ${prefix}${cmd}`)
+      .then(console.log(`Unknown command: ${cmd} \tUser: ${message.author.username}\t Channel: #${message.channel.name}`))
+      .catch(console.error);
     }
   }
 }
 
 bot.on('ready', function() {
-  console.log('Logged in as %s - %s', bot.username, bot.id);
+  console.log("----------------------------------------------------------------");
+  console.info(`Logged in as ${bot.user.username} - ${bot.user.id} on ${bot.guilds.array().length} servers`);
   stats.numberOfReconnection++;
-  stats.onlineSinceTime = new Date();
-  load_plugins(config.pluginDir, bot);
   eventBus.emit("ready");
   console.info("PurrplingBot READY!");
-  console.log("----------------------------------------------------------------");
 });
 
-bot.on('message', function(user, userID, channelID, message, event) {
-  var metadata = {
-    user: user,
-    userID: userID,
-    channelID: channelID
-  };
-  check_message_for_command(bot, metadata, message); //check and handle cmd
-  eventBus.emit("message", bot, metadata, message);
+bot.on('message', function(message) {
+  check_message_for_command(message); //check and handle cmd
+  eventBus.emit("message", message);
+});
+
+bot.on('messageUpdate', function(oldMessage, newMessage) {
+  check_message_for_command(newMessage); //check and handle cmd
+  eventBus.emit("message", newMessage);
 });
 
 bot.on('disconnect', function(errMsg, code) {
@@ -263,3 +263,7 @@ exports.getDiscordClient = function() {
 exports.getStats = function() {
   return stats;
 }
+
+//Load plugins and connect bot
+load_plugins(config.pluginDir, bot);
+bot.login(config.discord.token);
