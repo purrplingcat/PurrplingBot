@@ -8,26 +8,13 @@ const CODENAME = PKG.codename;
 
 const eventBus = new EventEmmiter();
 
+var config = {};
 var plugins = {};
 var plugins_disabled = [];
 
 var stats = {
   commandsHandled: 0,
   numberOfReconnection: 0
-}
-
-require('console-stamp')(console, 'dd.mm.yyyy HH:MM:ss.l');
-console.log("Starting PurrplingBot version " + VERSION + " '" + CODENAME + "'");
-console.log("Runtime: Node " + process.version + "(" + process.platform + ") Pid: " + process.pid);
-console.log("Argv: " + process.argv);
-
-var config = {};
-try {
-  config = require("./config.json");
-} catch (err) {
-  console.error("Configuration failed to load! Check the file config.json");
-  console.error(err);
-  process.exit(6);
 }
 
 var bot = new Discord.Client();
@@ -134,6 +121,30 @@ function load_plugins(pluginDir) {
     console.error(err);
     process.exit(8);
   }
+}
+
+function init() {
+  require('console-stamp')(console, 'dd.mm.yyyy HH:MM:ss.l'); // Setup logger
+
+  // Print info about PurrplingBot
+  console.log("Starting PurrplingBot version " + VERSION + " '" + CODENAME + "'");
+  console.log("Runtime: Node " + process.version + "(" + process.platform + ") Pid: " + process.pid);
+  console.log("Argv: " + process.argv);
+
+  // Load configuration file
+  try {
+    config = require("./config.json");
+  } catch (err) {
+    console.error("Configuration failed to load! Check the file config.json");
+    console.error(err);
+    process.exit(6);
+  }
+
+  // Load plugins
+  load_plugins(config.pluginDir, bot);
+
+  // Connect bot to Discord!
+  bot.login(config.discord.token);
 }
 
 function print_cmd_help(cmd) {
@@ -273,6 +284,7 @@ exports.getStats = function() {
   return stats;
 }
 
-//Load plugins and connect bot
-load_plugins(config.pluginDir, bot);
-bot.login(config.discord.token);
+// Start bot runtime - ONLY if was called as main file
+if (require.main === module) {
+  init();
+}
