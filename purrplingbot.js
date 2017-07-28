@@ -90,9 +90,9 @@ function load_plugins(pluginDir) {
     .filter(file => fs.lstatSync(path.join(pluginDir, file)).isDirectory())
     .forEach(pluginName => {
       var plugin;
+      const pluginPath = pluginDir + "/" + pluginName + "/" + pluginName.toLowerCase() + ".js";
       if (plugins_disabled.indexOf(pluginName) < 0) {
         try {
-          const pluginPath = pluginDir + "/" + pluginName + "/" + pluginName.toLowerCase() + ".js";
           plugin = require(pluginPath);
           console.log("<" + pluginName + "> Plugin loaded! Source: %s", pluginPath);
           if ("init" in plugin) {
@@ -130,7 +130,9 @@ function load_plugins(pluginDir) {
     eventBus.emit("pluginsLoaded", plugins);
     console.log("Plugin loader process was SUCCESFULL!");
   } catch (err) {
-    console.warn("Plugins can't be loaded! " + err)
+    console.error("Plugins can't be loaded!")
+    console.error(err);
+    process.exit(8);
   }
 }
 
