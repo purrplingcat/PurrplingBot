@@ -198,10 +198,17 @@ function check_message_for_command(message) {
     eventBus.emit("commandHandled", cmd, tail, message);
   }
   else if (cmds.hasOwnProperty(cmd)) {
-    console.log(`Handle command: ${cmd} \tUser: ${message.author.username}\t Channel: #${message.channel.name}`);
-    cmds[cmd].exec(message, tail);
-    stats.commandsHandled++;
-    eventBus.emit("commandHandled", cmd, tail, message);
+    try {
+      console.log(`Handle command: ${cmd} \tUser: ${message.author.username}\t Channel: #${message.channel.name}`);
+      cmds[cmd].exec(message, tail);
+      stats.commandsHandled++;
+      eventBus.emit("commandHandled", cmd, tail, message);
+    } catch (err) {
+      message.reply(`Failed to execute command: ${prefix}${cmd}`);
+      console.error("Command '%s%s' execution failed!", prefix, cmd);
+      console.error(err);
+      console.info("I am still running!");
+    }
   } else {
     if (prefix.length > 0) {
       message.channel.send(`Unknown command: ${prefix}${cmd}`)
