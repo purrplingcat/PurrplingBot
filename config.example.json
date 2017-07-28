@@ -8,8 +8,9 @@
 		"PurrplingCat",
 		"CallMeFoxie"
 	],
-	"nextstream": {
+	"twitch": {
 		"twitch_token": "l3d809cqz3r28buu2d603ayyg83g32",
-		"twitch_channel_name": "purrplingcat"
+		"twitch_channel_name": "purrplingcat",
+		"twitch_channel_id": "125991922"
 	}
 }

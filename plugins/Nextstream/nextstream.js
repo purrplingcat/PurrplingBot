@@ -5,13 +5,14 @@ exports.commands = [
   "nextstream"
 ]
 
-var twitch_token = config.nextstream.twitch_token;
-var twitch_channel_name = config.nextstream.twitch_channel_name;
+const twitch_token = config.twitch.twitch_token;
+const twitch_channel_name = config.twitch.twitch_channel_name;
+const twitch_channel_id = config.twitch.twitch_channel_id;
 
 exports.nextstream = {
   "description": "Streaming cat now? Or when will next stream?",
   "exec": function(message) {
-    var request_url = "https://api.twitch.tv/v5/channels/125991922/events?client_id=" + twitch_token;
+    var request_url = "https://api.twitch.tv/v5/channels/" + twitch_channel_id + "/events?client_id=" + twitch_token;
     request({
       url: request_url,
       json: true,
