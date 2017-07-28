@@ -10,7 +10,7 @@ var twitch_channel_name = config.nextstream.twitch_channel_name;
 
 exports.nextstream = {
   "description": "Streaming cat now? Or when will next stream?",
-  "exec": function(bot, metadata) {
+  "exec": function(message) {
     var request_url = "https://api.twitch.tv/v5/channels/125991922/events?client_id=" + twitch_token;
     request({
       url: request_url,
@@ -40,13 +40,13 @@ exports.nextstream = {
         else {
           console.log("No stream planned!");
         }
-        bot.sendMessage({
-          to: metadata.channelID,
-          message: msg
-        });
-        console.info("Information about stream sent!");
+        message.channel.send(msg)
+        .then(console.info(`Information about stream sent to #${message.channel.name} requested by: ${message.author.username}`))
+        .catch(console.error);
       } else {
-        console.error("An error occured while fetching stream events! Status code: %s", response.statusCode);
+        message.channel.send("Ooops! Něco se rozbilo! Zkus to prosím za chvíli.")
+        .then(console.error("An error occured while fetching stream events! Status code: %s", response.statusCode))
+        .catch(console.error);
       }
     });
   }

@@ -8,7 +8,8 @@ exports.commands = [
   "say",
   "whois",
   "status",
-  "users"
+  "users",
+  "uptime"
 ]
 
 exports.hello = {
@@ -77,7 +78,7 @@ exports.whois = {
         "Nickname: " + (member.nickname ? member.nickname : member.user.username) + "\n" +
         "Status: " + member.presence.status.toUpperCase() + "\n" +
         "Game: " + (member.presence.game ? member.presence.game.name : "User not playing now!") + "\n" +
-        "Joined at: " + moment(member.joinedAt).format("DD.MM.YYYY HH:MM:ss");
+        "Joined at: " + moment(member.joinedAt).format("DD.MM.YYYY HH:mm:ss");
     message.channel.send(user_info)
     .then(console.log(`Printing user's '${member.user.username}' info to channel #${message.channel.name}, requested by: ${message.author.username}`))
     .catch(console.error);
@@ -103,7 +104,7 @@ exports.status = {
         "Loaded plugins: " + Object.keys(plugins).length + "\n" +
         "Disabled plugins: " + Object.keys(plugins_disabled).length + "\n" +
         "Admins: " + config.admins + "\n" +
-        "Online since: " + moment(bot.readyAt).format("DD.MM.YYYY HH:MM:ss") + " (Uptime: " + moment(bot.readyAt).twix(new Date()).humanizeLength() +")";
+        "Online since: " + moment(bot.readyAt).format("DD.MM.YYYY HH:mm:ss") + " (Uptime: " + moment(bot.readyAt).twix(new Date()).humanizeLength() +")";
         message.channel.send(stat_info)
         .then(console.log(`Printed status information to '${message.author.username}' on channel '#${message.channel.name}'`))
         .catch(console.error);
@@ -121,6 +122,16 @@ exports.users = {
     });
     message.channel.send(memberlist)
     .then(console.log(`Requested user list sent! List length: ${members.array().length}\t User: ${message.author.username}\t Channel: #${message.channel.name}`))
+    .catch(console.error);
+  }
+}
+
+exports.uptime = {
+  "description": "Get uptime of bot",
+  "exec": function(message) {
+    var bot = message.client;
+    message.channel.send(`Uptime: ${moment(bot.readyAt).twix(new Date()).humanizeLength()} \nReady at: ${moment(bot.readyAt).format("DD.MM.YYYY HH:mm:ss")}`)
+    .then(console.log(`Uptime sent to #${message.channel.name} requested by: ${message.author.username}`))
     .catch(console.error);
   }
 }

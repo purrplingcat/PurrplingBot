@@ -4,7 +4,7 @@ exports.commands = [
 
 exports.catsnack = {
   "description": "Give a food to our cat",
-  "exec": function(bot, metadata) {
+  "exec": function(message) {
     var rand = Math.floor((Math.random() * 10) + 1);
     var msg = "";
     switch (rand) {
@@ -35,10 +35,8 @@ exports.catsnack = {
       default:
       msg = "Díky, mňauky!";
     }
-    bot.sendMessage({
-      to: metadata.channelID,
-      message: msg
-    });
-    console.log("I got food from %s in %s (index: %s)", metadata.user, metadata.channelID, rand);
+    message.channel.send(msg)
+    .then(console.log(`I got food from ${message.author.username} in #${message.channel.name} (Answer index: ${rand})`))
+    .catch(console.error);
   }
 };
