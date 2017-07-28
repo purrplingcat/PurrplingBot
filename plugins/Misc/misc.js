@@ -7,10 +7,29 @@ exports.commands = [
   "hello",
   "say",
   "whois",
+  "avatar",
   "status",
   "users",
   "uptime"
 ]
+
+function findMember(members, knownName) {
+  // Remove envelope, if knownName is an user ID from a mention
+  if(knownName.startsWith('<@')){
+      knownName = knownName.substr(2,knownName.length-3); // Mention? Get user's ID from it!
+  }
+  // Try a find a member
+  var member = members.find("id", knownName); // Catch member by id
+  if (!member) {
+    member = members.find("nickname", knownName); // Catch member by nickname
+  }
+  if (!member) {
+    member = members.find(function findByUserName(member) {
+      return member.user.username === knownName; // Catch member by user.username
+    });
+  }
+  return member;
+}
 
 exports.hello = {
   "description": "Greeting the bot and get greeting back!",
@@ -43,25 +62,14 @@ exports.say = {
 
 exports.whois = {
   "description": "Prints info about user",
-  "usage": "<user>",
+  "usage": "[<user>]",
   "exec": function(message, tail) {
     var requestedWhois = tail; //Save original tail as requested WHOIS string
     if (!tail.length && tail != null) {
       tail = message.author.id; //take message author id => requested user is ME
       requestedWhois = message.author.username; //Save my user name as requested WHOIS
     }
-    if(tail.startsWith('<@')){
-				tail = tail.substr(2,tail.length-3); //Mention? Get user's ID from it!
-		}
-    var member = message.channel.guild.members.find("id", tail); //catch member by id
-    if (!member) {
-      member = message.channel.guild.members.find("nickname", tail); //catch member by nickname
-    }
-    if (!member) {
-      member = message.channel.guild.members.find(function findByUserName(member) {
-        return member.user.username === tail; //catch member by user.username
-      });
-    }
+    member = findMember(message.channel.guild.members, tail);
     //console.log(member);
     if (!member) {
       //Member not found
@@ -81,6 +89,30 @@ exports.whois = {
         "Joined at: " + moment(member.joinedAt).format("DD.MM.YYYY HH:mm:ss");
     message.channel.send(user_info)
     .then(console.log(`Printing user's '${member.user.username}' info to channel #${message.channel.name}, requested by: ${message.author.username}`))
+    .catch(console.error);
+  }
+}
+
+exports.avatar = {
+  "description": "Get an avatar URL of user",
+  "usage": "[<user>]",
+  "exec": function(message, tail) {
+    var requestedWhois = tail; //Save original tail as requested WHOIS string
+    if (!tail.length && tail != null) {
+      tail = message.author.id; //take message author id => requested user is ME
+      requestedWhois = message.author.username; //Save my user name as requested WHOIS
+    }
+    member = findMember(message.channel.guild.members, tail);
+    //console.log(member);
+    if (!member) {
+      //Member not found
+      message.reply("Takovýho uživatele tady neznám :(")
+      .then(console.log(`Unknown user: ${requestedWhois} - Can't get user's avatar!`))
+      .catch(console.error);
+      return;
+    }
+    message.channel.send(member.user.avatarURL)
+    .then(console.log(`Sending user's '${member.user.username}' avatar to channel #${message.channel.name}, requested by: ${message.author.username}`))
     .catch(console.error);
   }
 }
