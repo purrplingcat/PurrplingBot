@@ -18,6 +18,8 @@ var stats = {
 
 require('console-stamp')(console, 'dd.mm.yyyy HH:MM:ss.l');
 console.log("Starting PurrplingBot version " + VERSION + " '" + CODENAME + "'");
+console.log("Runtime: Node " + process.version + "(" + process.platform + ") Pid: " + process.pid);
+console.log("Argv: " + process.argv);
 
 var config = {};
 try {
@@ -74,6 +76,7 @@ var cmds = {
 
 function load_plugins(pluginDir) {
   try {
+    console.log("Plugin loader process started!");
     const fs = require("fs");
     const path = require("path");
     const pluginDisabledDefinitionFile = pluginDir + "/plugins_disabled.json";
@@ -124,6 +127,8 @@ function load_plugins(pluginDir) {
         console.log("<%s> Plugin DISABLED - Skip loading", pluginName);
       }
     });
+    eventBus.emit("pluginsLoaded", plugins);
+    console.log("Plugin loader process was SUCCESFULL!");
   } catch (err) {
     console.warn("Plugins can't be loaded! " + err)
   }
@@ -191,7 +196,7 @@ function check_message_for_command(message) {
     eventBus.emit("commandHandled", cmd, tail, message);
   }
   else if (cmds.hasOwnProperty(cmd)) {
-    console.log(`Handle command: ${cmd} \tUser: ${message.author.username}\n Channel: #${message.channel.name}`);
+    console.log(`Handle command: ${cmd} \tUser: ${message.author.username}\t Channel: #${message.channel.name}`);
     cmds[cmd].exec(message, tail);
     stats.commandsHandled++;
     eventBus.emit("commandHandled", cmd, tail, message);
