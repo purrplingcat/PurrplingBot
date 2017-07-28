@@ -30,7 +30,12 @@ try {
 
 var bot = new Discord.Client();
 
-// Basic commands definition
+/*
+ * @note Basic commands definition
+ * @property description
+ * @property usage (optional)
+ * @function exec @args Message message, String tail
+ */
 var cmds = {
   "ping": {
     "description": "Ping the bot and get pong.",
