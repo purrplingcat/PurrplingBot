@@ -31,6 +31,13 @@ function findMember(members, knownName) {
   return member;
 }
 
+function findChannel(channels, knownChanName) {
+    if (knownChanName.startsWith("<#")) {
+      knownChanName = knownChanName.substr(2, knownChanName.length - 3);
+    }
+    return channels.find("id", knownChanName);
+}
+
 exports.hello = {
   "description": "Greeting the bot and get greeting back!",
   "exec": function(message) {
@@ -42,13 +49,34 @@ exports.hello = {
 
 exports.say = {
   "description": "Tell the bot words, where bot say (require admin perms to bot).",
-  "usage": "<message>",
+  "usage": "[#<channel>] <message>",
   "exec": function(message, tail) {
     if ("admins" in config) {
       if (config.admins.indexOf(message.author.username) > -1) {
-        message.channel.send(tail)
-        .then(console.log(`I said '${tail}' requested by '${message.author.username}'`))
-        .catch(console.error);
+        var args = tail.split(" ");
+        var channel;
+        if (message.channel.guild) {
+          channel = findChannel(message.channel.guild.channels, args.shift());
+        } else {
+          console.warn(`Channel ${message.channel} is not a TextChannel!`);
+        }
+        if (!channel) {
+          channel = message.channel;
+        } else {
+          tail = args.join(" ");
+        }
+        channel.send(tail)
+        .then(console.log(`I said '${tail}' requested by '${message.author.username}' to #${channel.name}`))
+        .catch(err => {
+          message.reply(`Je mi líto, ale zprávu se nepodařilo do kanálu ${channel} odeslat! :crying_cat_face:`)
+          .then(console.error(`Message can't be sent: ${err}`))
+          .catch(console.error);
+        });
+        if (channel.id != message.channel.id) {
+          message.channel.send(`Zpráva byla odeslána do kanálu ${channel}`)
+          .then(console.log(`Reciept sent to #${message.channel.name}`))
+          .catch(console.error);
+        }
       } else {
         message.channel.send("Mňaaaau!! Ty mi nemáš co poroučet, co mám nebo nemám říkat :P")
         .then(console.log(`User '%s' has no permissions for command 'say'!`))
@@ -102,7 +130,7 @@ exports.avatar = {
       tail = message.author.id; //take message author id => requested user is ME
       requestedWhois = message.author.username; //Save my user name as requested WHOIS
     }
-    member = findMember(message.channel.guild.members, tail);
+    var member = findMember(message.channel.guild.members, tail);
     //console.log(member);
     if (!member) {
       //Member not found
