@@ -29,7 +29,7 @@ function load_plugins(pluginDir) {
           console.log("<" + pluginName + "> Plugin loaded! Source: %s", pluginPath);
           if ("init" in plugin) {
             plugin.init(pluginName);
-            console.log("<" + pluginName + "> Triggered init for plugin");
+            console.log("<" + pluginName + "> Triggered init() for plugin");
           }
           if ("commands" in plugin) {
             plugin.commands.forEach(cmd => {
@@ -47,9 +47,10 @@ function load_plugins(pluginDir) {
               }
               eventBus.emit("commandRegister", cmd);
             });
-            plugins[pluginName] = plugin; //Add plugin to plugin registry
-            eventBus.emit("pluginLoaded", plugin, pluginName);
           }
+          console.info("<" + pluginName + "> Initialization DONE!");
+          plugins[pluginName] = plugin; //Add plugin to plugin registry
+          eventBus.emit("pluginLoaded", plugin, pluginName);
         } catch (err) {
           console.error("<" + pluginName + "> Error while loading plugin! Source: %s", pluginPath);
           console.error(err.stack);

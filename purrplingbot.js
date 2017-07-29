@@ -183,7 +183,7 @@ bot.on('message', function(message) {
 
 bot.on('messageUpdate', function(oldMessage, newMessage) {
   check_message_for_command(newMessage); //check and handle cmd
-  eventBus.emit("message", newMessage);
+  eventBus.emit("messageUpdate", oldMessage, newMessage);
 });
 
 bot.on('disconnect', function(errMsg, code) {
