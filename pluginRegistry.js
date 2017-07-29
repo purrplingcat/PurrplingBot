@@ -1,6 +1,7 @@
 var PurrplingBot = require("./purrplingbot.js");
 var eventBus = PurrplingBot.getEventBus();
 
+const CONFIG = require("./config.json");
 const PLUGIN_DIR = "./plugins";
 
 var plugins = {};
@@ -12,9 +13,7 @@ function load_plugins(pluginDir) {
     const fs = require("fs");
     const path = require("path");
     const pluginDisabledDefinitionFile = pluginDir + "/plugins_disabled.json";
-    if (fs.existsSync(pluginDisabledDefinitionFile)) {
-      plugins_disabled = require(pluginDisabledDefinitionFile);
-    }
+
     if (plugins_disabled.length) {
       console.log("Disabled plugins: %s", plugins_disabled);
     }
@@ -70,6 +69,9 @@ function load_plugins(pluginDir) {
 }
 
 exports.init = function() {
+  if (CONFIG.pluginsDisabled && CONFIG.pluginsDisabled instanceof Array) {
+    plugins_disabled = CONFIG.pluginsDisabled; // Fetch disabled plugins from config
+  }
   load_plugins(PLUGIN_DIR);
 }
 
