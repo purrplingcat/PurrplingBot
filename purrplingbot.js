@@ -139,15 +139,16 @@ function check_message_for_command(message) {
   tail = message.content.substring(cmd.length + prefix.length + 1);
   //Block the bot to react own commands
   if (message.author.id === bot.user.id) {
-    return;
+    return false;
   }
   if (cmd == "help") {
     console.log(`Printing requested help from user: ${message.author.username}\t Channel: #${message.channel.name}`);
     message.channel.send(print_help(tail));
     stats.commandsHandled++;
     eventBus.emit("commandHandled", cmd, tail, message);
+    return true;
   }
-  else if (cmds.hasOwnProperty(cmd)) {
+  if (cmds.hasOwnProperty(cmd)) {
     try {
       console.log(`Handle command: ${cmd} \tUser: ${message.author.username}\t Channel: #${message.channel.name}`);
       cmds[cmd].exec(message, tail);
@@ -159,6 +160,7 @@ function check_message_for_command(message) {
       console.error(err);
       console.info("I am still running!");
     }
+    return true;
   } else {
     if (prefix.length > 0) {
       message.channel.send(`Unknown command: ${prefix}${cmd}`)
@@ -166,6 +168,7 @@ function check_message_for_command(message) {
       .catch(console.error);
     }
   }
+  return false;
 }
 
 bot.on('ready', function() {
@@ -177,13 +180,13 @@ bot.on('ready', function() {
 });
 
 bot.on('message', function(message) {
-  check_message_for_command(message); //check and handle cmd
-  eventBus.emit("message", message);
+  var isCmd = check_message_for_command(message); //check and handle cmd
+  eventBus.emit("message", message, isCmd);
 });
 
 bot.on('messageUpdate', function(oldMessage, newMessage) {
-  check_message_for_command(newMessage); //check and handle cmd
-  eventBus.emit("messageUpdate", oldMessage, newMessage);
+  var isCmd = check_message_for_command(newMessage); //check and handle cmd
+  eventBus.emit("messageUpdate", oldMessage, newMessage, isCmd);
 });
 
 bot.on('disconnect', function(errMsg, code) {

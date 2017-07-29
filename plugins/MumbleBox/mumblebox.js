@@ -129,12 +129,16 @@ function execSubCommand(scmd, args, message) {
   }
 }
 
-eventBus.on("message", function(message){
-  matchAndSendMumble(message);
+eventBus.on("message", function(message, isCmd){
+  if (!isCmd) {
+    matchAndSendMumble(message);
+  }
 });
 
-eventBus.on("messageUpdate", function(oldMessage, newMessage) {
-  matchAndSendMumble(newMessage);
+eventBus.on("messageUpdate", function(oldMessage, newMessage, isCmd) {
+  if (!isCmd) {
+    matchAndSendMumble(newMessage);
+  }
 });
 
 exports.init = function(pluginName) {
