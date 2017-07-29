@@ -12,5 +12,14 @@
 		"twitch_token": "l3d809cqz3r28buu2d603ayyg83g32",
 		"twitch_channel_name": "purrplingcat",
 		"twitch_channel_id": "125991922"
+	},
+	"mumblebox": {
+		"lol": "Hahaha, it's funny!",
+		"cat": "I love cats!",
+		"PurrplingBot": [
+			"Me?",
+			"Who means my name?",
+			"Dont't take my name to your mounth!"
+		]
 	}
 }
