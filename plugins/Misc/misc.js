@@ -1,5 +1,6 @@
 var moment = require('moment');
 var purrplingBot = require("../../purrplingbot.js");
+var pluginRegistry = purrplingBot.getPluginRegistry();
 var config = require("../../config.json");
 require('twix');
 
@@ -149,8 +150,8 @@ exports.status = {
   "description": "Get a status info about bot",
   "exec": function (message) {
     var stats = purrplingBot.getStats();
-    var plugins = purrplingBot.getPluginRegistry();
-    var plugins_disabled = purrplingBot.getDisabledPlugins();
+    var plugins = pluginRegistry.getPlugins();
+    var plugins_disabled = pluginRegistry.getDisabledPlugins();
     var cmds = purrplingBot.getCommandRegistry();
     var bot = message.client;
     var stat_info =
