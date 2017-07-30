@@ -1,11 +1,63 @@
 {
   "mumbles": {
-    "lol": "Hahaha, it's funny!",
-    "cat": "I love cats!",
+    "kočička": [
+      "Já jsem kočička",
+      "Mám ráda kočičky",
+      "Mňaaaaau!"
+    ],
     "PurrplingBot": [
-      "Me?",
-      "Who means my name?",
-      "Dont't take my name to your mounth!"
+      "Já?",
+      "Kdo zmínil moje jméno?",
+      "Neber si mé jméno do huby nadarmo!"
+    ],
+    "dinner|večeře|jídlo|oběd|snídaně": [
+      "Já chci kapsičku!",
+      "Tuňáčka prosím!",
+      "Moje miska je prázdná. Co takhle nejdřív nakrmit mě?"
+    ],
+    "myslet|myslela?": "Hlavně nemyslet! Od toho jsem tady já",
+    "příkaz.?|přikázat|přikázal.?": [
+      "Přikazovat můžu jenom já! Já jsem kočka, já tě vlastním, ty posloucháš, já si dělám, co chci. Mňau!!",
+      "Ty mi nemáš co přikazovat!"
+    ],
+    "kocour": [
+      "Musíš mě strašit s takovým vetřelcem?",
+      "*syčí a prská*",
+      "Děkuji za tip na rande, ale jsem homosexuálně orientovaná číča :)"
+    ],
+    "wtf": [
+      "What the fuck??",
+      "http://gph.is/2gkSlvA",
+      "http://gph.is/1NSZmjg",
+      "http://gph.is/2br0sEH",
+      "http://gph.is/XIypEz"
+    ],
+    "drápat|drápky|drápy|škrábat": "Neříkej dvakrát. Dlouho jsem si o nic nebrousila drápky, tak si dávej pozor, nebo to tvůj gauč schytá! http://gph.is/2cZuQpE",
+    "nečum|čumí.?": "http://gph.is/28O95EW",
+    "kafe|káva|životabudič": [
+      "http://gph.is/28O95EW",
+      "http://gph.is/1syOzSF"
+    ],
+    "lol|haha|hehe|hihi|rofl": [
+      "Hahaa, to je vtipný!",
+      "Heh, to není vtipný!",
+      "Bože, to je trapný jak fusekle v sandálích...",
+      "Hahahahahaha... Jejda, já si smíchy učůrknula",
+      "http://gph.is/190sukp",
+      "http://gph.is/166zc3v",
+      "http://gph.is/1za9Unn",
+      "http://gph.is/YBA7E7"
+    ],
+    "Carmilla|Laura": [
+      "http://gph.is/2bf7tFA",
+      "http://gph.is/2cKuDax",
+      "http://gph.is/2d9gX7W",
+      "http://gph.is/2d3DFPC",
+      "http://gph.is/2dsA9kk"
+    ],
+    "Minecraft|MC|craftit": [
+      "http://gph.is/2fd79O9",
+      "Ach, zase ty kostičky"
     ]
   }
 }
