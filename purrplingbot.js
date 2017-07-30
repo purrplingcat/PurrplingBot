@@ -231,6 +231,9 @@ exports.addCommand = function(cmdName, cmdObject) {
   }
 }
 
+//Take init() bot outside main file (call it in another module after require)
+exports.init = init
+
 // Start bot runtime - ONLY if was called as main file
 if (require.main === module) {
   init();
