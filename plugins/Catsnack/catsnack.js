@@ -1,6 +1,13 @@
+var PurrplingBot = require("../../purrplingbot.js");
+var logger;
+
 exports.commands = [
   "catsnack"
 ]
+
+exports.init = function(pluginName) {
+  logger = PurrplingBot.createLogger(pluginName);
+}
 
 exports.catsnack = {
   "description": "Give a food to our cat",
@@ -36,8 +43,8 @@ exports.catsnack = {
       msg = "Díky, mňauky!";
     }
     message.channel.send(msg)
-    .then(console.log(`I got food from ${message.author.username} in #${message.channel.name} (Answer index: ${rand})`))
-    .catch(console.error);
+    .then(logger.log(`I got food from ${message.author.username} in #${message.channel.name} (Answer index: ${rand})`))
+    .catch(logger.error);
   }
 };
 

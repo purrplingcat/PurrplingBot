@@ -1,5 +1,7 @@
 const PKG = require("./package.json");
 const EventEmmiter = require('events');
+const LOGGER = require("./lib/logger.js");
+
 var Discord = require('discord.js');
 var moment = require('moment');
 
@@ -62,18 +64,19 @@ var cmds = {
 };
 
 function init() {
-  require('console-stamp')(console, 'dd.mm.yyyy HH:MM:ss.l'); // Setup logger
+  // Init main logger
+  LOGGER.init(console);
 
   // Print info about PurrplingBot
-  console.log("Starting PurrplingBot version " + VERSION + " '" + CODENAME + "'");
-  console.log("Runtime: Node " + process.version + "(" + process.platform + ") Pid: " + process.pid);
-  console.log("Argv: " + process.argv);
+  console.log("* Starting PurrplingBot version " + VERSION + " '" + CODENAME + "'");
+  console.log("* Runtime: Node " + process.version + "(" + process.platform + ") Pid: " + process.pid);
+  console.log("* Argv: " + process.argv);
 
   // Load configuration file
   try {
     config = require("./config.json");
   } catch (err) {
-    console.error("Configuration failed to load! Check the file config.json");
+    console.error("*** Configuration failed to load! Check the file config.json");
     console.error(err);
     process.exit(6);
   }
@@ -81,6 +84,9 @@ function init() {
   // Load plugin registry and init plugins
   pluginRegistry = require("./pluginRegistry.js");
   pluginRegistry.init();
+
+  // Switch scope: Set logger prefix to 'Main'
+  console.prefix = "Main";
 
   // Connect bot to Discord!
   bot.login(config.discord.token);
@@ -172,7 +178,6 @@ function check_message_for_command(message) {
 }
 
 bot.on('ready', function() {
-  console.log("----------------------------------------------------------------");
   console.info(`Logged in as ${bot.user.username} - ${bot.user.id} on ${bot.guilds.array().length} servers`);
   stats.numberOfReconnection++;
   eventBus.emit("ready");
@@ -229,6 +234,13 @@ exports.addCommand = function(cmdName, cmdObject) {
     console.error("Failed to add command: %s", cmdName);
     console.error(err);
   }
+}
+
+exports.createLogger = function(prefix) {
+  var _logger = new console.Console(process.stdout, process.stderr);
+  _logger.prefix = prefix;
+  LOGGER.init(_logger); // Init new logger at derivation
+  return _logger;
 }
 
 //Take init() bot outside main file (call it in another module after require)

@@ -5,6 +5,8 @@ const CONFIG = require("../../config.json");
 const IGNORELIST_STORE = "./ignorelist.json";
 var ignoreList = [];
 
+var logger;
+
 exports.commands = [
   "mumbles"
 ];
@@ -17,9 +19,9 @@ function matchMumbles(inputStr) {
       // Match a mumble. Flags: global, case insensitive, full unicode matching
       var matches = inputStr.match(new RegExp(mumbleSource, "giu"));
     } catch(err) {
-      console.error("Error while matching REGEX!");
-      console.error(err);
-      console.info("I am still running!");
+      logger.error("Error while matching REGEX!");
+      logger.error(err);
+      logger.info("I am still running!");
     }
     if (matches) {
       var content = mumbles[mumbleSource];
@@ -49,20 +51,20 @@ function matchAndSendMumble(message) {
   var mumbles = matchMumbles(message.content);
   if (mumbles.length) {
     if (ignoreList.indexOf(message.author.username) >= 0) {
-      console.log(`User ${message.author.username} on #${message.channel.name} ignored for mumbles!`);
+      logger.log(`User ${message.author.username} on #${message.channel.name} ignored for mumbles!`);
       return;
     }
     var rand = Math.floor((Math.random() * mumbles.length));
     var mumble = mumbles[rand];
     message.channel.send(mumble.content)
-    .then(console.log(`Matched phrase "${mumble.phrase}" in message "${message.content}" from #${message.channel.name} User: ${message.author.username}! Reply sent: "${mumble.content}" [ID: ${rand},${mumble.index}]`))
-    .catch(console.error);
+    .then(logger.log(`Matched phrase "${mumble.phrase}" in message "${message.content}" from #${message.channel.name} User: ${message.author.username}! Reply sent: "${mumble.content}" [ID: ${rand},${mumble.index}]`))
+    .catch(logger.error);
   }
 }
 
 function storeIgnoreList() {
   // ONLY story function. Ignore list will be restored by require()
-  console.dir(ignoreList);
+  logger.dir(ignoreList);
   fs = require('fs');
   var json = JSON.stringify(ignoreList);
   fs.writeFile(IGNORELIST_STORE, json, 'utf8');
@@ -79,30 +81,30 @@ function execSubCommand(scmd, args, message) {
     case 'ignore':
         if (ignoreList.indexOf(message.author.username) >= 0) {
           message.reply("You are already ignored!")
-          .catch(console.error);
-          console.log(`User ${message.author.username} already ignored!`);
+          .catch(logger.error);
+          logger.log(`User ${message.author.username} already ignored!`);
           return;
         }
         ignoreList.push(message.author.username);
         message.reply("You are ignored for my mumbles and reacts.")
-        .catch(console.error);
-        console.log(`User ${message.author.username} ignored for mumbles and reacts`);
+        .catch(logger.error);
+        logger.log(`User ${message.author.username} ignored for mumbles and reacts`);
         storeIgnoreList(); // Save ignore list to a file
-        console.log("Ignore list was stored!");
+        logger.log("Ignore list was stored!");
       break;
     case 'unignore':
         var index = ignoreList.indexOf(message.author.username);
         if (index >= 0) {
             ignoreList.splice(index);
             message.reply("You are unignored for mumbles.")
-            .catch(console.error);
-            console.log(`User ${message.author.username} unignored for mumbles and reacts`);
+            .catch(logger.error);
+            logger.log(`User ${message.author.username} unignored for mumbles and reacts`);
             storeIgnoreList(); // Save ignore list to a file
-            console.log("Ignore list was stored!");
+            logger.log("Ignore list was stored!");
         } else {
-          console.log(`Can't remove user ${message.author.username} - NOT in ignore list!`);
+          logger.log(`Can't remove user ${message.author.username} - NOT in ignore list!`);
           message.reply("You are NOT in ignore list!")
-          .catch(console.error);
+          .catch(logger.error);
         }
       break;
     case 'ignorelist':
@@ -111,7 +113,7 @@ function execSubCommand(scmd, args, message) {
         msg = `Ignored users: ${ignoreList}`;
       }
       message.channel.send(msg)
-      .then(console.log(`Ignore list sent to #${message.channel.name} requested by: ${message.author.username}`))
+      .then(logger.log(`Ignore list sent to #${message.channel.name} requested by: ${message.author.username}`))
       break;
     case 'help':
       message.channel.send("Availaible subcommands:\n"
@@ -119,13 +121,13 @@ function execSubCommand(scmd, args, message) {
         + "unignore - Remove you from ignore list\n"
         + "ignorelist - Show ignored users\n"
         + "help - This help message")
-      .then(console.log(`Requested help by ${message.author.username} on #${message.author.username} was sent`))
-      .catch(console.error);
+      .then(logger.log(`Requested help by ${message.author.username} on #${message.author.username} was sent`))
+      .catch(logger.error);
      break;
     default:
       message.reply(`Unknown mumbles subcommand: ${scmd}`)
-      .then(console.log(`Unknown mumbles subcommand: ${scmd}`))
-      .catch(console.error);
+      .then(logger.log(`Unknown mumbles subcommand: ${scmd}`))
+      .catch(logger.error);
   }
 }
 
@@ -142,14 +144,15 @@ eventBus.on("messageUpdate", function(oldMessage, newMessage, isCmd) {
 });
 
 exports.init = function(pluginName) {
+  logger = PurrplingBot.createLogger(pluginName);
   if (!CONFIG.mumblebox) {
-    console.warn("<%s> Mumbles is not defined in config! No mumbles for match&talk", pluginName);
+    logger.warn("Mumbles is not defined in config! No mumbles for match&talk", pluginName);
   }
   try {
     restoreIgnoreList();
-    console.log("<" + pluginName + "> Restored ignore list. Ignored chatters: %s", ignoreList);
+    logger.log("Restored ignore list. Ignored chatters: %s", ignoreList);
   } catch(err) {
-    console.warn("<" + pluginName + "> Can't restore ignore list! %s", err);
+    logger.warn("Can't restore ignore list! %s", err);
   }
 }
 
@@ -162,7 +165,7 @@ exports.mumbles = {
     }
     var args = tail.split(" ");
     var scmd = args.shift();
-    console.log(`Handle subcommand: ${tail} on #${message.channel.name} by ${message.author.username}`);
+    logger.log(`Handle subcommand: ${tail} on #${message.channel.name} by ${message.author.username}`);
     execSubCommand(scmd, args, message);
   }
 }

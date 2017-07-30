@@ -4,6 +4,8 @@ var pluginRegistry = purrplingBot.getPluginRegistry();
 var config = require("../../config.json");
 require('twix');
 
+var logger;
+
 exports.commands = [
   "hello",
   "say",
@@ -13,6 +15,10 @@ exports.commands = [
   "users",
   "uptime"
 ]
+
+exports.init = function(pluginName) {
+  logger = purrplingBot.createLogger(pluginName);
+}
 
 function findMember(members, knownName) {
   // Remove envelope, if knownName is an user ID from a mention
@@ -43,8 +49,8 @@ exports.hello = {
   "description": "Greeting the bot and get greeting back!",
   "exec": function(message) {
     message.channel.send(`Hello, ${message.author}`).
-    then(console.log(`Greeting ${message.author.username} in #${message.channel.name}`))
-    .catch(console.error);
+    then(logger.log(`Greeting ${message.author.username} in #${message.channel.name}`))
+    .catch(logger.error);
   }
 }
 
@@ -59,7 +65,7 @@ exports.say = {
         if (message.channel.guild) {
           channel = findChannel(message.channel.guild.channels, args.shift());
         } else {
-          console.warn(`Channel ${message.channel} is not a TextChannel!`);
+          logger.warn(`Channel ${message.channel} is not a TextChannel!`);
         }
         if (!channel) {
           channel = message.channel;
@@ -67,24 +73,24 @@ exports.say = {
           tail = args.join(" ");
         }
         channel.send(tail)
-        .then(console.log(`I said '${tail}' requested by '${message.author.username}' to #${channel.name}`))
+        .then(logger.log(`I said '${tail}' requested by '${message.author.username}' to #${channel.name}`))
         .catch(err => {
           message.reply(`Je mi líto, ale zprávu se nepodařilo do kanálu ${channel} odeslat! :crying_cat_face:`)
-          .then(console.error(`Message can't be sent: ${err}`))
-          .catch(console.error);
+          .then(logger.error(`Message can't be sent: ${err}`))
+          .catch(logger.error);
         });
         if (channel.id != message.channel.id) {
           message.channel.send(`Zpráva byla odeslána do kanálu ${channel}`)
-          .then(console.log(`Reciept sent to #${message.channel.name}`))
-          .catch(console.error);
+          .then(logger.log(`Reciept sent to #${message.channel.name}`))
+          .catch(logger.error);
         }
       } else {
         message.channel.send("Mňaaaau!! Ty mi nemáš co poroučet, co mám nebo nemám říkat :P")
-        .then(console.log(`User '%s' has no permissions for command 'say'!`))
-        .catch(console.error);
+        .then(logger.log(`User '%s' has no permissions for command 'say'!`))
+        .catch(logger.error);
       }
     } else {
-      console.warn("Node 'admins' is not defined in configuration!");
+      logger.warn("Node 'admins' is not defined in configuration!");
     }
   }
 }
@@ -99,12 +105,12 @@ exports.whois = {
       requestedWhois = message.author.username; //Save my user name as requested WHOIS
     }
     member = findMember(message.channel.guild.members, tail);
-    //console.log(member);
+    //logger.log(member);
     if (!member) {
       //Member not found
       message.reply("Takovýho uživatele tady neznám :(")
-      .then(console.log(`Unknown user: ${requestedWhois} - Can't print info about it!`))
-      .catch(console.error);
+      .then(logger.log(`Unknown user: ${requestedWhois} - Can't print info about it!`))
+      .catch(logger.error);
       return;
     }
     var user_info = "WHOIS " + requestedWhois + "\n" +
@@ -117,8 +123,8 @@ exports.whois = {
         "Game: " + (member.presence.game ? member.presence.game.name : "User not playing now!") + "\n" +
         "Joined at: " + moment(member.joinedAt).format("DD.MM.YYYY HH:mm:ss");
     message.channel.send(user_info)
-    .then(console.log(`Printing user's '${member.user.username}' info to channel #${message.channel.name}, requested by: ${message.author.username}`))
-    .catch(console.error);
+    .then(logger.log(`Printing user's '${member.user.username}' info to channel #${message.channel.name}, requested by: ${message.author.username}`))
+    .catch(logger.error);
   }
 }
 
@@ -132,17 +138,17 @@ exports.avatar = {
       requestedWhois = message.author.username; //Save my user name as requested WHOIS
     }
     var member = findMember(message.channel.guild.members, tail);
-    //console.log(member);
+    //logger.log(member);
     if (!member) {
       //Member not found
       message.reply("Takovýho uživatele tady neznám :(")
-      .then(console.log(`Unknown user: ${requestedWhois} - Can't get user's avatar!`))
-      .catch(console.error);
+      .then(logger.log(`Unknown user: ${requestedWhois} - Can't get user's avatar!`))
+      .catch(logger.error);
       return;
     }
     message.channel.send(member.user.avatarURL)
-    .then(console.log(`Sending user's '${member.user.username}' avatar to channel #${message.channel.name}, requested by: ${message.author.username}`))
-    .catch(console.error);
+    .then(logger.log(`Sending user's '${member.user.username}' avatar to channel #${message.channel.name}, requested by: ${message.author.username}`))
+    .catch(logger.error);
   }
 }
 
@@ -167,8 +173,8 @@ exports.status = {
         "Admins: " + config.admins + "\n" +
         "Online since: " + moment(bot.readyAt).format("DD.MM.YYYY HH:mm:ss") + " (Uptime: " + moment(bot.readyAt).twix(new Date()).humanizeLength() +")";
         message.channel.send(stat_info)
-        .then(console.log(`Printed status information to '${message.author.username}' on channel '#${message.channel.name}'`))
-        .catch(console.error);
+        .then(logger.log(`Printed status information to '${message.author.username}' on channel '#${message.channel.name}'`))
+        .catch(logger.error);
   }
 }
 
@@ -182,8 +188,8 @@ exports.users = {
       memberlist += user.username + (member.nickname ? "(" + member.nickname + "" : "") + " [" + ( member.presence.status ? member.presence.status.toUpperCase() : "OFFLINE") + "]" + ", In game: " + (user.presence.game ? "Yes": "No") + "\n";
     });
     message.channel.send(memberlist)
-    .then(console.log(`Requested user list sent! List length: ${members.array().length}\t User: ${message.author.username}\t Channel: #${message.channel.name}`))
-    .catch(console.error);
+    .then(logger.log(`Requested user list sent! List length: ${members.array().length}\t User: ${message.author.username}\t Channel: #${message.channel.name}`))
+    .catch(logger.error);
   }
 }
 
@@ -192,8 +198,8 @@ exports.uptime = {
   "exec": function(message) {
     var bot = message.client;
     message.channel.send(`Uptime: ${moment(bot.readyAt).twix(new Date()).humanizeLength()} \nReady at: ${moment(bot.readyAt).format("DD.MM.YYYY HH:mm:ss")}`)
-    .then(console.log(`Uptime sent to #${message.channel.name} requested by: ${message.author.username}`))
-    .catch(console.error);
+    .then(logger.log(`Uptime sent to #${message.channel.name} requested by: ${message.author.username}`))
+    .catch(logger.error);
   }
 }
 
