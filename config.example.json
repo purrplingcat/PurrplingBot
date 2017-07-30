@@ -1,5 +1,4 @@
 {
-	"pluginDir": "./plugins",
 	"cmdPrefix": "!",
 	"pluginsDisabled": [],
 	"discord": {
