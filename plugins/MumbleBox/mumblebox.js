@@ -4,6 +4,7 @@ const CONFIG = require("../../config.json");
 
 const IGNORELIST_STORE = "./ignorelist.json";
 var ignoreList = [];
+var mumblebox = {};
 
 var logger;
 
@@ -12,7 +13,7 @@ exports.commands = [
 ];
 
 function matchMumbles(inputStr) {
-  var mumbles = CONFIG.mumblebox;
+  var mumbles = mumblebox.mumbles;
   var matchedMumbles = [];
   for (mumbleSource in mumbles) {
     try {
@@ -74,6 +75,19 @@ function restoreIgnoreList() {
   fs = require('fs');
   var json = fs.readFileSync(IGNORELIST_STORE, 'utf8').toString();
   ignoreList = JSON.parse(json);
+}
+
+function readMumblebox(jsonFileName) {
+  try {
+    fs = require('fs');
+    var json = fs.readFileSync(jsonFileName, 'utf8').toString();
+    logger.info("Loaded mumblebox config file: %s", jsonFileName);
+    return JSON.parse(json);
+  } catch(err) {
+    logger.error("Failed while reading %s - using defaults", jsonFileName);
+    logger.error(err);
+    return {};
+  }
 }
 
 function execSubCommand(scmd, args, message) {
@@ -146,7 +160,9 @@ eventBus.on("messageUpdate", function(oldMessage, newMessage, isCmd) {
 exports.init = function(pluginName) {
   logger = PurrplingBot.createLogger(pluginName);
   if (!CONFIG.mumblebox) {
-    logger.warn("Mumbles is not defined in config! No mumbles for match&talk", pluginName);
+    logger.warn("Mumblebox file is not defined in config! No mumbles for match&talk");
+  } else {
+    mumblebox = readMumblebox(CONFIG.mumblebox);
   }
   try {
     restoreIgnoreList();
