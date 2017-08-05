@@ -4,3 +4,4 @@ purrplingbot.log
 config.json
 plugins/plugins_disabled.json
 ignorelist.json
+lastuser.json
