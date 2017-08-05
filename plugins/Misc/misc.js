@@ -146,7 +146,11 @@ exports.avatar = {
       .catch(logger.error);
       return;
     }
-    message.channel.send(member.user.avatarURL)
+    var avatar = member.user.defaultAvatarURL;
+    if (member.user.avatar) {
+      avatar = member.user.avatarURL;
+    }
+    message.channel.send(avatar)
     .then(logger.log(`Sending user's '${member.user.username}' avatar to channel #${message.channel.name}, requested by: ${message.author.username}`))
     .catch(logger.error);
   }
