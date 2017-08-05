@@ -22,7 +22,7 @@ exports.catsnack = {
       msg = "Yummy!";
       break;
       case 3:
-      msg = "Tak málo? Pffft. Naval ještě, " + metadata.user + "!";
+      msg = "Tak málo? Pffft. Naval ještě, " + message.author + "!";
       break;
       case 4:
       msg = "Granule? To žrát nebudu, já chci kapsičku s tuňákem!";
