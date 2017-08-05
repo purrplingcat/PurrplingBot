@@ -13,5 +13,9 @@
 		"twitch_channel_name": "purrplingcat",
 		"twitch_channel_id": "125991922"
 	},
-	"mumblebox": "./mumblebox.json"
+	"mumblebox": "./mumblebox.json",
+	"greetings": {
+		"channelID": "300515295821299714",
+		"greetingMessage": "Vítej mezi námi!"
+	}
 }
