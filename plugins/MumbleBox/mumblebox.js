@@ -68,7 +68,14 @@ function storeIgnoreList() {
   logger.dir(ignoreList);
   fs = require('fs');
   var json = JSON.stringify(ignoreList);
-  fs.writeFile(IGNORELIST_STORE, json, 'utf8');
+  fs.writeFile(IGNORELIST_STORE, json, 'utf8', err => {
+    if (err) {
+      logger.error("An error occured while storing ignoreList!");
+      logger.error(err);
+    } else {
+      logger.log("Ignore list was stored!");
+    }
+  });
 }
 
 function restoreIgnoreList() {
@@ -104,7 +111,6 @@ function execSubCommand(scmd, args, message) {
         .catch(logger.error);
         logger.log(`User ${message.author.username} ignored for mumbles and reacts`);
         storeIgnoreList(); // Save ignore list to a file
-        logger.log("Ignore list was stored!");
       break;
     case 'unignore':
         var index = ignoreList.indexOf(message.author.username);
@@ -114,7 +120,6 @@ function execSubCommand(scmd, args, message) {
             .catch(logger.error);
             logger.log(`User ${message.author.username} unignored for mumbles and reacts`);
             storeIgnoreList(); // Save ignore list to a file
-            logger.log("Ignore list was stored!");
         } else {
           logger.log(`Can't remove user ${message.author.username} - NOT in ignore list!`);
           message.reply("You are NOT in ignore list!")
