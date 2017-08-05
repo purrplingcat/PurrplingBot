@@ -31,8 +31,11 @@ function restoreLastUser() {
 }
 
 bot.on('guildMemberAdd', function (member) {
-  logger.dir(CONFIG.greetings);
   channel = member.guild.channels.find('id', CONFIG.greetings.channelID);
+  if (!channel) {
+    logger.error("Greeting channel was not set or not found!");
+    return;
+  }
   channel.send(`${member.user} ${CONFIG.greetings.greetingMessage}`)
   .then(logger.info(`Greeting new user: ${member.user.username}`))
   .catch(logger.error);
@@ -42,6 +45,20 @@ bot.on('guildMemberAdd', function (member) {
     "joinedAt": member.joinedAt
   };
   storeLastUser(); //save last joined user info
+});
+
+bot.on('guildMemberUpdate', function(oldMember, newMember) {
+  channel = oldMember.guild.channels.find('id', CONFIG.greetings.channelID);
+  if (!channel) {
+    logger.error("Greeting channel was not set or not found!");
+    return;
+  }
+  // Nickname changed
+  if (oldMember.nickname != newMember.nickname) {
+    channel.send(`${oldMember.user} Changed her/his nickname from **${oldMember.nickname ? oldMember.nickname : oldMember.user.username}** to **${newMember.nickname ? newMember.nickname : newMember.user.username}**`)
+    .then(logger.info(`Sent info about nickname changed! User: ${oldMember.user.username} From: ${oldMember.nickname} To: ${newMember.nickname}`))
+    .catch(logger.error);
+  }
 });
 
 exports.init = function(pluginName) {
