@@ -182,7 +182,7 @@ exports.users = {
   "description": "Get a user list on this server",
   "exec": function(message) {
     var members = message.channel.guild.members;
-    var memberlist = "Members joined on this server: \n";
+    var memberlist = "Members joined on this server: " + members.array().length + "\n\n";
     members.forEach(member => {
       var user = member.user;
       memberlist += user.username + (member.nickname ? "(" + member.nickname + "" : "") + " [" + ( member.presence.status ? member.presence.status.toUpperCase() : "OFFLINE") + "]" + ", In game: " + (user.presence.game ? "Yes": "No") + "\n";
