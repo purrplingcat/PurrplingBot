@@ -1,4 +1,5 @@
 var request = require("request");
+var moment = require('moment');
 var PurrplingBot = require("../../purrplingbot.js");
 var config = require("../../config.json");
 var logger;
@@ -36,7 +37,7 @@ exports.nextstream = {
             logger.log("Stream is live!\t Stream name: %s \t Channel name: %s", e.title, twitch_channel_name);
           }
           else if (currentTime.getTime() < streamStartTime.getTime()) {
-            msg = "Další stream: '" + e.title + "' bude " + streamStartTime.toString() + " https://www.twitch.tv/events/" + e._id;
+            msg = "Další stream: '" + e.title + "' bude " + moment(streamStartTime).format("DD.MM.YYYY HH:mm:ss") + " - Hrát se bude '" + e.game.name + "' https://www.twitch.tv/events/" + e._id;
             logger.log("Next stream comming soon!\t Stream name: %s \t Stream starts: %s", e.title, streamStartTime);
           }
           else {
