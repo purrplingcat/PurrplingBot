@@ -90,3 +90,7 @@ exports.getPlugins = function () {
 exports.getDisabledPlugins = function() {
   return plugins_disabled;
 }
+
+if (require.main === module) {
+  console.log("To start PurrplingBot please run purrplingbot.js instead.");
+}
