@@ -160,8 +160,8 @@ exports.status = {
   "description": "Get a status info about bot",
   "exec": function (message) {
     var stats = purrplingBot.getStats();
-    var plugins = pluginRegistry.getPlugins();
-    var plugins_disabled = pluginRegistry.getDisabledPlugins();
+    var pluginsCount = pluginRegistry.countPlugins();
+    var plugins_disabledCount = pluginRegistry.countDisabledPlugins();
     var cmds = purrplingBot.getCommandRegistry();
     var bot = message.client;
     var stat_info =
@@ -172,8 +172,8 @@ exports.status = {
         "Count of reconnections: " + stats.numberOfReconnection + "\n" +
         "Count of handled commands: " + stats.commandsHandled + "\n" +
         "Registered commands: " + Object.keys(cmds).length + "\n" +
-        "Loaded plugins: " + Object.keys(plugins).length + "\n" +
-        "Disabled plugins: " + Object.keys(plugins_disabled).length + "\n" +
+        "Loaded plugins: " + pluginsCount + "\n" +
+        "Disabled plugins: " + plugins_disabledCount + "\n" +
         "Admins: " + config.admins + "\n" +
         "Online since: " + moment(bot.readyAt).format("DD.MM.YYYY HH:mm:ss") + " (Uptime: " + moment(bot.readyAt).twix(new Date()).humanizeLength() +")";
         message.channel.send(stat_info)

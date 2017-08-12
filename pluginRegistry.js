@@ -87,8 +87,16 @@ exports.getPlugins = function () {
   return plugins;
 }
 
+exports.countPlugins = function() {
+  return Object.keys(plugins).length
+}
+
 exports.getDisabledPlugins = function() {
   return plugins_disabled;
+}
+
+exports.countDisabledPlugins = function() {
+  return Object.keys(plugins_disabled).length
 }
 
 if (require.main === module) {
