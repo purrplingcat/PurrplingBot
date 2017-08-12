@@ -9,6 +9,7 @@ const VERSION = PKG.version;
 const CODENAME = PKG.codename;
 
 const eventBus = new EventEmmiter();
+const DEBUG = process.env.DEBUG || false;
 
 var config = {};
 var pluginRegistry;
@@ -71,6 +72,7 @@ function init() {
   console.log("* Starting PurrplingBot version " + VERSION + " '" + CODENAME + "'");
   console.log("* Runtime: Node " + process.version + "(" + process.platform + ") Pid: " + process.pid);
   console.log("* Argv: " + process.argv);
+  if (DEBUG) console.log("* DEBUG MODE ENABLED !!");
 
   // Load configuration file
   try {
@@ -205,6 +207,18 @@ bot.on('disconnect', function(errMsg, code) {
     console.error(err);
     process.exit(100);
   }
+});
+
+bot.on('debug', function(info){
+  if (DEBUG) console.log(info);
+});
+
+bot.on('warn', function(info){
+  console.warn(info);
+});
+
+bot.on('reconecting', function(){
+  console.warn("Connection lost! Trying to reconnect ...");
 });
 
 exports.getPluginRegistry = function () {
