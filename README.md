@@ -20,6 +20,8 @@ docker pull purrplingcat/purrplingbot:1.1.1 # Maintained stable version 1.1.1 'C
 docker pull purrplingcat/purrplingbot:latest # Latest development version
 ```
 
+**[Docker Setup/Migrate guide](https://gist.github.com/EllenFawkes/75c389714aa92a31a976d02d451e3e9c)**
+
 ## Install (dev)
 
 1. Rename config.example.json to config.json `mv config.example.json config.json`
@@ -38,6 +40,8 @@ You can disable plugins, where you don't want. Create file `config.json` in node
 ```
 
 ## Docker Quickstart
+
+### [Docker Setup/Migrate guide](https://gist.github.com/EllenFawkes/75c389714aa92a31a976d02d451e3e9c)
 
 ### Pull image from DockerHub
 
