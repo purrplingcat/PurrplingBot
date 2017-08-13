@@ -108,6 +108,10 @@ function resumeAnnounce(name, interval) {
     logger.log(`Announce '${name} not exists - Can't resume!`);
     return;
   }
+  if (announceRunners[name]) {
+    logger.warn("Announce '%s' already resumed and running!", name);
+    return false;
+  }
   if (interval) {
     announce.interval = interval;
   }
