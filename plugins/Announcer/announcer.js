@@ -166,8 +166,8 @@ function execSubCommand(scmd, args, message) {
         "active": false
       };
       storeAnnounces();
-      message.channel.send(`Announce ${name} with interval ${interval} seconds to channel <#${channel}> added! Activate it by '!announce resume ${name}'`)
-      .then(logger.log(`Announce ${name} with interval ${interval} to channel <#${channel}> added! User: ${message.author.username} in #${message.channel.name}}`))
+      message.channel.send(`Announce '${name}' added! Activate it by '!announce resume ${name}'`)
+      .then(logger.log(`Announce '${name}' added! User: ${message.author.username} in #${message.channel.name}}`))
       .catch(logger.error);
     break;
     case 'rm':
