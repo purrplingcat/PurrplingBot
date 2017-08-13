@@ -56,12 +56,12 @@ function restoreAnnounces() {
 /* TODO: Only base test. Write a complete logic for:
  * [DONE] Trig a timer function for announce
  * [DONE] Add new announce by command !announce add <name> <interval> <#channel> <message>
- * Store announces after add
+ * [DONE] Store announces after add
  * [DONE] List announces by !announce List
  * Cancel announce by !announce cancel name
  * [DONE] Resume announce by !announce resume <name> [<interval>]
  * [DONE] Remove announce by !announce rm <name>
- * Restore announces after start the bot
+ * [DONE] Restore announces after start the bot
  * [DONE] Handle a command manualy by user
  *
  * Privileges: to !announce command can access only admins!
@@ -102,14 +102,14 @@ function cancelAnnounce(name) {
   }
 }
 
-function resumeAnnounce(name, duration) {
+function resumeAnnounce(name, interval) {
   var announce = announces[name];
   if (!announce) {
     logger.log(`Announce '${name} not exists - Can't resume!`);
     return;
   }
-  if (duration) {
-    announce.duration = duration
+  if (interval) {
+    announce.interval = interval;
   }
   try {
     var runner = bot.setInterval(handleAnnounce, announce.interval * 1000, name, "@IntervalTrigger");
@@ -231,7 +231,8 @@ function execSubCommand(scmd, args, message) {
         return;
       }
       var name = args[0];
-      var announce = resumeAnnounce(name);
+      var interval = args[1];
+      var announce = resumeAnnounce(name, interval);
       if (!announce) {
         message.reply(`Can't resume Announce '${name}'`)
         .catch(logger.error);
