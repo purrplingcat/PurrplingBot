@@ -58,7 +58,7 @@ function restoreAnnounces() {
  * [DONE] Add new announce by command !announce add <name> <interval> <#channel> <message>
  * [DONE] Store announces after add
  * [DONE] List announces by !announce List
- * Cancel announce by !announce cancel name
+ * [DONE] Cancel announce by !announce cancel name
  * [DONE] Resume announce by !announce resume <name> [<interval>]
  * [DONE] Remove announce by !announce rm <name>
  * [DONE] Restore announces after start the bot
@@ -287,12 +287,22 @@ exports.announce = {
   "description": "Control an Announcer",
   "usage": "<add|rm|list|resume|cancel|handle|help> [options/args]",
   "exec": function(message, tail) {
-    if (!tail.length || tail == null) {
-      tail = "help";
+    if ("admins" in config) {
+      if (config.admins.indexOf(message.author.username) > -1) {
+        if (!tail.length || tail == null) {
+          tail = "help";
+        }
+        var args = tail.split(" ");
+        var scmd = args.shift();
+        logger.log(`Handle subcommand: ${tail} on #${message.channel.name} by ${message.author.username}`);
+        execSubCommand(scmd, args, message);
+      } else {
+        message.reply("You are not permitted to use this command!")
+        .then(logger.info(`User '${message.author.username}' has no permissions for command 'announce'!`))
+        .catch(logger.error);
+      }
+    } else {
+      logger.warn("Node 'admins' is not defined in configuration!");
     }
-    var args = tail.split(" ");
-    var scmd = args.shift();
-    logger.log(`Handle subcommand: ${tail} on #${message.channel.name} by ${message.author.username}`);
-    execSubCommand(scmd, args, message);
   }
 }
