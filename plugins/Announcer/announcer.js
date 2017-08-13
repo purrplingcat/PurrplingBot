@@ -214,8 +214,8 @@ function execSubCommand(scmd, args, message) {
       var name = args[0];
       var runner = announceRunners[name];
       if (!runner) {
-        message.reply(`Announce '${name} not active and not running!'`)
-        .then(logger.info(`Announce '${name} not active and not running! User: ${message.author.username} in #${message.channel.name}`))
+        message.reply(`Announce '${name}' not active and not running!`)
+        .then(logger.info(`Announce '${name}' not active and not running! User: ${message.author.username} in #${message.channel.name}`))
         .catch(logger.error);
         return;
       }
@@ -238,7 +238,7 @@ function execSubCommand(scmd, args, message) {
       var interval = args[1];
       var announce = resumeAnnounce(name, interval);
       if (!announce) {
-        message.reply(`Can't resume Announce '${name}'`)
+        message.reply(`Can't resume Announce '${name}' - Already resumed or announce not exists.`)
         .catch(logger.error);
         return;
       }
