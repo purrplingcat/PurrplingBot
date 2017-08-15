@@ -178,7 +178,7 @@ eventBus.on("message", function(message, isCmd){
 });
 
 eventBus.on("messageUpdate", function(oldMessage, newMessage, isCmd) {
-  if (mumblebox.ignoredChannelIDs && !mumblebox.ignoredChannelIDs.indexOf(message.channel.id)) {
+  if (mumblebox.ignoredChannelIDs && !mumblebox.ignoredChannelIDs.indexOf(newMessage.channel.id)) {
     return; // Channel is in ignore list? Don't match mumbles
   }
   if (!isCmd) {
