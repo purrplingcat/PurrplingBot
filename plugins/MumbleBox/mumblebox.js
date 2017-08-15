@@ -3,6 +3,10 @@ var eventBus = PurrplingBot.getEventBus();
 const CONFIG = require("../../config.json");
 
 const IGNORELIST_STORE = "./ignorelist.json";
+
+const TYPE_REACT = "REACT";
+const TYPE_MUMBLE = "MUMBLE";
+
 var ignoreList = [];
 var mumblebox = {};
 
@@ -12,8 +16,7 @@ exports.commands = [
   "mumbles"
 ];
 
-function matchMumbles(inputStr) {
-  var mumbles = mumblebox.mumbles;
+function matchMumbles(inputStr, mumbles) {
   var matchedMumbles = [];
   for (mumbleSource in mumbles) {
     try {
@@ -45,11 +48,18 @@ function matchMumbles(inputStr) {
   return matchedMumbles;
 }
 
-function matchAndSendMumble(message) {
+function matchAndSendMumble(message, type) {
+  if (type === TYPE_REACT) {
+    var source = mumblebox.reactions || {};
+  } else if (type === TYPE_MUMBLE) {
+    var source = mumblebox.mumbles || {};
+  } else {
+    throw new Error("Invalid mumble type: " + type);
+  }
   if (message.author.id === message.client.user.id) {
     return; // ignore self messages
   }
-  var mumbles = matchMumbles(message.content);
+  var mumbles = matchMumbles(message.content, source);
   if (mumbles.length) {
     if (ignoreList.indexOf(message.author.username) >= 0) {
       logger.log(`User ${message.author.username} on #${message.channel.name} ignored for mumbles!`);
@@ -57,9 +67,16 @@ function matchAndSendMumble(message) {
     }
     var rand = Math.floor((Math.random() * mumbles.length));
     var mumble = mumbles[rand];
-    message.channel.send(mumble.content)
-    .then(logger.log(`Matched phrase "${mumble.phrase}" in message "${message.content}" from #${message.channel.name} User: ${message.author.username}! Reply sent: "${mumble.content}" [ID: ${rand},${mumble.index}]`))
-    .catch(logger.error);
+    var log_message = `(ACT:${type}) Matched phrase "${mumble.phrase}" in message "${message.content}" from #${message.channel.name} User: ${message.author.username}! Reply sent: "${mumble.content}" [ID: ${rand},${mumble.index}]`;
+    if (type === TYPE_MUMBLE) {
+      message.channel.send(mumble.content)
+      .then(logger.log(log_message))
+      .catch(logger.error);
+    } else if (type === TYPE_REACT) {
+      message.react(mumble.content)
+      .then(logger.log(log_message))
+      .catch(logger.error);
+    }
   }
 }
 
@@ -151,20 +168,16 @@ function execSubCommand(scmd, args, message) {
 }
 
 eventBus.on("message", function(message, isCmd){
-  if (mumblebox.ignoredChannelIDs && !mumblebox.ignoredChannelIDs.indexOf(message.channel.id)) {
-    return; // Channel is in ignore list? Don't match mumbles
-  }
   if (!isCmd) {
-    matchAndSendMumble(message);
+    matchAndSendMumble(message, TYPE_REACT); // React to a message
+    matchAndSendMumble(message, TYPE_MUMBLE); // Reply to a message
   }
 });
 
 eventBus.on("messageUpdate", function(oldMessage, newMessage, isCmd) {
-  if (mumblebox.ignoredChannelIDs && !mumblebox.ignoredChannelIDs.indexOf(newMessage.channel.id)) {
-    return; // Channel is in ignore list? Don't match mumbles
-  }
   if (!isCmd) {
-    matchAndSendMumble(newMessage);
+    matchAndSendMumble(newMessage, TYPE_REACT); // React to a message
+    matchAndSendMumble(oldMessage, TYPE_MUMBLE); // Reply to a message
   }
 });
 

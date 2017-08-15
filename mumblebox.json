@@ -1,5 +1,4 @@
 {
-  "ignoredChannelIDs": [],
   "mumbles": {
     "kočička": [
       "Já jsem kočička",
@@ -59,21 +58,9 @@
     "Minecraft|craftit": [
       "http://gph.is/2fd79O9",
       "Ach, zase ty kostičky"
-    ],
-    "Pes|pejsek|hafan": [
-      "Ustup satane",
-      "http://images.huffingtonpost.com/2012-06-13-catsdogsfight3-thumb.jpg",
-      "https://696f2f1b047a974c9d02-fe376ee1391e139016dd683a89931094.ssl.cf1.rackcdn.com/images/cat-and-dog.jpg",
-      "https://s-media-cache-ak0.pinimg.com/236x/85/27/d0/8527d0dbf7dd572651513689320c6354--kittens-and-puppies-cuddling-kittens.jpg"
-    ],
-    "lokmon|Loki": [
-      "https://media.giphy.com/media/suCJQGchI6oBW/giphy.gif",
-      "https://s-media-cache-ak0.pinimg.com/originals/68/e0/b3/68e0b310b35e416ffbb6e1bcfcadf195.gif"
-    ],
-    "PurrplingCat|Ellen|CallMeFoxie|Ashley": [
-      "To je moje milovaná maminka <3",
-      "To je moje panička :-*",
-      "Miaw! Miluju jí!"
     ]
+  },
+  "reactions": {
+    "kočička": "🐱"
   }
 }
