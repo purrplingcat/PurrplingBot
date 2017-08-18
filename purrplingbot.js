@@ -40,6 +40,7 @@ var cmds = {
     "description": "Get list of loaded plugins",
     "exec": function(message) {
       var plugins = pluginRegistry.getPlugins();
+      var plugins_disabled = pluginRegistry.getDisabledPlugins();
       var iteration = 0;
       var plugin_list = "Loaded plugins: ";
       for (pluginName in plugins) {
@@ -48,6 +49,9 @@ var cmds = {
           plugin_list += ", ";
         }
         iteration++;
+      }
+      if (plugins_disabled.length > 0) {
+        plugin_list += "\nDisabled plugins: " + plugins_disabled;
       }
       message.channel.send(plugin_list)
       .then(console.log(`Plugin list sent to: #${message.channel.name}\t Requested by: ${message.author.username}`))
