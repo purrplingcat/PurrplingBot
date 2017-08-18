@@ -91,6 +91,7 @@ function init() {
   console.prefix = "Main";
 
   // Connect bot to Discord!
+  console.info("*** Trying to connect Discord");
   bot.login(config.discord.token);
 }
 
@@ -196,17 +197,11 @@ bot.on('messageUpdate', function(oldMessage, newMessage) {
   eventBus.emit("messageUpdate", oldMessage, newMessage, isCmd);
 });
 
-bot.on('disconnect', function(errMsg, code) {
+bot.on('disconnect', function(event) {
   console.warn("PurrplingBot disconnected from Discord service!")
-  console.warn("#%s - %s", code, errMsg);
-  console.log("*** Trying to reconnect");
-  try {
-    bot.connect();
-  } catch (err) {
-    console.error("Can't connect to discord!");
-    console.error(err);
-    process.exit(100);
-  }
+  console.warn("Reason: #%s - %s", event.code, event.reason);
+  console.info("*** Exiting");
+  process.exit(15);
 });
 
 bot.on('debug', function(info){
