@@ -23,8 +23,8 @@ function fetchAndSendMyGif(message, tag, type) {
     json: true,
   }, function (error, response, body) {
     var result = null;
-    if (!error && response.statusCode === 200) {
-      result = body.data.url;
+    if (!error && response.statusCode === 200 && body) {
+      result = body.data.url || "Nothing found for keyword: " + tag;
     }
     if (result === null) {
       result = "Je mi líto, ale něco se rozbilo. Zkus to prosím později.";
