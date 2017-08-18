@@ -3,7 +3,7 @@ var bot = PurrplingBot.getDiscordClient();
 const CONFIG = require("../../config.json");
 
 var logger;
-var lastuser;
+var lastuser = {};
 
 const LASTUSER_STORE = "./lastuser.json";
 
@@ -31,24 +31,35 @@ function restoreLastUser() {
 }
 
 bot.on('guildMemberAdd', function (member) {
-  channel = member.guild.channels.find('id', CONFIG.greetings.channelID);
+  var greeting_message = "Welcome!";
+  if (!CONFIG.greetings) {
+    channel = member.guild.defaultChannel;
+  } else {
+    channel = member.guild.channels.find('id', CONFIG.greetings.channelID);
+    greeting_message = CONFIG.greetings.greetingMessage || greeting_message;
+  }
   if (!channel) {
     logger.error("Greeting channel was not set or not found!");
     return;
   }
-  channel.send(`${member.user} ${CONFIG.greetings.greetingMessage}`)
+  channel.send(`${member.user} ${greeting_message}`)
   .then(logger.info(`Greeting new user: ${member.user.username}`))
   .catch(logger.error);
-  lastuser = {
+  lastuser[member.guild.id] = {
     "id": member.user.id,
     "username": member.user.username,
+    "server": member.guild.name,
     "joinedAt": member.joinedAt
   };
   storeLastUser(); //save last joined user info
 });
 
 bot.on('guildMemberUpdate', function(oldMember, newMember) {
-  channel = oldMember.guild.channels.find('id', CONFIG.greetings.channelID);
+  if (!CONFIG.greetings) {
+    channel = newMember.guild.defaultChannel;
+  } else {
+    channel = newMember.guild.channels.find('id', CONFIG.greetings.channelID);
+  }
   if (!channel) {
     logger.error("Greeting channel was not set or not found!");
     return;
@@ -74,9 +85,13 @@ exports.init = function(pluginName) {
 exports.lastuser = {
   "description": "Print last username and user's joined at",
   "exec": function(message) {
-    if (lastuser) {
-      message.channel.send(`Last joined user is: ${lastuser.username}\nUser joined at: ${lastuser.joinedAt}`)
-      .then(logger.info(`Printed info about joined user: ${lastuser.username} JoinedAt: ${lastuser.joinedAt}`))
+    var luser = lastuser[message.channel.guild.id];
+    if (!luser && lastuser.id) {
+      luser = lastuser; // Back compatibility with store from old version (v1.2.2 and lower)
+    }
+    if (luser) {
+      message.channel.send(`Last joined user is: ${luser.username}\nUser joined at: ${luser.joinedAt}`)
+      .then(logger.info(`Printed info about joined user: ${luser.username} JoinedAt: ${luser.joinedAt} Server ${luser.server}`))
       .catch(logger.error);
     } else {
       message.channel.send("I don't know about last joined user! Maybe nothing joined this server.")
