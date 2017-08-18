@@ -131,6 +131,7 @@ function print_help(cmd) {
     }
     iteration++;
   }
+  help_text += `\n\nFor more information type '${prefix}help <command>'`;
   return help_text;
 }
 
