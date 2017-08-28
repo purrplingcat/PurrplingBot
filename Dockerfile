@@ -6,6 +6,7 @@ LABEL com.purrplingcat.vendor="PurrplingCat"
 LABEL com.purrplingcat.email="dev@purrplingcat.com"
 LABEL com.purrplingcat.github="https://github.com/EllenFawkes/PurrplingBot"
 
+ENV DEBUG=0
 ENV APP_DIR="/opt/PurrplingBot"
 ENV APP_LOGS="/var/log/purrplingbot.log"
 
