@@ -1,7 +1,7 @@
 FROM node:8.2.1-alpine
 
 LABEL com.purrplingcat.name="PurrplingBot"
-LABEL com.purrplingcat.version="1.0.0"
+LABEL com.purrplingcat.version="1.0.1"
 LABEL com.purrplingcat.vendor="PurrplingCat"
 LABEL com.purrplingcat.email="dev@purrplingcat.com"
 LABEL com.purrplingcat.github="https://github.com/EllenFawkes/PurrplingBot"
