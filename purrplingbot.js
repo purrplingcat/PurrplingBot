@@ -68,6 +68,19 @@ var cmds = {
   }
 };
 
+function check_conf() {
+  console.prefix = "Config";
+  if (!config.discord) {
+    console.error("Discord scope not defined in config!");
+    process.exit(6);
+  }
+  if (!config.discord.token) {
+    console.error("Token not defined in discord scope!");
+    process.exit(6);
+  }
+  console.log("Configuration is OK!");
+}
+
 function init() {
   // Init main logger
   LOGGER.init(console);
@@ -86,6 +99,9 @@ function init() {
     console.error(err);
     process.exit(6);
   }
+
+  // Check configuration
+  check_conf();
 
   // Load plugin registry and init plugins
   pluginRegistry = require("./pluginRegistry.js");
