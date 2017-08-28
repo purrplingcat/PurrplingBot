@@ -1,7 +1,7 @@
 FROM node:8.2.1-alpine
 
 LABEL com.purrplingcat.name="PurrplingBot"
-LABEL com.purrplingcat.version="1.0.1"
+LABEL com.purrplingcat.version="1.0.2"
 LABEL com.purrplingcat.vendor="PurrplingCat"
 LABEL com.purrplingcat.email="dev@purrplingcat.com"
 LABEL com.purrplingcat.github="https://github.com/EllenFawkes/PurrplingBot"
@@ -24,8 +24,10 @@ COPY . .
 # Redirect logs to /var/log
 RUN rm -rf purrplingbot.log && \
     ln -s $APP_LOGS purrplingbot.log
-    
+
 VOLUME ./config.json
+VOLUME ./mumblebox.json
+VOLUME /etc/localtime
 
 # Start PurrplingBot
 CMD ["npm", "start"]
