@@ -71,7 +71,7 @@ var cmds = {
 
 function init() {
   // Init main logger
-  logger = createLogger("Core");
+  logger = LOGGER.createLogger("Core");
 
   // Print info about PurrplingBot
   logger.info("* Starting PurrplingBot version " + VERSION + " '" + CODENAME + "'");
@@ -100,13 +100,6 @@ function init() {
   // Connect bot to Discord!
   logger.info("*** Trying to connect Discord");
   bot.login(config.discord.token);
-}
-
-function createLogger(prefix) {
-  var _logger = new console.Console(process.stdout, process.stderr);
-  _logger.prefix = prefix;
-  LOGGER.init(_logger); // Init new logger at derivation
-  return _logger;
 }
 
 function print_cmd_help(cmd) {
@@ -261,7 +254,7 @@ exports.addCommand = function(cmdName, cmdObject) {
 }
 
 // createLogger() availaible for all modules
-exports.createLogger = createLogger;
+exports.createLogger = LOGGER.createLogger;
 
 //Take init() bot outside main file (call it in another module after require)
 exports.init = init
