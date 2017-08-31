@@ -70,16 +70,22 @@ var cmds = {
 };
 
 function check_conf() {
-  console.prefix = "Config";
   if (!config.discord) {
-    console.error("Discord scope not defined in config!");
+    logger.error("Discord scope not defined in config!");
     process.exit(6);
   }
   if (!config.discord.token) {
-    console.error("Token not defined in discord scope!");
+    logger.error("Token not defined in discord scope!");
     process.exit(6);
   }
-  console.log("Configuration is OK!");
+  logger.log("Configuration check is OK!");
+}
+
+function print_bot_info() {
+  var _logger = LOGGER.createLogger();
+  _logger.info("* Starting PurrplingBot version " + VERSION + " '" + CODENAME + "'");
+  _logger.info("* Runtime: Node " + process.version + "(" + process.platform + ") Pid: " + process.pid);
+  _logger.info("* Argv: " + process.argv);
 }
 
 function init() {
@@ -87,9 +93,7 @@ function init() {
   logger = LOGGER.createLogger("Core");
 
   // Print info about PurrplingBot
-  logger.info("* Starting PurrplingBot version " + VERSION + " '" + CODENAME + "'");
-  logger.info("* Runtime: Node " + process.version + "(" + process.platform + ") Pid: " + process.pid);
-  logger.info("* Argv: " + process.argv);
+  print_bot_info();
   if (DEBUG > 0) logger.log("* DEBUG MODE ENABLED !! (level: %s)", DEBUG);
 
   // Load configuration file
