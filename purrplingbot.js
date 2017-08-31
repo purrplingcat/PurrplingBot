@@ -81,9 +81,10 @@ function init() {
 
   // Load configuration file
   try {
-    config = require("./config.json");
+    const Configurator = require("./lib/configurator.js");
+    config = Configurator.loadConfiguration("./config.json");
   } catch (err) {
-    logger.error("*** Configuration failed to load! Check the file config.json");
+    logger.error("*** Configuration failed to load! Check the config file.");
     logger.error(err);
     process.exit(6);
   }
@@ -251,6 +252,10 @@ exports.addCommand = function(cmdName, cmdObject) {
     logger.error("Failed to add command: %s", cmdName);
     logger.error(err);
   }
+}
+
+exports.getConfiguration = function(){
+  return config;
 }
 
 // createLogger() availaible for all modules
