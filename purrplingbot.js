@@ -86,6 +86,7 @@ function print_bot_info() {
   _logger.info("* Starting PurrplingBot version " + VERSION + " '" + CODENAME + "'");
   _logger.info("* Runtime: Node " + process.version + "(" + process.platform + ") Pid: " + process.pid);
   _logger.info("* Argv: " + process.argv);
+  if (DEBUG > 0) _logger.log("* DEBUG MODE ENABLED !! (level: %s)", DEBUG);
 }
 
 function init() {
@@ -94,7 +95,7 @@ function init() {
 
   // Print info about PurrplingBot
   print_bot_info();
-  if (DEBUG > 0) logger.log("* DEBUG MODE ENABLED !! (level: %s)", DEBUG);
+  logger.info("Starting PurrplingBot ...");
 
   // Load configuration file
   try {
