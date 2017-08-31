@@ -27,7 +27,6 @@ RUN rm -rf purrplingbot.log && \
 
 VOLUME ./config.json
 VOLUME ./mumblebox.json
-VOLUME /etc/localtime
 
 # Start PurrplingBot
 CMD ["npm", "start"]
