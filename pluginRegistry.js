@@ -1,86 +1,111 @@
 var PurrplingBot = require("./purrplingbot.js");
 var eventBus = PurrplingBot.getEventBus();
 
-const CONFIG = require("./config.json");
+const CONFIG = PurrplingBot.getConfiguration();
 const PLUGIN_DIR = "./plugins";
+const DEBUG = process.env.DEBUG || 0;
 
-var plugins = {};
+var plugins = {}; // { pluginName: plugin, ...}
+var pluginList = {}; // { pluginName: pluginPath, ... }
 var plugins_disabled = [];
+var logger;
 
-function load_plugins(pluginDir) {
+function preload_plugins(pluginDir) {
+  const fs = require("fs");
+  const path = require("path");
+  var _pluginList = {};
+  logger.log("Prealoading plugins ...");
+  fs.readdirSync(pluginDir)
+  .filter(file => fs.lstatSync(path.join(pluginDir, file)).isDirectory())
+  .forEach(pluginName => {
+    logger.log("Preloading plugin: %s", pluginName);
+    const pluginPath = pluginDir + "/" + pluginName + "/" + pluginName.toLowerCase() + ".js";
+    if (plugins_disabled.indexOf(pluginName) < 0) {
+      if (fs.existsSync(pluginPath)) {
+        logger.log("Found plugin entry file: %s", pluginPath);
+        // TODO: Write NPM install denepdencies (issue #22)
+        _pluginList[pluginName] = pluginPath;
+        eventBus.emit("pluginPreloaded", pluginName, pluginPath);
+        logger.info("Enabled plugin: %s", pluginName);
+      } else {
+        plugins_disabled.push(pluginName);
+        logger.error("Plugin '%s' is not valid! Entry file '%s' not found - Plugin DISABLED!", pluginName, pluginPath);
+      }
+    } else {
+      logger.log("Plugin '%s' DISABLED - Skip loading", pluginName);
+    }
+  });
+  if (DEBUG > 2) logger.dir(_pluginList);
+  return _pluginList;
+}
+
+function load_plugins(pluginList) {
   try {
-    console.log("Plugin loader process started!");
-    const fs = require("fs");
-    const path = require("path");
-    const pluginDisabledDefinitionFile = pluginDir + "/plugins_disabled.json";
+    logger.log("Loading plugins ...");
 
     if (plugins_disabled.length) {
-      console.log("Disabled plugins: %s", plugins_disabled);
+      logger.info("Disabled plugins: %s", plugins_disabled);
     }
-    fs.readdirSync(pluginDir)
-    .filter(file => fs.lstatSync(path.join(pluginDir, file)).isDirectory())
-    .forEach(pluginName => {
-      // Switch scope: Current plugin scope
-      console.prefix = pluginName
-
-      var plugin;
-      const pluginPath = pluginDir + "/" + pluginName + "/" + pluginName.toLowerCase() + ".js";
-      if (plugins_disabled.indexOf(pluginName) < 0) {
-        try {
-          plugin = require(pluginPath);
-          console.log("Plugin loaded! Source: %s", pluginPath);
-          if ("init" in plugin) {
-            plugin.init(pluginName);
-            console.log(" Triggered init() for plugin");
-          }
-          if ("commands" in plugin) {
-            plugin.commands.forEach(cmd => {
-              try {
-                if ("exec" in plugin[cmd]) {
-                  PurrplingBot.addCommand(cmd, plugin[cmd]);
-                  console.log("Registered command: %s", cmd);
-                } else {
-                  throw new Error("Command '%s' is invalid! Missing exec() function.", cmd);
-                }
-              } catch (err) {
-                console.error("Can't register command: '%s'", cmd);
-                console.error(err.stack);
-                process.exit(12);
-              }
-              eventBus.emit("commandRegister", cmd);
-            });
-          }
-          console.info("Initialization DONE!");
-          plugins[pluginName] = plugin; //Add plugin to plugin registry
-          eventBus.emit("pluginLoaded", plugin, pluginName);
-        } catch (err) {
-          console.error("Error while loading plugin! Source: %s", pluginPath);
-          console.error(err.stack);
-          process.exit(10); // PLUGIN FAILURE! Kill the bot
-        }
-      } else {
-        console.log("Plugin DISABLED - Skip loading");
-      }
-    });
-    // Switch scope back: PluginLoader
-    console.prefix = "PluginLoader"
+    for (pluginName in pluginList) {
+      logger.info("Trying to load plugin: %s", pluginName);
+      const pluginPath = pluginList[pluginName];
+      plugins[pluginName] = init_plugin(pluginName, pluginPath); // Init plugin and add it to plugin registry
+      eventBus.emit("pluginLoaded", plugin, pluginName);
+    }
     eventBus.emit("pluginsLoaded", plugins);
-    console.log("Plugin loader process was SUCCESFULL!");
+    logger.info("*** Plugin loader process was SUCCESFULL!");
   } catch (err) {
-    console.error("Plugins can't be loaded!")
-    console.error(err);
+    logger.error("Plugins can't be loaded!")
+    logger.error(err);
     process.exit(8);
   }
 }
 
-exports.init = function() {
-  // Switch scope: PluginLoader
-  console.prefix = "PluginLoader"
+function init_plugin(pluginName, pluginPath) {
+  // Create internal logger for different plugin loader process
+  var _logger = PurrplingBot.createLogger(pluginName);
+  try {
+    plugin = require(pluginPath);
+    _logger.log("Plugin loaded! Source: %s", pluginPath);
+    if ("init" in plugin) {
+      plugin.init(pluginName);
+      _logger.log("Triggered init() for plugin");
+    }
+    if ("commands" in plugin) {
+      plugin.commands.forEach(cmd => {
+        try {
+          if ("exec" in plugin[cmd]) {
+            PurrplingBot.addCommand(cmd, plugin[cmd]);
+            _logger.log("Registered command: %s", cmd);
+          } else {
+            throw new Error("Command '%s' is invalid! Missing exec() function.", cmd);
+          }
+        } catch (err) {
+          _logger.error("Can't register command: '%s'", cmd);
+          _logger.error(err.stack);
+          process.exit(12);
+        }
+        eventBus.emit("commandRegister", cmd);
+      });
+    }
+    _logger.info("Initialization DONE!");
+    return plugin;
+  } catch (err) {
+    _logger.error("Error while loading plugin! Source: %s", pluginPath);
+    _logger.error(err.stack);
+    process.exit(10); // PLUGIN FAILURE! Kill the bot
+  }
+}
 
+exports.init = function() {
+  logger = PurrplingBot.createLogger("PluginRegistry");
+  logger.info("*** Plugin loader process started!");
   if (CONFIG.pluginsDisabled && CONFIG.pluginsDisabled instanceof Array) {
     plugins_disabled = CONFIG.pluginsDisabled; // Fetch disabled plugins from config
   }
-  load_plugins(PLUGIN_DIR);
+  pluginList = preload_plugins(PLUGIN_DIR);
+  if (DEBUG > 2) logger.dir(plugins_disabled)
+  load_plugins(pluginList);
 }
 
 exports.getPlugins = function () {

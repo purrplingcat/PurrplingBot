@@ -4,12 +4,13 @@ const LOGGER = require("./lib/logger.js");
 
 var Discord = require('discord.js');
 var moment = require('moment');
+var logger;
 
 const VERSION = PKG.version;
 const CODENAME = PKG.codename;
 
 const eventBus = new EventEmmiter();
-const DEBUG = (process.env.DEBUG == 1);
+const DEBUG = process.env.DEBUG || 0;
 
 var config = {};
 var pluginRegistry;
@@ -32,8 +33,8 @@ var cmds = {
     "description": "Ping the bot and get pong.",
     "exec": function(message) {
       message.reply("pong")
-      .then(msg => console.log(`Pong sent to ${msg.author.username} in #${msg.channel.name}`))
-      .catch(console.error);
+      .then(msg => logger.info(`Pong sent to ${msg.author.username} in #${msg.channel.name}`))
+      .catch(logger.error);
     }
   },
   "plugins": {
@@ -54,16 +55,16 @@ var cmds = {
         plugin_list += "\nDisabled plugins: " + plugins_disabled;
       }
       message.channel.send(plugin_list)
-      .then(console.log(`Plugin list sent to: #${message.channel.name}\t Requested by: ${message.author.username}`))
-      .catch(console.error);
+      .then(logger.info(`Plugin list sent to: #${message.channel.name}\t Requested by: ${message.author.username}`))
+      .catch(logger.error);
     }
   },
   "version": {
     "description": "PurrplingBot version and codename",
     "exec": function(message) {
       message.channel.send("PurrplingBot version " + VERSION + " '" + CODENAME + "'")
-      .then(console.log(`Version info sent to ${message.author.username} in ${message.channel.name}`))
-      .catch(console.error);
+      .then(logger.info(`Version info sent to ${message.author.username} in ${message.channel.name}`))
+      .catch(logger.error);
     }
   }
 };
@@ -83,20 +84,21 @@ function check_conf() {
 
 function init() {
   // Init main logger
-  LOGGER.init(console);
+  logger = LOGGER.createLogger("Core");
 
   // Print info about PurrplingBot
-  console.log("* Starting PurrplingBot version " + VERSION + " '" + CODENAME + "'");
-  console.log("* Runtime: Node " + process.version + "(" + process.platform + ") Pid: " + process.pid);
-  console.log("* Argv: " + process.argv);
-  if (DEBUG === true) console.log("* DEBUG MODE ENABLED !!");
+  logger.info("* Starting PurrplingBot version " + VERSION + " '" + CODENAME + "'");
+  logger.info("* Runtime: Node " + process.version + "(" + process.platform + ") Pid: " + process.pid);
+  logger.info("* Argv: " + process.argv);
+  if (DEBUG > 0) logger.log("* DEBUG MODE ENABLED !! (level: %s)", DEBUG);
 
   // Load configuration file
   try {
-    config = require("./config.json");
+    const Configurator = require("./lib/configurator.js");
+    config = Configurator.loadConfiguration("./config.json");
   } catch (err) {
-    console.error("*** Configuration failed to load! Check the file config.json");
-    console.error(err);
+    logger.error("*** Configuration failed to load! Check the config file.");
+    logger.error(err);
     process.exit(6);
   }
 
@@ -107,11 +109,13 @@ function init() {
   pluginRegistry = require("./pluginRegistry.js");
   pluginRegistry.init();
 
-  // Switch scope: Set logger prefix to 'Main'
-  console.prefix = "Main";
+  // Print a stats to log
+  logger.info("* Registered commands: %s", Object.keys(cmds).length);
+  logger.info("* Loaded plugins: %s", pluginRegistry.countPlugins());
+  logger.info("* Disabled plugins: %s", pluginRegistry.countDisabledPlugins());
 
   // Connect bot to Discord!
-  console.info("*** Trying to connect Discord");
+  logger.info("*** Trying to connect Discord");
   bot.login(config.discord.token);
 }
 
@@ -121,7 +125,7 @@ function print_cmd_help(cmd) {
     cmd = cmd.substring(prefix.length); //Strip a prefix for command, if was set in arg
   }
   if (!cmds.hasOwnProperty(cmd)) {
-    console.log("Requested help for UNKNOWN command: " + prefix + cmd);
+    logger.info("Requested help for UNKNOWN command: " + prefix + cmd);
     return "Unknown command: " + prefix + cmd + ". Type " + prefix + "help to list availaible commands.";
   }
   var help_text = "Command: " + prefix + cmd;
@@ -132,7 +136,7 @@ function print_cmd_help(cmd) {
   if ("usage" in cmd_context) {
     help_text += "\nUsage: " + prefix + cmd + " " + cmd_context["usage"];
   }
-  console.log("Requested help for command: " + prefix + cmd);
+  logger.info("Requested help for command: " + prefix + cmd);
   return help_text;
 }
 
@@ -172,7 +176,7 @@ function check_message_for_command(message) {
     return false;
   }
   if (cmd == "help") {
-    console.log(`Printing requested help from user: ${message.author.username}\t Channel: #${message.channel.name}`);
+    logger.info(`Printing requested help from user: ${message.author.username}\t Channel: #${message.channel.name}`);
     message.channel.send(print_help(tail));
     stats.commandsHandled++;
     eventBus.emit("commandHandled", cmd, tail, message);
@@ -180,32 +184,32 @@ function check_message_for_command(message) {
   }
   if (cmds.hasOwnProperty(cmd)) {
     try {
-      console.log(`Handle command: ${cmd} \tUser: ${message.author.username}\t Channel: #${message.channel.name}`);
+      logger.info(`Handle command: ${cmd} \tUser: ${message.author.username}\t Channel: #${message.channel.name}`);
       cmds[cmd].exec(message, tail);
       stats.commandsHandled++;
       eventBus.emit("commandHandled", cmd, tail, message);
     } catch (err) {
       message.reply(`Failed to execute command: ${prefix}${cmd}`);
-      console.error("Command '%s%s' execution failed!", prefix, cmd);
-      console.error(err);
-      console.info("I am still running!");
+      logger.error("Command '%s%s' execution failed!", prefix, cmd);
+      logger.error(err);
+      logger.info("I am still running!");
     }
     return true;
   } else {
     if (prefix.length > 0) {
       message.channel.send(`Unknown command: ${prefix}${cmd}`)
-      .then(console.log(`Unknown command: ${cmd} \tUser: ${message.author.username}\t Channel: #${message.channel.name}`))
-      .catch(console.error);
+      .then(logger.info(`Unknown command: ${cmd} \tUser: ${message.author.username}\t Channel: #${message.channel.name}`))
+      .catch(logger.error);
     }
   }
   return false;
 }
 
 bot.on('ready', function() {
-  console.info(`Logged in as ${bot.user.username} - ${bot.user.id} on ${bot.guilds.array().length} servers`);
+  logger.info(`Logged in as ${bot.user.username} - ${bot.user.id} on ${bot.guilds.array().length} servers`);
   stats.numberOfReconnection++;
   eventBus.emit("ready");
-  console.info("PurrplingBot READY!");
+  logger.info("PurrplingBot READY!");
 });
 
 bot.on('message', function(message) {
@@ -219,22 +223,22 @@ bot.on('messageUpdate', function(oldMessage, newMessage) {
 });
 
 bot.on('disconnect', function(event) {
-  console.warn("PurrplingBot disconnected from Discord service!")
-  console.warn("Reason: #%s - %s", event.code, event.reason);
-  console.info("*** Exiting");
+  logger.warn("PurrplingBot disconnected from Discord service!")
+  logger.warn("Reason: #%s - %s", event.code, event.reason);
+  logger.info("*** Exiting");
   process.exit(15);
 });
 
 bot.on('debug', function(info){
-  if (DEBUG === true) console.log(info);
+  if (DEBUG > 1) logger.log(info);
 });
 
 bot.on('warn', function(info){
-  console.warn(info);
+  logger.warn(info);
 });
 
 bot.on('reconecting', function(){
-  console.warn("Connection lost! Trying to reconnect ...");
+  logger.warn("Connection lost! Trying to reconnect ...");
 });
 
 exports.getPluginRegistry = function () {
@@ -261,17 +265,17 @@ exports.addCommand = function(cmdName, cmdObject) {
   try {
     cmds[cmdName] = cmdObject;
   } catch (err) {
-    console.error("Failed to add command: %s", cmdName);
-    console.error(err);
+    logger.error("Failed to add command: %s", cmdName);
+    logger.error(err);
   }
 }
 
-exports.createLogger = function(prefix) {
-  var _logger = new console.Console(process.stdout, process.stderr);
-  _logger.prefix = prefix;
-  LOGGER.init(_logger); // Init new logger at derivation
-  return _logger;
+exports.getConfiguration = function(){
+  return config;
 }
+
+// createLogger() availaible for all modules
+exports.createLogger = LOGGER.createLogger;
 
 //Take init() bot outside main file (call it in another module after require)
 exports.init = init
