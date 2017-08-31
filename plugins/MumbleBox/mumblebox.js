@@ -1,6 +1,6 @@
 var PurrplingBot = require("../../purrplingbot.js");
 var eventBus = PurrplingBot.getEventBus();
-const CONFIG = require("../../config.json");
+const CONFIG = PurrplingBot.getConfiguration();
 
 const IGNORELIST_STORE = "./ignorelist.json";
 
@@ -189,10 +189,11 @@ eventBus.on("messageUpdate", function(oldMessage, newMessage, isCmd) {
 
 exports.init = function(pluginName) {
   logger = PurrplingBot.createLogger(pluginName);
-  if (!CONFIG.mumblebox) {
-    logger.warn("Mumblebox file is not defined in config! No mumbles for match&talk");
+  if (!CONFIG.mumblebox || !Object.keys(CONFIG.mumblebox).length) {
+    logger.warn("Mumblebox config is not defined! No mumbles for match&talk");
   } else {
-    mumblebox = readMumblebox(CONFIG.mumblebox);
+    mumblebox = CONFIG.mumblebox;
+    //logger.dir(mumblebox);
   }
   try {
     restoreIgnoreList();

@@ -1,6 +1,6 @@
 var PurrplingBot = require("../../purrplingbot.js");
 var bot = PurrplingBot.getDiscordClient();
-const CONFIG = require("../../config.json");
+const CONFIG = PurrplingBot.getConfiguration();
 
 var logger;
 var lastuser = {};

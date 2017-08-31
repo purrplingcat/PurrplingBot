@@ -1,6 +1,6 @@
 var purrplingBot = require("../../purrplingbot.js");
 var bot = purrplingBot.getDiscordClient();
-var config = require("../../config.json");
+var config = purrplingBot.getConfiguration();
 
 const utils = require("./utils.js");
 const ANNOUNCES_STORE = "./announces.json";

@@ -1,7 +1,7 @@
 var moment = require('moment');
 var purrplingBot = require("../../purrplingbot.js");
 var pluginRegistry = purrplingBot.getPluginRegistry();
-var config = require("../../config.json");
+var config = purrplingBot.getConfiguration();
 require('twix');
 
 var logger;

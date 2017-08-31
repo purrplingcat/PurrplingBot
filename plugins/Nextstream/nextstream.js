@@ -1,7 +1,7 @@
 var request = require("request");
 var moment = require('moment');
 var PurrplingBot = require("../../purrplingbot.js");
-var config = require("../../config.json");
+var config = PurrplingBot.getConfiguration();
 var logger;
 
 const twitch_token = config.twitch.twitch_token;
