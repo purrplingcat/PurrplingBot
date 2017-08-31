@@ -3,6 +3,7 @@ var eventBus = PurrplingBot.getEventBus();
 
 const CONFIG = PurrplingBot.getConfiguration();
 const PLUGIN_DIR = "./plugins";
+const DEBUG = process.env.DEBUG || 0;
 
 var plugins = {}; // { pluginName: plugin, ...}
 var pluginList = {}; // { pluginName: pluginPath, ... }
@@ -20,14 +21,21 @@ function preload_plugins(pluginDir) {
     logger.log("Preloading plugin: %s", pluginName);
     const pluginPath = pluginDir + "/" + pluginName + "/" + pluginName.toLowerCase() + ".js";
     if (plugins_disabled.indexOf(pluginName) < 0) {
-      _pluginList[pluginName] = pluginPath;
-      eventBus.emit("pluginPreloaded", pluginName, pluginPath);
-      logger.info("Enabled plugin: %s", pluginName);
+      if (fs.existsSync(pluginPath)) {
+        logger.log("Found plugin entry file: %s", pluginPath);
+        // TODO: Write NPM install denepdencies (issue #22)
+        _pluginList[pluginName] = pluginPath;
+        eventBus.emit("pluginPreloaded", pluginName, pluginPath);
+        logger.info("Enabled plugin: %s", pluginName);
+      } else {
+        plugins_disabled.push(pluginName);
+        logger.error("Plugin '%s' is not valid! Entry file '%s' not found - Plugin DISABLED!", pluginName, pluginPath);
+      }
     } else {
       logger.log("Plugin '%s' DISABLED - Skip loading", pluginName);
     }
   });
-  logger.dir(_pluginList);
+  if (DEBUG > 2) logger.dir(_pluginList);
   return _pluginList;
 }
 
@@ -96,6 +104,7 @@ exports.init = function() {
     plugins_disabled = CONFIG.pluginsDisabled; // Fetch disabled plugins from config
   }
   pluginList = preload_plugins(PLUGIN_DIR);
+  if (DEBUG > 2) logger.dir(plugins_disabled)
   load_plugins(pluginList);
 }
 
