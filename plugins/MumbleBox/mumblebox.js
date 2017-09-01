@@ -17,6 +17,11 @@ exports.commands = [
 ];
 
 function matchMumbles(inputStr, mumbles) {
+  const urlRegex = require("url-regex"); // For eliminate matching in urls
+  logger.log("Original input: ", inputStr);
+  inputStr = inputStr.replace(urlRegex(), ''); // Remove urls from source phrase
+  logger.log("Input after URL clean: ", inputStr);
+
   var matchedMumbles = [];
   for (mumbleSource in mumbles) {
     try {
@@ -45,6 +50,7 @@ function matchMumbles(inputStr, mumbles) {
       });
     }
   }
+  logger.log("Mumble match DONE! Matched mumbles: %s", matchedMumbles.length);
   return matchedMumbles;
 }
 
@@ -59,6 +65,7 @@ function matchAndSendMumble(message, type) {
   if (message.author.id === message.client.user.id) {
     return; // ignore self messages
   }
+  logger.log("Matching mumbles (ACT:%s) in message: %s", type, message.content);
   var mumbles = matchMumbles(message.content, source);
   if (mumbles.length) {
     if (ignoreList.indexOf(message.author.username) >= 0) {
