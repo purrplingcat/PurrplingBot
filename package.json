@@ -32,7 +32,8 @@
     "moment": "^2.18.1",
     "request": "^2.81.0",
     "stringbuilder": "0.0.11",
-    "twix": "^1.2.0"
+    "twix": "^1.2.0",
+    "url-regex": "^4.1.1"
   },
   "devDependencies": {
     "cross-env": "^5.0.1"
