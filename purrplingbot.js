@@ -99,9 +99,9 @@ function init() {
   print_bot_info();
   logger.info("Starting PurrplingBot ...");
 
-  // Load configuration file
+  // Load configuration
+  const Configurator = require("./lib/configurator.js");
   try {
-    const Configurator = require("./lib/configurator.js");
     config = Configurator.loadConfiguration("./config.json");
   } catch (err) {
     logger.error("*** Configuration failed to load! Check the config file.");
@@ -111,6 +111,16 @@ function init() {
 
   // Check configuration
   check_conf();
+
+  // Load aliases
+  // TODO: Write a storage manager and load aliases from it instead of via Configurator!
+  var _aliases = Configurator.readConfigFile("./aliases.json");
+  if (_aliases) {
+    aliases = _aliases;
+    logger.info("Loaded aliases (Count: %s)", _aliases.length);
+  } else {
+    logger.info("Alias config file not found. Aliases not loaded!");
+  }
 
   // Load plugin registry and init plugins
   pluginRegistry = require("./pluginRegistry.js");

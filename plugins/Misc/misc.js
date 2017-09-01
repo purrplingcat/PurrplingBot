@@ -6,6 +6,8 @@ require('twix');
 
 var logger;
 
+const ALIASES_STORE = "aliases.json";
+
 exports.commands = [
   "alias",
   "alias_remove",
@@ -45,6 +47,22 @@ function findChannel(channels, knownChanName) {
       knownChanName = knownChanName.substr(2, knownChanName.length - 3);
     }
     return channels.find("id", knownChanName);
+}
+
+// TODO: Write a storage manager
+function storeAliases() {
+  var aliases = purrplingBot.getAliases();
+  logger.dir(aliases);
+  fs = require('fs');
+  var json = JSON.stringify(aliases);
+  fs.writeFile(ALIASES_STORE, json, 'utf8', err => {
+    if (err) {
+      logger.error("An error occured while storing aliases!");
+      logger.error(err);
+    } else {
+      logger.log("Aliases was stored!");
+    }
+  });
 }
 
 exports.hello = {
@@ -243,6 +261,7 @@ exports.alias = {
       command = command.substr(prefix.length);
     }
     purrplingBot.addAlias(alias, command);
+    storeAliases();
     logger.log(`User ${message.author.username} created alias '${alias}' to '${command}' in #${message.channel.name}`);
     message.channel.send(`Alias \`${prefix}${alias}\` to \`${prefix}${command}\` created!`)
     .catch(logger.error);
@@ -268,6 +287,7 @@ exports.alias_remove = {
     }
     if (tail in aliases) {
       delete aliases[tail];
+      storeAliases();
       logger.info("Removed alias: %s", tail);
       message.reply(`Alias \`${prefix}${tail}\` removed!`)
       .then(logger.log(`Sent info about alias SUCCESS remove to #${message.channel.name}`))
