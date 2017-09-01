@@ -22,6 +22,10 @@ var stats = {
 
 var bot = new Discord.Client();
 
+var aliases = {
+  "h": "help"
+};
+
 /*
  * @note Basic commands definition
  * @property description
@@ -29,6 +33,75 @@ var bot = new Discord.Client();
  * @function exec @args Message message, String tail
  */
 var cmds = {
+  "alias": {
+    "description": "Create an alias or list aliases",
+    "usage": "[<aliasName> <command>]",
+    "exec": function(message, tail) {
+      if (!tail.length) {
+        message.channel.send("Aliases: ```\n" + Object.keys(aliases) + "```")
+        .then(logger.info(`Aliases list sent to #${message.channel.name} requested by: ${message.author.username}`))
+        .catch(logger.error);
+        return;
+      }
+      if (!config.admins || config.admins.indexOf(message.author.username) < 0) {
+        message.reply("You are not permitted for add alias!")
+        .catch(logger.error);
+        logger.info(`User ${message.author.username} is not permitted for add alias!`);
+        return;
+      }
+      var [alias, command] = tail.split(' ');
+      var prefix = config.cmdPrefix || "";
+      if (!alias || !command) {
+        message.reply("Missing or wrong some parameters!")
+        .catch(logger.error);
+        logger.info("Missing or wrong parameters for command alias!");
+        return;
+      }
+      // Remove prefix from aliasName
+      if (alias.startsWith(prefix)) {
+        alias = alias.substr(prefix.length);
+      }
+      // Remove prefix from aliased command
+      if (command.startsWith(prefix)) {
+        command = command.substr(prefix.length);
+      }
+      aliases[alias] = command;
+      logger.log(`User ${message.author.username} created alias '${alias}' to '${command}' in #${message.channel.name}`);
+      message.channel.send(`Alias \`${prefix}${alias}\` to \`${prefix}${command}\` created!`)
+      .catch(logger.error);
+    }
+  },
+  "alias-remove": {
+    "description": "Remove an alias",
+    "usage": "<aliasName>",
+    "exec": function(message, tail) {
+      var prefix = config.cmdPrefix || "";
+      if (!config.admins || config.admins.indexOf(message.author.username) < 0) {
+        message.reply("You are not permitted for remove alias!")
+        .catch(logger.error);
+        logger.info(`User ${message.author.username} is not permitted for remove alias!`);
+        return;
+      }
+      if (!tail) {
+        message.reply("Invalid arguments.")
+        .catch(logger.error);
+        logger.info("Invalid parameters for remove an alias!");
+        return;
+      }
+      if (tail in aliases) {
+        delete aliases[tail];
+        logger.info("Removed alias: %s", tail);
+        message.reply(`Alias \`${prefix}${tail}\` removed!`)
+        .then(logger.log(`Sent info about alias SUCCESS remove to #${message.channel.name}`))
+        .catch(logger.error);
+      } else {
+        logger.info("Unknown alias: %s - Can't remove", tail);
+        message.reply(`Alias \`${prefix}${tail}\` is not found! Can't remove.`)
+        .then(logger.log(`Sent info about alias FAILED remove to #${message.channel.name}`))
+        .catch(logger.error);
+      }
+    }
+  },
   "ping": {
     "description": "Ping the bot and get pong.",
     "exec": function(message) {
@@ -153,13 +226,14 @@ function print_help(cmd) {
   var prefix = config.cmdPrefix;
   var help_text = "Availaible commands: ";
   var iteration = 0;
-  for (cmd_name in cmds) {
-    help_text += prefix + cmd_name;
-    if (iteration != Object.keys(cmds).length - 1) {
+  var _cmds = Object.keys(cmds).concat(Object.keys(aliases));
+  _cmds.forEach(cmd_name => {
+    help_text += "`" + prefix + cmd_name + "`";
+    if (iteration != _cmds.length - 1) {
       help_text += ", ";
     }
     iteration++;
-  }
+  });
   help_text += `\n\nFor more information type '${prefix}help <command>'`;
   return help_text;
 }
@@ -174,14 +248,30 @@ function check_message_for_command(message) {
   if (!cmd.startsWith(prefix)) {
     return;
   }
-  cmd = cmd.substring(prefix.length);
-  tail = message.content.substring(cmd.length + prefix.length + 1);
+
   //Block the bot to react own commands
   if (message.author.id === bot.user.id) {
     return false;
   }
+
+  cmd = cmd.substring(prefix.length);
+  tail = message.content.substring(cmd.length + prefix.length + 1);
+
+  if (cmd in aliases) {
+    var aliased = aliases[cmd];
+    logger.info(`Called alias '${cmd}' for '${aliased}' on #${message.channel.name} by: ${message.author.username}`);
+    var argv = aliased.split(' ');
+    cmd = argv.shift();
+    tail = tail + argv.join(' ');
+    logger.log("Aliased cmd: %s Tail: %s", cmd, tail);
+  }
   if (cmd == "help") {
     logger.info(`Printing requested help from user: ${message.author.username}\t Channel: #${message.channel.name}`);
+    if (tail in aliases) {
+      message.channel.send(`**${prefix}${tail}** is alias for **${prefix}${aliases[tail]}**`)
+      .catch(logger.error);
+      return true;
+    }
     message.channel.send(print_help(tail));
     stats.commandsHandled++;
     eventBus.emit("commandHandled", cmd, tail, message);
