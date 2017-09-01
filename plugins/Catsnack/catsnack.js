@@ -43,7 +43,7 @@ exports.catsnack = {
       msg = "Díky, mňauky!";
     }
     message.channel.send(msg)
-    .then(logger.log(`I got food from ${message.author.username} in #${message.channel.name} (Answer index: ${rand})`))
+    .then(logger.info(`I got food from ${message.author.username} in #${message.channel.name} (Answer index: ${rand})`))
     .catch(logger.error);
   }
 };

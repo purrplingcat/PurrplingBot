@@ -27,7 +27,7 @@ function fetchAndSendMyGif(message, tag) {
       logger.warn("An error occured while get request. Status code: " + response.statusCode);
     }
     message.channel.send(result)
-    .then(logger.log(`GIF SENT! result: ${result}\ttag: ${tag}`))
+    .then(logger.info(`GIF SENT! result: ${result}\ttag: ${tag}`))
     .catch(logger.error);
   });
 }

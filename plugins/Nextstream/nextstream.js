@@ -34,11 +34,11 @@ exports.nextstream = {
           var currentTime = new Date();
           if (currentTime.getTime() > streamStartTime.getTime() && currentTime.getTime() < streamEndTime.getTime()) {
             msg = "Cat právě vysílá: '" + e.title + "'! Nebo alespoň by podle plánu vysílat měla. Nenech si to ujít, sleduj na https://www.twitch.tv/" + twitch_channel_name;
-            logger.log("Stream is live!\t Stream name: %s \t Channel name: %s", e.title, twitch_channel_name);
+            logger.info("Stream is live!\t Stream name: %s \t Channel name: %s", e.title, twitch_channel_name);
           }
           else if (currentTime.getTime() < streamStartTime.getTime()) {
             msg = "Další stream: '" + e.title + "' bude " + moment(streamStartTime).format("DD.MM.YYYY HH:mm:ss") + " - Hrát se bude '" + e.game.name + "' https://www.twitch.tv/events/" + e._id;
-            logger.log("Next stream comming soon!\t Stream name: %s \t Stream starts: %s", e.title, streamStartTime);
+            logger.info("Next stream comming soon!\t Stream name: %s \t Stream starts: %s", e.title, streamStartTime);
           }
           else {
             msg = "Cat pravděpodobně už nevysílá. Chvilku vydrž, než to zjistím, a zkus to později.";

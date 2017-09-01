@@ -37,7 +37,7 @@ function storeAnnounces() {
       logger.error("An error occured while storing announces!");
       logger.error(err);
     } else {
-      logger.log("Announces was stored!");
+      logger.info("Announces was stored!");
     }
   });
 }
@@ -105,11 +105,11 @@ function cancelAnnounce(name) {
 function resumeAnnounce(name, interval) {
   var announce = announces[name];
   if (!announce) {
-    logger.log(`Announce '${name} not exists - Can't resume!`);
+    logger.info(`Announce '${name} not exists - Can't resume!`);
     return;
   }
   if (announceRunners[name]) {
-    logger.warn("Announce '%s' already resumed and running!", name);
+    logger.info("Announce '%s' already resumed and running!", name);
     return false;
   }
   if (interval) {
@@ -133,7 +133,7 @@ function execSubCommand(scmd, args, message) {
     case 'add':
       if (args.length < 4) {
         message.reply("Invalid parameters!")
-        .then(logger.log(`Invalid parameters for ADD User: ${message.author.username} in #${message.channel.name}`))
+        .then(logger.info(`Invalid parameters for ADD User: ${message.author.username} in #${message.channel.name}`))
         .catch(logger.error);
         return;
       }
@@ -167,7 +167,7 @@ function execSubCommand(scmd, args, message) {
       };
       storeAnnounces();
       message.channel.send(`Announce '${name}' added! Activate it by '!announce resume ${name}'`)
-      .then(logger.log(`Announce '${name}' added! User: ${message.author.username} in #${message.channel.name}}`))
+      .then(logger.info(`Announce '${name}' added! User: ${message.author.username} in #${message.channel.name}}`))
       .catch(logger.error);
     break;
     case 'rm':
@@ -185,13 +185,13 @@ function execSubCommand(scmd, args, message) {
       delete announces[name];
       storeAnnounces();
       message.channel.send(`Announce '${name}'' removed!`)
-      .then(logger.log(`Announce '${name}'' removed! User: ${message.author.username} in #${message.channel.name}`))
+      .then(logger.info(`Announce '${name}'' removed! User: ${message.author.username} in #${message.channel.name}`))
       .catch(logger.error);
     break;
     case 'list':
       if (!Object.keys(announces).length) {
         message.channel.send(`Announces list is empty!`)
-        .then(logger.log(`Announces list is empty! User: ${message.author.username} in #${message.channel.name}`))
+        .then(logger.info(`Announces list is empty! User: ${message.author.username} in #${message.channel.name}`))
         .catch(logger.error);
         return;
       }
@@ -201,7 +201,7 @@ function execSubCommand(scmd, args, message) {
         announces_print += "Announce '" + announce.name + "' (" + announce.interval + " seconds) in <#" + announce.channel + "> - " + (announce.active ? "ACTIVE" : "INACTIVE") + (announceRunners[announce.name] ? " [RUNNING]" : " [STOPPED]") + "\n";
       }
       message.channel.send(announces_print)
-      .then(logger.log(`Announces list sent! Announces count: ${Object.keys(announces).length}\t User: ${message.author.username} in #${message.channel.name}`))
+      .then(logger.info(`Announces list sent! Announces count: ${Object.keys(announces).length}\t User: ${message.author.username} in #${message.channel.name}`))
       .catch(logger.error);
     break;
     case 'cancel':
@@ -243,7 +243,7 @@ function execSubCommand(scmd, args, message) {
         return;
       }
       message.channel.send(`Announce '${announce.name}' resumed with interval ${announce.interval} seconds`)
-      .then(logger.log(`Announce '${announce.name}' resumed with interval ${announce.interval} seconds\t User: ${message.author.username} in #${message.channel.name}`))
+      .then(logger.info(`Announce '${announce.name}' resumed with interval ${announce.interval} seconds\t User: ${message.author.username} in #${message.channel.name}`))
       .catch(logger.error);
     break;
     case 'handle':
@@ -278,7 +278,7 @@ function execSubCommand(scmd, args, message) {
     break;
     default:
       message.reply(`Unknown announcer subcommand: ${scmd}`)
-      .then(logger.log(`Unknown announcer subcommand: ${scmd}`))
+      .then(logger.info(`Unknown announcer subcommand: ${scmd}`))
       .catch(logger.error);
   }
 }
@@ -305,4 +305,10 @@ exports.announce = {
       logger.warn("Node 'admins' is not defined in configuration!");
     }
   }
+}
+
+// Avoid plugin run standalone
+if (require.main === module) {
+  console.error("This plugin cannot be run standalone! Run 'node purrplingbot.js' instead.");
+  process.exit(1);
 }

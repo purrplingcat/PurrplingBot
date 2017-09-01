@@ -28,10 +28,10 @@ function fetchAndSendMyGif(message, tag, type) {
     }
     if (result === null) {
       result = "Je mi líto, ale něco se rozbilo. Zkus to prosím později.";
-      logger.warn("An error occured while get request. Status code: " + response.statusCode);
+      logger.warn("An error occured while get request. Status code: %s\t Requested URL: %s", response.statusCode, request_url);
     }
     message.channel.send(result)
-    .then(logger.log(`GIF SENT! result: ${result}\ttag: ${tag}\t type: ${type}`))
+    .then(logger.info(`GIF SENT! result: ${result}\ttag: ${tag}\t type: ${type}`))
     .catch(logger.error);
   });
 }
@@ -43,7 +43,7 @@ function executeSearch(message, tail, type) {
     return;
   }
   message.reply("Tell me, what I have to search on Giphy.")
-  .then(logger.log(`No keyword/tag specified. User: ${message.author.username} in #${message.channel.name}`))
+  .then(logger.info(`No keyword/tag specified. User: ${message.author.username} in #${message.channel.name}`))
   .catch(logger.error);
 }
 

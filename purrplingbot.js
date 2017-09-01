@@ -189,7 +189,7 @@ function check_message_for_command(message) {
   }
   if (cmds.hasOwnProperty(cmd)) {
     try {
-      logger.info(`Handle command: ${cmd} \tUser: ${message.author.username}\t Channel: #${message.channel.name}`);
+      logger.info(`Handle command: ${cmd} (${tail})\tUser: ${message.author.username}\t Channel: #${message.channel.name}`);
       cmds[cmd].exec(message, tail);
       stats.commandsHandled++;
       eventBus.emit("commandHandled", cmd, tail, message);

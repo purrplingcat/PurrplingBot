@@ -62,7 +62,7 @@ function matchAndSendMumble(message, type) {
   var mumbles = matchMumbles(message.content, source);
   if (mumbles.length) {
     if (ignoreList.indexOf(message.author.username) >= 0) {
-      logger.log(`User ${message.author.username} on #${message.channel.name} ignored for mumbles!`);
+      logger.info(`User ${message.author.username} on #${message.channel.name} ignored for mumbles!`);
       return;
     }
     var rand = Math.floor((Math.random() * mumbles.length));
@@ -70,11 +70,11 @@ function matchAndSendMumble(message, type) {
     var log_message = `(ACT:${type}) Matched phrase "${mumble.phrase}" in message "${message.content}" from #${message.channel.name} User: ${message.author.username}! Reply sent: "${mumble.content}" [ID: ${rand},${mumble.index}]`;
     if (type === TYPE_MUMBLE) {
       message.channel.send(mumble.content)
-      .then(logger.log(log_message))
+      .then(logger.info(log_message))
       .catch(logger.error);
     } else if (type === TYPE_REACT) {
       message.react(mumble.content)
-      .then(logger.log(log_message))
+      .then(logger.info(log_message))
       .catch(logger.error);
     }
   }
@@ -120,13 +120,13 @@ function execSubCommand(scmd, args, message) {
         if (ignoreList.indexOf(message.author.username) >= 0) {
           message.reply("You are already ignored!")
           .catch(logger.error);
-          logger.log(`User ${message.author.username} already ignored!`);
+          logger.info(`User ${message.author.username} already ignored!`);
           return;
         }
         ignoreList.push(message.author.username);
         message.reply("You are ignored for my mumbles and reacts.")
         .catch(logger.error);
-        logger.log(`User ${message.author.username} ignored for mumbles and reacts`);
+        logger.info(`User ${message.author.username} ignored for mumbles and reacts`);
         storeIgnoreList(); // Save ignore list to a file
       break;
     case 'unignore':
@@ -135,10 +135,10 @@ function execSubCommand(scmd, args, message) {
             ignoreList.splice(index);
             message.reply("You are unignored for mumbles.")
             .catch(logger.error);
-            logger.log(`User ${message.author.username} unignored for mumbles and reacts`);
+            logger.info(`User ${message.author.username} unignored for mumbles and reacts`);
             storeIgnoreList(); // Save ignore list to a file
         } else {
-          logger.log(`Can't remove user ${message.author.username} - NOT in ignore list!`);
+          logger.info(`Can't remove user ${message.author.username} - NOT in ignore list!`);
           message.reply("You are NOT in ignore list!")
           .catch(logger.error);
         }
@@ -149,7 +149,7 @@ function execSubCommand(scmd, args, message) {
         msg = `Ignored users: ${ignoreList}`;
       }
       message.channel.send(msg)
-      .then(logger.log(`Ignore list sent to #${message.channel.name} requested by: ${message.author.username}`))
+      .then(logger.info(`Ignore list sent to #${message.channel.name} requested by: ${message.author.username}`))
       break;
     case 'help':
       message.channel.send("Availaible subcommands:\n"
@@ -157,12 +157,12 @@ function execSubCommand(scmd, args, message) {
         + "unignore - Remove you from ignore list\n"
         + "ignorelist - Show ignored users\n"
         + "help - This help message")
-      .then(logger.log(`Requested help by ${message.author.username} on #${message.author.username} was sent`))
+      .then(logger.info(`Requested help by ${message.author.username} on #${message.author.username} was sent`))
       .catch(logger.error);
      break;
     default:
       message.reply(`Unknown mumbles subcommand: ${scmd}`)
-      .then(logger.log(`Unknown mumbles subcommand: ${scmd}`))
+      .then(logger.info(`Unknown mumbles subcommand: ${scmd}`))
       .catch(logger.error);
   }
 }
@@ -197,7 +197,7 @@ exports.init = function(pluginName) {
   }
   try {
     restoreIgnoreList();
-    logger.log("Restored ignore list. Ignored chatters: %s", ignoreList);
+    logger.info("Restored ignore list. Ignored chatters: %s", ignoreList);
   } catch(err) {
     logger.warn("Can't restore ignore list! %s", err);
   }
@@ -212,7 +212,7 @@ exports.mumbles = {
     }
     var args = tail.split(" ");
     var scmd = args.shift();
-    logger.log(`Handle subcommand: ${tail} on #${message.channel.name} by ${message.author.username}`);
+    logger.info(`Handle subcommand: ${tail} on #${message.channel.name} by ${message.author.username}`);
     execSubCommand(scmd, args, message);
   }
 }
