@@ -11,7 +11,12 @@
 	"twitch": {
 		"twitch_token": "l3d809cqz3r28buu2d603ayyg83g32",
 		"twitch_channel_name": "purrplingcat",
-		"twitch_channel_id": "125991922"
+		"twitch_channel_id": "125991922",
+		"twitch_stream_checker": {
+			"enabled": true,
+			"interval": 300,
+			"announceChannelId": "323516538378256395"
+		}
 	},
 	"mumblebox": "./mumblebox.json",
 	"greetings": {
