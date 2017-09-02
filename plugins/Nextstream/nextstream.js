@@ -14,7 +14,8 @@ var previousStreamState = "OFFLINE"
 var streamInfo;
 
 exports.commands = [
-  "nextstream"
+  "nextstream",
+  "livenow"
 ];
 
 function streamLiveNowAnnounce() {
@@ -84,11 +85,13 @@ exports.nextstream = {
   "description": "Streaming cat now? Or when will next stream?",
   "exec": function(message) {
     var request_url = "https://api.twitch.tv/v5/channels/" + twitch_channel_id + "/events?client_id=" + twitch_token;
+    message.channel.startTyping();
     request({
       url: request_url,
       json: true,
     }, function (error, response, body) {
       logger.log("Request: %s", request_url);
+      message.channel.stopTyping();
       if (!error && response.statusCode === 200) {
         var msg = "Další stream bude, až bude cat vysílat. Momentálně nevím o ničem naplánovaném :cat:";
         if (body.events.hasOwnProperty(0)) {
@@ -123,6 +126,38 @@ exports.nextstream = {
     });
   }
 };
+
+exports.livenow = {
+  "description": "Streaming cat now? Or when will next stream?",
+  "exec": function(message) {
+    var request_url = "https://api.twitch.tv/v5/streams/" + twitch_channel_id + "?client_id=" + twitch_token;
+    logger.info("Checking for if %s's stream is live now ...", twitch_channel_name);
+    message.channel.startTyping();
+    request({
+      url: request_url,
+      json: true,
+    }, function (error, response, body) {
+        logger.log("Request: %s", request_url);
+        message.channel.stopTyping();
+        if (!error && response.statusCode === 200) {
+          if (!body.stream) {
+            message.channel.send(`Stream je momentálně OFFLINE. Další informace o plánovaném streamu níže:`)
+              .then(logger.info(`Information about stream status sent to #${message.channel.name} requested by: ${message.author.username}`))
+              .catch(logger.error);
+              exports.nextstream.exec(message);
+            return;
+          }
+          message.channel.send(`Stream je právě ONLINE! Sleduj to na ${streamInfo.channel.url}\nTitulek streamu: **${streamInfo.channel.status}**\nHraje: **${streamInfo.channel.game}**`, { embed: null})
+            .then(logger.info(`Information about stream status sent to #${message.channel.name} requested by: ${message.author.username}`))
+            .catch(logger.error);
+        } else {
+          logger.error("An error occured while fetching stream status! Status code: %s", response.statusCode);
+          message.channel.send(`Omlouvám se, ale něco se rozbilo. :crying_cat_face: Zkus to prosím později. MŇAU!*`)
+            .catch(logger.error);
+        }
+    });
+  }
+}
 
 // Avoid plugin run standalone
 if (require.main === module) {
