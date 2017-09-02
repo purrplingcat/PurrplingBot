@@ -317,6 +317,10 @@ exports.addAlias = function (aliasName, command) {
   }
 }
 
+exports.on = function(eventName, callback) {
+  eventBus.on(eventName, callback);
+}
+
 exports.getConfiguration = function(){
   return config;
 }
