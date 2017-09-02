@@ -227,13 +227,23 @@ exports.uptime = {
   }
 }
 
+function formatAliasList(aliases) {
+  var prefix = config.cmdPrefix || "";
+  var content = "```\n"
+  for (alias in aliases) {
+    var command = aliases[alias];
+      content += prefix + alias + " => " + prefix + command + "\n"
+  }
+  return content += "```";
+}
+
 exports.alias = {
   "description": "Create an alias or list aliases",
   "usage": "[<aliasName> <command>]",
   "exec": function(message, tail) {
     if (!tail.length) {
       var aliases = purrplingBot.getAliases();
-      message.channel.send("Aliases: ```\n" + Object.keys(aliases) + "```")
+      message.channel.send("List of aliases: " + formatAliasList(aliases))
       .then(logger.info(`Aliases list sent to #${message.channel.name} requested by: ${message.author.username}`))
       .catch(logger.error);
       return;
@@ -244,7 +254,9 @@ exports.alias = {
       logger.info(`User ${message.author.username} is not permitted for add alias!`);
       return;
     }
-    var [alias, command] = tail.split(' ');
+    var argv = tail.split(' ');
+    var alias = argv.shift();
+    var command = argv.join(' ');
     var prefix = config.cmdPrefix || "";
     if (!alias || !command) {
       message.reply("Missing or wrong some parameters!")

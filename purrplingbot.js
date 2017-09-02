@@ -163,17 +163,17 @@ function print_help(cmd) {
   }
   //TODO: Rewrite to StringBuilder
   var prefix = config.cmdPrefix;
-  var help_text = "Availaible commands: ";
+  var help_text = "Availaible commands: ```\n";
   var iteration = 0;
   var _cmds = Object.keys(cmds).concat(Object.keys(aliases));
   _cmds.forEach(cmd_name => {
-    help_text += "`" + prefix + cmd_name + "`";
+    help_text += prefix + cmd_name;
     if (iteration != _cmds.length - 1) {
       help_text += ", ";
     }
     iteration++;
   });
-  help_text += `\n\nFor more information type '${prefix}help <command>'`;
+  help_text += `\n\`\`\`\nFor more information type '${prefix}help <command>'`;
   return help_text;
 }
 
