@@ -16,6 +16,7 @@ exports.init = function(pluginName) {
 }
 
 function fetchAndSendMyGif(message, tag, type) {
+  message.channel.startTyping();
   var request_url = `http://api.giphy.com/v1/${type}/random?api_key=${API_KEY}&tag=${tag}`;
   logger.log("Request url: " + request_url + "\ttag: " + tag);
   request({
@@ -23,6 +24,7 @@ function fetchAndSendMyGif(message, tag, type) {
     json: true,
   }, function (error, response, body) {
     var result = null;
+    message.channel.stopTyping();
     if (!error && response.statusCode === 200 && body) {
       result = body.data.url || "Nothing found for keyword: " + tag;
     }

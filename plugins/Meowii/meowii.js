@@ -14,11 +14,13 @@ exports.init = function(pluginName) {
 function fetchAndSendMyGif(message, tag) {
   var request_url = "http://api.giphy.com/v1/gifs/random?api_key=dc6zaTOxFJmzC&tag=" + tag;
   logger.log("Request url: " + request_url + "\ttag: " + tag);
+  message.channel.startTyping();
   request({
     url: request_url,
     json: true,
   }, function (error, response, body) {
     var result = null;
+    message.channel.stopTyping();
     if (!error && response.statusCode === 200) {
       result = body.data.url;
     }
