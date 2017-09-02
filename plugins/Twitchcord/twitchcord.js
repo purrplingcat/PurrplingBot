@@ -64,7 +64,7 @@ PurrplingBot.on("message", function(message, isCmd) {
   if (isCmd) return;
   if (message.channel.id == TWITCHORD_CONFIG.discordChannelId || "") {
     logger.log("[DISCORD -> TWITCH] Forwarding message ...");
-    tmiClient.say(TWITCHORD_CONFIG.twitchChannel || "#test", `<${message.author.username}> ${message.content}`)
+    tmiClient.say(TWITCHORD_CONFIG.twitchChannel || "#test", `<${message.author.username}> ${translateDiscordMentions(message)}`)
       .then(logger.info("[DISCORD -> TWITCH] Message forwarded to: %s", TWITCHORD_CONFIG.twitchChannel || "#test"));
   }
 });
@@ -79,6 +79,41 @@ function init(pluginName) {
   logger = PurrplingBot.createLogger(pluginName);
   tmiClient.log = logger; // Setup PurrplingBot's logger to tmiClient
   logger.log("Twitch chat client state: %s", tmiClient.readyState());
+}
+
+function translateDiscordMentions(message) {
+  const mentionPattern = /<(@&|@!|@|#|)(\d+)>/g;
+  var content = message.content; // Save content for translating
+  while ((m = mentionPattern.exec(message.content)) !== null) {
+    var [full, type, mentioned] = m;
+    var translated;
+    switch (type) {
+      case '@&':
+          var role = message.guild.roles.find('id', mentioned);
+          if (role) translated = "@" + role.name;
+          else translated = "@deleted-role";
+        break;
+      case '@!':
+          var member = message.guild.members.find('id', mentioned);
+          if (member) translated = "@" + member.displayName;
+          else translated = "@deleted-user";
+        break;
+      case '@':
+          var member = message.guild.members.find('id', mentioned);
+          if (member) translated = "@" + member.displayName;
+          else translated = "@deleted-user";
+        break;
+      case '#':
+          var channel = message.guild.channels.find('id', mentioned);
+          if (channel) translated = "#" + channel.name;
+          else translated = "@deleted-channel";
+        break;
+      default:
+        translated = mentioned;
+    }
+    content = content.replace(full, translated);
+  }
+  return content;
 }
 
 exports.init = init;
