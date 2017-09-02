@@ -13,6 +13,13 @@
 		"twitch_channel_name": "purrplingcat",
 		"twitch_channel_id": "125991922"
 	},
+	"twitchcord": {
+		"username": "purrplingbot",
+		"password": "oauth:3j98jl1efnoodmeb00tnlshw69ac9x",
+		"twitchChannel": "#purrplingcat",
+		"discordChannelId": "353532218712522753",
+		"reconnectLimit": 32
+	},
 	"mumblebox": "./mumblebox.json",
 	"greetings": {
 		"channelID": "300515295821299714",
