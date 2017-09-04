@@ -108,6 +108,7 @@ function hallOfFame(message, type, top = 10) {
   });
 
   message.channel.send(msg).then(logger.info("Sent hall of fame to #% requested by: %s", message.channel.name, message.author.username));
+  message.channel.stopTyping();
 }
 
 PurrplingBot.on("message", function(message) {
@@ -155,7 +156,8 @@ exports.fame = {
   "usage": "<messages|words>",
   "exec": function(message, tail) {
     if (tail == "words" || tail == "messages") {
-      hallOfFame(message, tail);
+      message.channel.startTyping();
+      setTimeout(hallOfFame, 100, message, tail); // Call hallOfFame() async
       return;
     }
     message.reply("Do you want hall of fame of messages or words?");
