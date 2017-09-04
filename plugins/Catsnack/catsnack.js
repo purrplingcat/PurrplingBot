@@ -1,17 +1,57 @@
 var PurrplingBot = require("../../purrplingbot.js");
+var CONFIG = PurrplingBot.getConfiguration();
 var logger;
+
+const catsnackConf = CONFIG.catsnack || {};
+
+var overfeedThreshold;
+var overfeedDiscount;
+var overfeeded = false;
 
 exports.commands = [
   "catsnack"
 ]
 
+function healKitty() {
+  overfeedDiscount = overfeedThreshold;
+  overfeeded = false;
+  logger.info("Kitty overfeed healed!");
+  logger.log("Overfeed discount: %s", overfeedDiscount);
+}
+
 exports.init = function(pluginName) {
   logger = PurrplingBot.createLogger(pluginName);
+  overfeedThreshold = catsnackConf.overfeedThreshold || 20;
+  overfeedDiscount = overfeedThreshold;
+
+  const TIMEOUT = catsnackConf.overfeedTimeout || 60; // Overfeed timeout
+  const FSB = catsnackConf.overfeedFSB || 4; // Regular heal FSB
+  setInterval(healKitty, TIMEOUT * FSB * 1000);
 }
 
 exports.catsnack = {
   "description": "Give a food to our cat",
   "exec": function(message) {
+    if (!overfeedDiscount) {
+      overfeeded = true;
+      overfeedDiscount = overfeedThreshold;
+      const TIMEOUT = catsnackConf.overfeedTimeout || 60; // Post-Overfeed timeout
+      setTimeout(healKitty, TIMEOUT * 1000);
+      logger.info("Kitty getting overfeed for %s seconds", TIMEOUT);
+    }
+    if (overfeeded) {
+      message.reply("Jsem přežraná, neotravuj!", {
+        embed: {
+          title: "RAAAAAAAINBOOOOOOOOOW",
+          image: {
+            url: "http://wonkville.net/wp-content/uploads/2016/02/Cat-Vomit-animated-puke_rainbows__by_mariannamiledy-d51d4vo.gif"
+          }
+        }
+      })
+      .then(logger.info("Kitty is overfeeded!"));
+      return;
+    } else overfeedDiscount--;
+    logger.log("Overfeed discount: %s", overfeedDiscount);
     var rand = Math.floor((Math.random() * 10) + 1);
     var msg = "";
     switch (rand) {
