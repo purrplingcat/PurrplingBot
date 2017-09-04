@@ -125,6 +125,9 @@ function init() {
     store.flush();
   };
 
+  // Restore aliases
+  aliases = store.restoreScope("aliases");
+
   // Load plugin registry and init plugins
   pluginRegistry = require("./pluginRegistry.js");
   pluginRegistry.init();
