@@ -132,6 +132,16 @@ function init() {
   pluginRegistry = require("./pluginRegistry.js");
   pluginRegistry.init();
 
+  // Backup enabled? Set interval for backup storage
+  if (STORAGE_CONF.backup || true) {
+    const INTERVAL = STORAGE_CONF.backupInterval || 90; // Interval in seconds
+    bot.setInterval(function () {
+      if (DEBUG > 1) logger.log("Triggered store backup interval!");
+      store.flush();
+    }, INTERVAL * 1000);
+    logger.info("Store backup period started!");
+  }
+
   // Print a stats to log
   logger.info("* Registered commands: %s", Object.keys(cmds).length);
   logger.info("* Loaded plugins: %s", pluginRegistry.countPlugins());
