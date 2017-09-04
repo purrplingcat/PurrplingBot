@@ -14,7 +14,7 @@ const DEBUG = process.env.DEBUG || 0;
 
 var config = {};
 var pluginRegistry;
-var store = {};
+var store;
 
 var stats = {
   commandsHandled: 0,
@@ -122,6 +122,7 @@ function init() {
   if (!store.countScopes()) {
     logger.info("Storage has no data! Restore defaults");
     store.import("extras/store.defaults.json");
+    store.flush();
   };
 
   // Load plugin registry and init plugins
@@ -321,6 +322,10 @@ exports.addAlias = function (aliasName, command) {
 
 exports.getConfiguration = function(){
   return config;
+}
+
+exports.getStore = function() {
+  return store;
 }
 
 // createLogger() availaible for all modules
