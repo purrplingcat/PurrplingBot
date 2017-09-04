@@ -14,6 +14,7 @@ const DEBUG = process.env.DEBUG || 0;
 
 var config = {};
 var pluginRegistry;
+var store;
 
 var stats = {
   commandsHandled: 0,
@@ -112,19 +113,34 @@ function init() {
   // Check configuration
   check_conf();
 
-  // Load aliases
-  // TODO: Write a storage manager and load aliases from it instead of via Configurator!
-  var _aliases = Configurator.readConfigFile("./aliases.json");
-  if (_aliases) {
-    aliases = _aliases;
-    logger.info("Loaded aliases (Count: %s)", _aliases.length);
-  } else {
-    logger.info("Alias config file not found. Aliases not loaded!");
-  }
+  // Init storage
+  const Storage = require("./lib/storage.js");
+  const STORAGE_CONF = config.storage || {};
+  store = Storage(STORAGE_CONF.file || "storage.json");
+
+  // No data in storage? Import defaults
+  if (!store.countScopes()) {
+    logger.info("Storage has no data! Restore defaults");
+    store.import("extras/store.defaults.json");
+    store.flush();
+  };
+
+  // Restore aliases
+  aliases = store.restoreScope("aliases");
 
   // Load plugin registry and init plugins
   pluginRegistry = require("./pluginRegistry.js");
   pluginRegistry.init();
+
+  // Backup enabled? Set interval for backup storage
+  if (STORAGE_CONF.backup || true) {
+    const INTERVAL = STORAGE_CONF.backupInterval || 90; // Interval in seconds
+    bot.setInterval(function () {
+      if (DEBUG > 1) logger.log("Triggered store backup interval!");
+      store.flush();
+    }, INTERVAL * 1000);
+    logger.info("Store backup period started!");
+  }
 
   // Print a stats to log
   logger.info("* Registered commands: %s", Object.keys(cmds).length);
@@ -163,17 +179,17 @@ function print_help(cmd) {
   }
   //TODO: Rewrite to StringBuilder
   var prefix = config.cmdPrefix;
-  var help_text = "Availaible commands: ";
+  var help_text = "Availaible commands: ```\n";
   var iteration = 0;
   var _cmds = Object.keys(cmds).concat(Object.keys(aliases));
   _cmds.forEach(cmd_name => {
-    help_text += "`" + prefix + cmd_name + "`";
+    help_text += prefix + cmd_name;
     if (iteration != _cmds.length - 1) {
       help_text += ", ";
     }
     iteration++;
   });
-  help_text += `\n\nFor more information type '${prefix}help <command>'`;
+  help_text += `\n\`\`\`\nFor more information type '${prefix}help <command>'`;
   return help_text;
 }
 
@@ -323,6 +339,10 @@ exports.on = function(eventName, callback) {
 
 exports.getConfiguration = function(){
   return config;
+}
+
+exports.getStore = function() {
+  return store;
 }
 
 // createLogger() availaible for all modules

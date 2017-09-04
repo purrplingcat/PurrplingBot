@@ -6,3 +6,4 @@ plugins/plugins_disabled.json
 ignorelist.json
 lastuser.json
 announces.json
+storage.json

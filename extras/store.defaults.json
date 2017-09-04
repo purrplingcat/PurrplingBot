@@ -1,0 +1,9 @@
+{
+  "aliases": {
+    "h": "help",
+    "p": "ping",
+    "v": "version",
+    "ignore": "mumblebox ignore",
+    "msgs": "messages"
+  }
+}
