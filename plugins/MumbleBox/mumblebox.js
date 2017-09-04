@@ -175,7 +175,7 @@ function execSubCommand(scmd, args, message) {
 }
 
 eventBus.on("message", function(message, isCmd){
-  if (mumblebox.ignoredChannelIDs && mumblebox.ignoredChannelIDs.indexOf(message.channel.id)) {
+  if (mumblebox.ignoredChannelIDs && mumblebox.ignoredChannelIDs.indexOf(message.channel.id) > -1) {
     return; // Channel is in ignore list? Don't match mumbles
   }
   if (!isCmd) {
@@ -185,7 +185,7 @@ eventBus.on("message", function(message, isCmd){
 });
 
 eventBus.on("messageUpdate", function(oldMessage, newMessage, isCmd) {
-  if (mumblebox.ignoredChannelIDs && mumblebox.ignoredChannelIDs.indexOf(newMessage.channel.id)) {
+  if (mumblebox.ignoredChannelIDs && mumblebox.ignoredChannelIDs.indexOf(newMessage.channel.id) > -1) {
     return; // Channel is in ignore list? Don't match mumbles
   }
   if (!isCmd) {
