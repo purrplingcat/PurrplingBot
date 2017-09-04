@@ -5,6 +5,9 @@ var store = PurrplingBot.getStore();
 var logger;
 
 const STORE = "wordcounter";
+const MSG_SAVE_COUNT = 10;
+
+var discountToSave = MSG_SAVE_COUNT;
 
 /*
  * DATA SCHEMA
@@ -86,6 +89,14 @@ eventBus.on("message", function(message) {
 
   // Store wordcounter (without saving. Will be saved by interval)
   store.storeScope(STORE, counterStore);
+  if (!discountToSave) {
+    logger.info("Save discount expired! Store wordcounter to storage.");
+    store.flush();
+    discountToSave = MSG_SAVE_COUNT;
+  } else {
+    discountToSave--;
+    logger.log("Save discount: %s", discountToSave);
+  }
 });
 
 exports.words = {
