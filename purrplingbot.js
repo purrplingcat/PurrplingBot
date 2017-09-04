@@ -132,14 +132,14 @@ function init() {
   pluginRegistry = require("./pluginRegistry.js");
   pluginRegistry.init();
 
-  // Backup enabled? Set interval for backup storage
-  if (STORAGE_CONF.backup || true) {
-    const INTERVAL = STORAGE_CONF.backupInterval || 90; // Interval in seconds
+  // Autosave enabled? Set interval for save storage
+  if (STORAGE_CONF.autosave || true) {
+    const INTERVAL = STORAGE_CONF.autosaveInterval || 90; // Interval in seconds
     bot.setInterval(function () {
-      if (DEBUG > 1) logger.log("Triggered store backup interval!");
+      if (DEBUG > 1) logger.log("Triggered store autosave interval!");
       store.flush();
     }, INTERVAL * 1000);
-    logger.info("Store backup period started!");
+    logger.info("Store autosave started! Interval: %ss", INTERVAL);
   }
 
   // Print a stats to log
