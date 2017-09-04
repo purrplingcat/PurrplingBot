@@ -1,33 +1,26 @@
 var PurrplingBot = require("../../purrplingbot.js");
 var bot = PurrplingBot.getDiscordClient();
+var store = PurrplingBot.getStore();
 const CONFIG = PurrplingBot.getConfiguration();
 
 var logger;
 var lastuser = {};
 
-const LASTUSER_STORE = "./lastuser.json";
+const LASTUSER_STORE = "lastuser";
 
 exports.commands = [
   "lastuser"
 ];
 
 function storeLastUser() {
-  fs = require('fs');
-  var json = JSON.stringify(lastuser);
-  fs.writeFile(LASTUSER_STORE, json, 'utf8', err => {
-    if (err) {
-      logger.error("An error occured while storing last user!");
-      logger.error(err);
-    } else {
-      logger.log("Last user was stored!");
-    }
-  });
+  logger.info("Store last user to data storage");
+  store.storeScope(LASTUSER_STORE, lastuser)
+  .flush();
 }
 
 function restoreLastUser() {
-  fs = require('fs');
-  var json = fs.readFileSync(LASTUSER_STORE, 'utf8').toString();
-  lastuser = JSON.parse(json);
+  logger.info("Restore last user from data storage");
+  lastuser = store.restoreScope(LASTUSER_STORE);
 }
 
 bot.on('guildMemberAdd', function (member) {
