@@ -18,7 +18,8 @@ var counterStore = {};
 
 exports.commands = [
   "words",
-  "messages"
+  "messages",
+  "fame"
 ]
 
 exports.init = function(pluginName) {
@@ -77,6 +78,39 @@ function printStats(message, user, type) {
   }
 }
 
+function hallOfFame(message, type, top = 10) {
+  if (!message.guild) return;
+  logger.info("Processing hall of fame - %s ...", type);
+  var guildID = message.guild.id;
+  var guildStats = counterStore[guildID];
+
+  const discordjs = require("discord.js");
+  const Collection = discordjs.Collection;
+  var fame = new Collection();
+  var index = 0;
+
+  for (userID in guildStats) {
+    fame.set(userID, guildStats[userID][type]);
+    if (index < top) index++;
+    else break;
+  }
+
+  // Sort hall of fame board from the biggest score to lowest (DESCENDING)
+  var sortedFame = fame.sort(function(a, b){return b-a});
+
+  var msg = "Hall of fame - " + type + "\n\n";
+  var no = 1;
+  sortedFame.forEach(function(score, userID){
+    var client = PurrplingBot.getDiscordClient();
+    var user = client.users.find('id', userID);
+    if (!user) user = {username: "deleted-user"};
+    msg += no + ". " + user.username + " - " + score + " " + type + "\n";
+    no++;
+  });
+
+  message.channel.send(msg).then(logger.info("Sent hall of fame to #% requested by: %s", message.channel.name, message.author.username));
+}
+
 eventBus.on("message", function(message) {
   if (!message.guild) return;
 
@@ -117,6 +151,17 @@ exports.messages = {
   }
 }
 
+exports.fame = {
+  "description": "Hall of fame in messages/words count",
+  "usage": "<messages|words>",
+  "exec": function(message, tail) {
+    if (tail == "words" || tail == "messages") {
+      hallOfFame(message, tail);
+      return;
+    }
+    message.reply("Do you want hall of fame of messages or words?");
+  }
+}
 // Avoid plugin run standalone
 if (require.main === module) {
   console.error("This plugin cannot be run standalone! Run 'node purrplingbot.js' instead.");
