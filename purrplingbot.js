@@ -103,7 +103,7 @@ function init() {
   // Load configuration
   const Configurator = require("./lib/configurator.js");
   try {
-    config = Configurator.loadConfiguration("./config.json");
+    config = Configurator.loadConfiguration("config/config.json");
   } catch (err) {
     logger.error("*** Configuration failed to load! Check the config file.");
     logger.error(err);
@@ -116,7 +116,7 @@ function init() {
   // Init storage
   const Storage = require("./lib/storage.js");
   const STORAGE_CONF = config.storage || {};
-  store = Storage(STORAGE_CONF.file || "storage.json");
+  store = Storage(STORAGE_CONF.file || "config/storage.json");
 
   // No data in storage? Import defaults
   if (!store.countScopes()) {

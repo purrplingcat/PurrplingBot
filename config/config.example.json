@@ -1,11 +1,11 @@
 {
 	"@imports": {
-		"mumblebox": "./mumblebox.json"
+		"mumblebox": "extras/mumblebox.json"
 	},
 	"cmdPrefix": "!",
 	"pluginsDisabled": [],
 	"storage": {
-		"file": "storedb.json",
+		"file": "config/storedb.json",
 		"autosave": true,
 		"autosaveInterval": 90
 	},

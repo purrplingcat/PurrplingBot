@@ -1,9 +1,5 @@
 node_modules/*
 npm-debug.log
 purrplingbot.log
-config.json
-plugins/plugins_disabled.json
-ignorelist.json
-lastuser.json
-announces.json
-storage.json
+config/*.json
+!config/*.example.json
