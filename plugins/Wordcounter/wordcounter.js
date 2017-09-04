@@ -78,6 +78,8 @@ function printStats(message, user, type) {
 }
 
 eventBus.on("message", function(message) {
+  if (!message.guild) return;
+
   var guildId = message.guild.id;
   var userId = message.author.id;
   var words = message.content.split(' ').length || 0;
