@@ -4,7 +4,7 @@ var config = PurrplingBot.getConfiguration();
 var store = PurrplingBot.getStore();
 var logger;
 
-const SCOPE = "wordcounter";
+const STORE = "wordcounter";
 
 /*
  * DATA SCHEMA
@@ -21,7 +21,7 @@ exports.commands = [
 exports.init = function(pluginName) {
   logger = PurrplingBot.createLogger(pluginName);
   logger.info("Restore wordcounter data");
-  counterStore = store.restoreScope(SCOPE);
+  counterStore = store.restoreScope(STORE);
 }
 
 // Exclude this function to ../../lib/utils.js (issue #72)
@@ -84,9 +84,8 @@ eventBus.on("message", function(message) {
   usersStats.words += words;
   usersStats.messages++;
 
-  // Store wordcounter data
-  store.storeScope(SCOPE, counterStore)
-  .flush();
+  // Store wordcounter (without saving. Will be saved by interval)
+  store.storeScope(STORE, counterStore);
 });
 
 exports.words = {
