@@ -1,8 +1,9 @@
 var PurrplingBot = require("../../purrplingbot.js");
 var eventBus = PurrplingBot.getEventBus();
+var store = PurrplingBot.getStore();
 const CONFIG = PurrplingBot.getConfiguration();
 
-const IGNORELIST_STORE = "./ignorelist.json";
+const IGNORELIST_STORE = "ignorelist";
 
 const TYPE_REACT = "REACT";
 const TYPE_MUMBLE = "MUMBLE";
@@ -88,37 +89,12 @@ function matchAndSendMumble(message, type) {
 }
 
 function storeIgnoreList() {
-  // ONLY story function. Ignore list will be restored by require()
-  logger.dir(ignoreList);
-  fs = require('fs');
-  var json = JSON.stringify(ignoreList);
-  fs.writeFile(IGNORELIST_STORE, json, 'utf8', err => {
-    if (err) {
-      logger.error("An error occured while storing ignoreList!");
-      logger.error(err);
-    } else {
-      logger.log("Ignore list was stored!");
-    }
-  });
+  store.storeScope(IGNORELIST_STORE, ignoreList)
+  .flush();
 }
 
 function restoreIgnoreList() {
-  fs = require('fs');
-  var json = fs.readFileSync(IGNORELIST_STORE, 'utf8').toString();
-  ignoreList = JSON.parse(json);
-}
-
-function readMumblebox(jsonFileName) {
-  try {
-    fs = require('fs');
-    var json = fs.readFileSync(jsonFileName, 'utf8').toString();
-    logger.info("Loaded mumblebox config file: %s", jsonFileName);
-    return JSON.parse(json);
-  } catch(err) {
-    logger.error("Failed while reading %s - using defaults", jsonFileName);
-    logger.error(err);
-    return {};
-  }
+  ignoreList = store.restoreScope(IGNORELIST_STORE, []);
 }
 
 function execSubCommand(scmd, args, message) {
@@ -175,7 +151,8 @@ function execSubCommand(scmd, args, message) {
 }
 
 eventBus.on("message", function(message, isCmd){
-  if (mumblebox.ignoredChannelIDs && mumblebox.ignoredChannelIDs.indexOf(message.channel.id)) {
+  if (mumblebox.ignoredChannelIDs && mumblebox.ignoredChannelIDs.indexOf(message.channel.id) > -1) {
+    logger.log("Channel #%s ignored for munmbling!", message.channel.name);
     return; // Channel is in ignore list? Don't match mumbles
   }
   if (!isCmd) {
@@ -185,7 +162,8 @@ eventBus.on("message", function(message, isCmd){
 });
 
 eventBus.on("messageUpdate", function(oldMessage, newMessage, isCmd) {
-  if (mumblebox.ignoredChannelIDs && mumblebox.ignoredChannelIDs.indexOf(newMessage.channel.id)) {
+  if (mumblebox.ignoredChannelIDs && mumblebox.ignoredChannelIDs.indexOf(newMessage.channel.id) > -1) {
+    logger.log("Channel #%s ignored for munmbling!", message.channel.name);
     return; // Channel is in ignore list? Don't match mumbles
   }
   if (!isCmd) {
@@ -200,14 +178,16 @@ exports.init = function(pluginName) {
     logger.warn("Mumblebox config is not defined! No mumbles for match&talk");
   } else {
     mumblebox = CONFIG.mumblebox;
-    //logger.dir(mumblebox);
   }
-  try {
-    restoreIgnoreList();
-    logger.info("Restored ignore list. Ignored chatters: %s", ignoreList);
-  } catch(err) {
-    logger.warn("Can't restore ignore list! %s", err);
-  }
+
+  // Add mumblebox match tester
+  if (!mumblebox.mumbles) mumblebox.mumbles = {};
+  if (!mumblebox.reactions) mumblebox.reactions = {};
+  mumblebox.mumbles["::mtest"] = "MUMBLE MATCH TEST OK!";
+  mumblebox.reactions["::mtest"] = '👍';
+
+  restoreIgnoreList();
+  logger.info("Restored ignore list. Ignored chatters: %s", ignoreList);
 }
 
 exports.mumbles = {
