@@ -14,6 +14,7 @@ const DEBUG = process.env.DEBUG || 0;
 
 var config = {};
 var pluginRegistry;
+var store = {};
 
 var stats = {
   commandsHandled: 0,
@@ -112,15 +113,16 @@ function init() {
   // Check configuration
   check_conf();
 
-  // Load aliases
-  // TODO: Write a storage manager and load aliases from it instead of via Configurator!
-  var _aliases = Configurator.readConfigFile("./aliases.json");
-  if (_aliases) {
-    aliases = _aliases;
-    logger.info("Loaded aliases (Count: %s)", _aliases.length);
-  } else {
-    logger.info("Alias config file not found. Aliases not loaded!");
-  }
+  // Init storage
+  const Storage = require("./lib/storage.js");
+  const STORAGE_CONF = config.storage || {};
+  store = Storage(STORAGE_CONF.file || "storage.json");
+
+  // No data in storage? Import defaults
+  if (!store.countScopes()) {
+    logger.info("Storage has no data! Restore defaults");
+    store.import("extras/store.defaults.json");
+  };
 
   // Load plugin registry and init plugins
   pluginRegistry = require("./pluginRegistry.js");
