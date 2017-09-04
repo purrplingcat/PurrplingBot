@@ -5,7 +5,7 @@ var store = PurrplingBot.getStore();
 var logger;
 
 const STORE = "wordcounter";
-const MSG_SAVE_COUNT = 10;
+const MSG_SAVE_COUNT = 50;
 
 var discountToSave = MSG_SAVE_COUNT;
 
