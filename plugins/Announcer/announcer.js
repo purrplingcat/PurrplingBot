@@ -1,9 +1,10 @@
 var purrplingBot = require("../../purrplingbot.js");
 var bot = purrplingBot.getDiscordClient();
+var store = purrplingBot.getStore();
 var config = purrplingBot.getConfiguration();
 
 const utils = require("./utils.js");
-const ANNOUNCES_STORE = "./announces.json";
+const ANNOUNCES_STORE = "announces";
 
 var logger;
 var announces = {};
@@ -30,27 +31,14 @@ exports.init = function(pluginName) {
 }
 
 function storeAnnounces() {
-  fs = require('fs');
-  var json = JSON.stringify(announces);
-  fs.writeFile(ANNOUNCES_STORE, json, 'utf8', err => {
-    if (err) {
-      logger.error("An error occured while storing announces!");
-      logger.error(err);
-    } else {
-      logger.info("Announces was stored!");
-    }
-  });
+  logger.info("Store announces to data storage");
+  store.storeScope(ANNOUNCES_STORE, announces)
+  .flush();
 }
 
 function restoreAnnounces() {
-  fs = require('fs');
-  try {
-    var json = fs.readFileSync(ANNOUNCES_STORE, 'utf8').toString();
-    announces = JSON.parse(json);
-    logger.info("Announces restored!");
-  } catch (err) {
-    logger.warn("Can't restore announces list: %s", err);
-  }
+  logger.info("Restore announces from data storage");
+  announces = store.restoreScope(ANNOUNCES_STORE);
 }
 
 /* TODO: Only base test. Write a complete logic for:
