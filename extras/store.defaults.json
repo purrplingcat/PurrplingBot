@@ -3,6 +3,7 @@
     "h": "help",
     "p": "ping",
     "v": "version",
-    "ignore": "mumblebox ignore"
+    "ignore": "mumblebox ignore",
+    "msgs": "messages"
   }
 }

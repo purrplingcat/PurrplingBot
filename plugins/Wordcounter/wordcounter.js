@@ -1,7 +1,10 @@
 var PurrplingBot = require("../../purrplingbot.js");
 var eventBus = PurrplingBot.getEventBus(); // Use PurrplingBot.on() directly after merge pull reuest #79 (implements issue #76)
 var config = PurrplingBot.getConfiguration();
+var store = PurrplingBot.getStore();
 var logger;
+
+const SCOPE = "wordcounter";
 
 /*
  * DATA SCHEMA
@@ -17,6 +20,8 @@ exports.commands = [
 
 exports.init = function(pluginName) {
   logger = PurrplingBot.createLogger(pluginName);
+  logger.info("Restore wordcounter data");
+  counterStore = store.restoreScope(SCOPE);
 }
 
 // Exclude this function to ../../lib/utils.js (issue #72)
@@ -36,10 +41,8 @@ function fetchUserGuildStats(guildId, userId) {
 
 function printStats(message, user, type) {
   if (!user) {
-    message.reply(`Please tell me, who user's ${type} you want know.`)
-    .catch(logger.error);
-    logger.info(`User no specified! Info sent to #${message.channel.name} requested by ${message.author.username}`);
-    return;
+    user = message.author.id;
+    logger.info(`User no specified! Using message author ${message.author.username}`);
   }
   var userID = parseUserlID(user);
   var member = message.guild.members.find('id', userID);
@@ -80,6 +83,10 @@ eventBus.on("message", function(message) {
   // Increment a counters
   usersStats.words += words;
   usersStats.messages++;
+
+  // Store wordcounter data
+  store.storeScope(SCOPE, counterStore)
+  .flush();
 });
 
 exports.words = {
