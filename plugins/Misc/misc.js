@@ -1,12 +1,13 @@
 var moment = require('moment');
 var purrplingBot = require("../../purrplingbot.js");
 var pluginRegistry = purrplingBot.getPluginRegistry();
+var store = purrplingBot.getStore();
 var config = purrplingBot.getConfiguration();
 require('twix');
 
 var logger;
 
-const ALIASES_STORE = "aliases.json";
+const ALIASES_STORE = "aliases";
 
 exports.commands = [
   "alias",
@@ -52,17 +53,8 @@ function findChannel(channels, knownChanName) {
 // TODO: Write a storage manager
 function storeAliases() {
   var aliases = purrplingBot.getAliases();
-  logger.dir(aliases);
-  fs = require('fs');
-  var json = JSON.stringify(aliases);
-  fs.writeFile(ALIASES_STORE, json, 'utf8', err => {
-    if (err) {
-      logger.error("An error occured while storing aliases!");
-      logger.error(err);
-    } else {
-      logger.log("Aliases was stored!");
-    }
-  });
+  store.storeScope(ALIASES_STORE, aliases)
+  .flush();
 }
 
 exports.hello = {
