@@ -1,5 +1,4 @@
 var PurrplingBot = require("../../purrplingbot.js");
-var eventBus = PurrplingBot.getEventBus(); // Use PurrplingBot.on() directly after merge pull reuest #79 (implements issue #76)
 var config = PurrplingBot.getConfiguration();
 var store = PurrplingBot.getStore();
 var logger;
@@ -109,10 +108,9 @@ function hallOfFame(message, type, top = 10) {
   });
 
   message.channel.send(msg).then(logger.info("Sent hall of fame to #% requested by: %s", message.channel.name, message.author.username));
-  message.channel.stopTyping();
 }
 
-eventBus.on("message", function(message) {
+PurrplingBot.on("message", function(message) {
   if (!message.guild) return;
 
   var guildId = message.guild.id;
@@ -157,8 +155,7 @@ exports.fame = {
   "usage": "<messages|words>",
   "exec": function(message, tail) {
     if (tail == "words" || tail == "messages") {
-      message.channel.startTyping();
-      setTimeout(hallOfFame, 100, message, tail); // Call hallOfFame() async
+      hallOfFame(message, tail);
       return;
     }
     message.reply("Do you want hall of fame of messages or words?");

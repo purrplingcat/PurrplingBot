@@ -299,6 +299,9 @@ exports.getCommandRegistry = function () {
   return cmds;
 }
 
+/*
+ * @deprecated
+ */
 exports.getEventBus = function () {
   return eventBus;
 }

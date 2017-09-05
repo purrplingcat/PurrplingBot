@@ -1,5 +1,4 @@
 var PurrplingBot = require("../../purrplingbot.js");
-var eventBus = PurrplingBot.getEventBus();
 var store = PurrplingBot.getStore();
 const CONFIG = PurrplingBot.getConfiguration();
 
@@ -150,7 +149,7 @@ function execSubCommand(scmd, args, message) {
   }
 }
 
-eventBus.on("message", function(message, isCmd){
+PurrplingBot.on("message", function(message, isCmd){
   if (mumblebox.ignoredChannelIDs && mumblebox.ignoredChannelIDs.indexOf(message.channel.id) > -1) {
     logger.log("Channel #%s ignored for munmbling!", message.channel.name);
     return; // Channel is in ignore list? Don't match mumbles
@@ -161,7 +160,7 @@ eventBus.on("message", function(message, isCmd){
   }
 });
 
-eventBus.on("messageUpdate", function(oldMessage, newMessage, isCmd) {
+PurrplingBot.on("messageUpdate", function(oldMessage, newMessage, isCmd) {
   if (mumblebox.ignoredChannelIDs && mumblebox.ignoredChannelIDs.indexOf(newMessage.channel.id) > -1) {
     logger.log("Channel #%s ignored for munmbling!", message.channel.name);
     return; // Channel is in ignore list? Don't match mumbles

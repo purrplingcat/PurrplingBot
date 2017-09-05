@@ -41,19 +41,6 @@ function restoreAnnounces() {
   announces = store.restoreScope(ANNOUNCES_STORE);
 }
 
-/* TODO: Only base test. Write a complete logic for:
- * [DONE] Trig a timer function for announce
- * [DONE] Add new announce by command !announce add <name> <interval> <#channel> <message>
- * [DONE] Store announces after add
- * [DONE] List announces by !announce List
- * [DONE] Cancel announce by !announce cancel name
- * [DONE] Resume announce by !announce resume <name> [<interval>]
- * [DONE] Remove announce by !announce rm <name>
- * [DONE] Restore announces after start the bot
- * [DONE] Handle a command manualy by user
- *
- * Privileges: to !announce command can access only admins!
- */
 function handleAnnounce(name, _by) {
   var announce = announces[name];
   if (!announce) {
