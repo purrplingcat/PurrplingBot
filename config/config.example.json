@@ -10,14 +10,14 @@
 		"autosaveInterval": 90
 	},
 	"discord": {
-		"token": "MzIzMzk3MjU4MDgxMDc1MjAx.DB6raw.U4n_AdA-bGYKFTATc6ACFI2mnTA"
+		"token": "MzIzMzk3MjU4MDgxFBn1MjAx.DB6raw.U4n_AdA-bGYKFTATc6ACFI2mnTA"
 	},
 	"admins": [
 		"PurrplingCat",
 		"CallMeFoxie"
 	],
 	"twitch": {
-		"twitch_token": "l3d809cqz3r28buu2d603ayyg83g32",
+		"twitch_token": "l3d809bfd3r20buu2d626ayyg83g64",
 		"twitch_channel_name": "purrplingcat",
 		"twitch_channel_id": "125991922",
 		"twitch_stream_checker": {
@@ -28,7 +28,7 @@
 	},
 	"twitchcord": {
 		"username": "purrplingbot",
-		"password": "oauth:3j98jl1efnoodmeb00tnlshw69ac9x",
+		"password": "oauth:3j98jl1efnoobmeb00tnlshw69ac9x",
 		"twitchChannel": "#purrplingcat",
 		"discordChannelId": "353532218712522753",
 		"reconnectLimit": 32
