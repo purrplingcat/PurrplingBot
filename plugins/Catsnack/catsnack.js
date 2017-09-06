@@ -29,6 +29,16 @@ exports.init = function(pluginName) {
   setInterval(healKitty, TIMEOUT * FSB * 1000);
 }
 
+exports.status = function() {
+  return {
+    "overfeedDiscount": overfeedDiscount,
+    "overfeedThreshold": overfeedThreshold,
+    "overfeeded": overfeeded,
+    "overfeedTimeout": catsnackConf.overfeedTimeout || 60,
+    "overfeedFSB": catsnackConf.overfeedFSB || 4
+  }
+}
+
 exports.catsnack = {
   "description": "Give a food to our cat",
   "exec": function(message) {

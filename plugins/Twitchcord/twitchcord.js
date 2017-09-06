@@ -117,6 +117,14 @@ function translateDiscordMentions(message) {
 }
 
 exports.init = init;
+exports.status = function() {
+  return {
+    "Twitch client state": tmiClient.readyState(),
+    "Twitch channel": TWITCHORD_CONFIG.twitchChannel || "#test",
+    "Discord channel ID": TWITCHORD_CONFIG.discordChannelId,
+    "Reconnect count": reconnectCount + "/" + RECONNECT_LIMIT
+  }
+}
 
 // Avoid plugin run standalone
 if (require.main === module) {

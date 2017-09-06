@@ -81,6 +81,14 @@ exports.init = function(pluginName) {
   }
 }
 
+exports.status = function () {
+  return {
+    "Twitch channel": twitch_channel_name,
+    "Stream checker interval": twitch_stream_checker.interval + "s",
+    "Stream checker enabled": twitch_stream_checker.enabled,
+  }
+}
+
 exports.nextstream = {
   "description": "Streaming cat now? Or when will next stream?",
   "exec": function(message) {

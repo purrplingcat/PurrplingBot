@@ -27,6 +27,12 @@ exports.init = function(pluginName) {
   counterStore = store.restoreScope(STORE);
 }
 
+exports.status = function() {
+  return {
+    "Discount to save": discountToSave
+  }
+}
+
 // Exclude this function to ../../lib/utils.js (issue #72)
 function parseUserlID(userSlug) {
   if (userSlug.startsWith("<@")) {
