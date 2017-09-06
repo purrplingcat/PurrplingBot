@@ -37,7 +37,7 @@ function fetchAndSendUrbanDefinition(message, term, n = 1) {
     }
     message.channel.stopTyping();
     message.channel.send(result, {embed: {url: null}})
-    .then(logger.info(`URBAN DEFINITION SENT! result: ${result}\tterm: ${term} page: ${n}`))
+    .then(logger.info(`URBAN DEFINITION SENT!\tterm: ${term} page: ${n}`))
     .catch(logger.error);
   });
 }
