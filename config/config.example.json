@@ -33,6 +33,10 @@
 		"discordChannelId": "353532218712522753",
 		"reconnectLimit": 32
 	},
+	"announcer": {
+		"antispam": true,
+		"inactivity": "1h"
+	},
 	"greetings": {
 		"channelID": "300515295821299714",
 		"greetingMessage": "Vítej mezi námi!"

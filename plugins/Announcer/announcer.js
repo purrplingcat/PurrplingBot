@@ -6,10 +6,12 @@ var config = purrplingBot.getConfiguration();
 
 const utils = require("./utils.js");
 const ANNOUNCES_STORE = "announces";
+const INTERVAL_TRIGGER = "@Interval";
 
 var logger;
 var announces = {};
 var announceRunners = {};
+var announcerConf = config.announcer || {};
 
 exports.commands = [
   "announce"
@@ -21,6 +23,7 @@ exports.init = function(pluginName) {
     restoreAnnounces();
     for (name in announces) {
       var announce = announces[name];
+      announce.neverHandled = true; // Mark announce as never handled at bot starts
       if (announce.active) {
         resumeAnnounce(announce.name);
       }
@@ -53,6 +56,18 @@ function handleAnnounce(name, _by) {
     logger.warn("Can't handle announce %s - Unknown channel", name);
     return false;
   }
+  if ((announcerConf.antispam || true) && _by == INTERVAL_TRIGGER && !announce.neverHandled) {
+      var msgs = channel.messages.filterArray(function (msg) {
+        var currentTime = new Date();
+        var durationParser = require("duration-parser");
+        return (currentTime.getTime() - msg.createdAt.getTime()) < durationParser(announcerConf.inactivity || "1h") && msg.author.id != bot.user.id;
+      });
+      if (!msgs.length) {
+        logger.info("Can't handle announce %s - No activity in #%s", announce.name, channel.name);
+        return false;
+      }
+  }
+  announce.neverHandled = false;
   channel.send(announce.message)
   .then(logger.info(`Handled announce: ${announce.name} by: ${_by}`));
   return true;
@@ -100,9 +115,10 @@ function resumeAnnounce(name, interval) {
       logger.log(err);
       return {error: true, message: "Can't resume announce - Invalid duration format: " + announce.interval};
     }
-    var runner = bot.setInterval(handleAnnounce, duration, name, "@IntervalTrigger");
+    var runner = bot.setInterval(handleAnnounce, duration, name, INTERVAL_TRIGGER);
     announceRunners[name] = runner;
     announce.active = true;
+    announce.neverHandled = true;
     logger.info(`Resumed announce: ${announce.name} (Interval: ${announce.interval})`);
     storeAnnounces();
     return announce;
@@ -148,7 +164,8 @@ function execSubCommand(scmd, args, message) {
         "interval": interval,
         "channel": utils.parseChannelID(channel),
         "message": _message,
-        "active": false
+        "active": false,
+        "neverHandled": true
       };
       storeAnnounces();
       message.channel.send(`Announce '${name}' added! Activate it by '!announce resume ${name}'`)
