@@ -1,4 +1,5 @@
 var purrplingBot = require("../../purrplingbot.js");
+var durationParse = require("duration-parser");
 var bot = purrplingBot.getDiscordClient();
 var store = purrplingBot.getStore();
 var config = purrplingBot.getConfiguration();
@@ -80,26 +81,35 @@ function cancelAnnounce(name) {
 function resumeAnnounce(name, interval) {
   var announce = announces[name];
   if (!announce) {
-    logger.info(`Announce '${name} not exists - Can't resume!`);
-    return;
+    logger.info(`Announce '${name}' not exists - Can't resume!`);
+    return {error: true, message: `Announce '${name} not exists - Can't resume!`};
   }
   if (announceRunners[name]) {
     logger.info("Announce '%s' already resumed and running!", name);
-    return false;
+    return {error: true, message: `Announce '${name}' already resumed and running!`};
   }
   if (interval) {
     announce.interval = interval;
   }
   try {
-    var runner = bot.setInterval(handleAnnounce, announce.interval * 1000, name, "@IntervalTrigger");
+    var duration;
+    try {
+      duration = durationParse(announce.interval);
+    } catch (err) {
+      logger.error("Can't resume announce - Invalid duration format: " + announce.interval);
+      logger.log(err);
+      return {error: true, message: "Can't resume announce - Invalid duration format: " + announce.interval};
+    }
+    var runner = bot.setInterval(handleAnnounce, duration, name, "@IntervalTrigger");
     announceRunners[name] = runner;
     announce.active = true;
-    logger.info(`Resumed announce: ${announce.name} (Interval: ${announce.interval} seconds)`);
+    logger.info(`Resumed announce: ${announce.name} (Interval: ${announce.interval})`);
     storeAnnounces();
     return announce;
   } catch (err) {
     logger.error(`Can't resume announce '${name}' - FATAL ERROR:`);
     logger.error(err);
+    return {error: true, message: "Can't resume announce - " + err.toString()};
   }
 }
 
@@ -173,7 +183,7 @@ function execSubCommand(scmd, args, message) {
       var announces_print = "";
       for (announceName in announces) {
         var announce = announces[announceName];
-        announces_print += "Announce '" + announce.name + "' (" + announce.interval + " seconds) in <#" + announce.channel + "> - " + (announce.active ? "ACTIVE" : "INACTIVE") + (announceRunners[announce.name] ? " [RUNNING]" : " [STOPPED]") + "\n";
+        announces_print += "Announce '" + announce.name + "' (" + announce.interval + ") in <#" + announce.channel + "> - " + (announce.active ? "ACTIVE" : "INACTIVE") + (announceRunners[announce.name] ? " [RUNNING]" : " [STOPPED]") + "\n";
       }
       message.channel.send(announces_print)
       .then(logger.info(`Announces list sent! Announces count: ${Object.keys(announces).length}\t User: ${message.author.username} in #${message.channel.name}`))
@@ -213,12 +223,17 @@ function execSubCommand(scmd, args, message) {
       var interval = args[1];
       var announce = resumeAnnounce(name, interval);
       if (!announce) {
-        message.reply(`Can't resume Announce '${name}' - Already resumed or announce not exists.`)
+        message.reply(`Can't resume Announce '${name}' - Unknown error`)
         .catch(logger.error);
         return;
       }
-      message.channel.send(`Announce '${announce.name}' resumed with interval ${announce.interval} seconds`)
-      .then(logger.info(`Announce '${announce.name}' resumed with interval ${announce.interval} seconds\t User: ${message.author.username} in #${message.channel.name}`))
+      if (announce.error) {
+        message.reply(`${announce.message}`)
+        .catch(logger.error);
+        return;
+      }
+      message.channel.send(`Announce '${announce.name}' resumed with interval ${announce.interval}`)
+      .then(logger.info(`Announce '${announce.name}' resumed with interval ${announce.interval}\t User: ${message.author.username} in #${message.channel.name}`))
       .catch(logger.error);
     break;
     case 'handle':
@@ -239,10 +254,10 @@ function execSubCommand(scmd, args, message) {
     break;
     case 'help':
       var help_text = "Availaible subcomands: \n\n"
-      + "`add <name> <interval> <channel> <message>` - Add an announcer. Interval is in seconds.\n"
+      + "`add <name> <interval> <channel> <message>` - Add an announcer. Interval examples: 10s, 5m, 1h25m, 1h45m30s.\n"
       + "`rm <name>` - Remove an announcer\n"
       + "`list` - List announces\n"
-      + "`resume <name> [<interval>]` - Resume an announcer to ACTIVE state and start the runner. Interval is in seconds.\n"
+      + "`resume <name> [<interval>]` - Resume an announcer to ACTIVE state and start the runner. Interval examples: 10s, 5m, 1h25m, 1h45m30s.\n"
       + "`cancel <name>` - Cancel an announcer to INACTIVE atate and stop the runner.\n"
       + "`handle <name>` - Manually handle an announcer.\n"
       + "`help` - This help message\n";
