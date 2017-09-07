@@ -11,11 +11,13 @@ class Repeater extends EventEmiter {
     this._options = options || {};
     this._logger = logger;
     this._queue = [];
-    if (this.options.enabled)
+    if (this.options.enabled) {
       this.announces = announces;
       this._logger.info("Repeater is ENABLED!");
-    else
+    }
+    else {
       this.announces = null;
+    }
     this._logger.log("Initalized!");
   }
 
