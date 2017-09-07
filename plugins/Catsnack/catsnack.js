@@ -13,10 +13,12 @@ exports.commands = [
 ]
 
 function healKitty() {
-  overfeedDiscount = overfeedThreshold;
-  overfeeded = false;
-  logger.info("Kitty overfeed healed!");
-  logger.log("Overfeed discount: %s", overfeedDiscount);
+  if (overfeed || overfeedDiscount != overfeedThreshold) {
+    overfeedDiscount = overfeedThreshold;
+    overfeeded = false;
+    logger.info("Kitty overfeed healed!");
+    logger.log("Overfeed discount: %s", overfeedDiscount);
+  }
 }
 
 exports.init = function(pluginName) {
