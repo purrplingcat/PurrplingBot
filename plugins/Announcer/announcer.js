@@ -3,15 +3,19 @@ var durationParse = require("duration-parser");
 var bot = purrplingBot.getDiscordClient();
 var store = purrplingBot.getStore();
 var config = purrplingBot.getConfiguration();
+const Repeater = require("./repeater.js");
 
 const utils = require("./utils.js");
 const ANNOUNCES_STORE = "announces";
 const INTERVAL_TRIGGER = "@Interval";
+const REPEATER_TRIGGER = "@Repeater";
 
 var logger;
+var repeater;
 var announces = {};
 var announceRunners = {};
 var announcerConf = config.announcer || {};
+var repeaterConf = announcerConf.repeater || {};
 
 exports.commands = [
   "announce"
@@ -28,11 +32,22 @@ exports.init = function(pluginName) {
         resumeAnnounce(announce.name);
       }
     }
+    repeater = new Repeater(announces, repeaterConf, purrplingBot.createLogger(pluginName + ":Repeater"));
+    repeater.on('repeat', function(announce){
+      if ((announcerConf.antispam || true))
+        handleAnnounce(announce.name, REPEATER_TRIGGER);
+    });
   } catch (err) {
     logger.error("An error occured while resuming announces!")
     logger.error(err);
   }
 }
+
+purrplingBot.on('message', function(message){
+  if (message.author.id == bot.user.id) return;
+  if ((announcerConf.antispam || true))
+    repeater.processQueue();
+});
 
 function storeAnnounces() {
   logger.info("Store announces to data storage");
@@ -51,6 +66,7 @@ function handleAnnounce(name, _by) {
     logger.warn("Can't handle announce %s - Unexisted announce", name);
     return false;
   }
+  announce.lastTry = new Date();
   var channel = bot.channels.find('id', announce.channel);
   if (!channel) {
     logger.warn("Can't handle announce %s - Unknown channel", name);
@@ -63,11 +79,13 @@ function handleAnnounce(name, _by) {
         return (currentTime.getTime() - msg.createdAt.getTime()) < durationParser(announcerConf.inactivity || "1h") && msg.author.id != bot.user.id;
       });
       if (!msgs.length) {
-        logger.info("Can't handle announce %s - No activity in #%s", announce.name, channel.name);
+        logger.log("Can't handle announce %s - No activity in #%s", announce.name, channel.name);
+        repeater.addToQueue(announce);
         return false;
       }
   }
   announce.neverHandled = false;
+  announce.lastHandle = new Date();
   channel.send(announce.message)
   .then(logger.info(`Handled announce: ${announce.name} by: ${_by}`));
   return true;

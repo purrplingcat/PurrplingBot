@@ -35,7 +35,12 @@
 	},
 	"announcer": {
 		"antispam": true,
-		"inactivity": "1h"
+		"inactivity": "1h",
+		"repeater": {
+			"enabled": false,
+			"expirePercentTime": 0.25,
+			"handleWait": "5m"
+		}
 	},
 	"greetings": {
 		"channelID": "300515295821299714",
