@@ -76,6 +76,10 @@ class Repeater extends EventEmiter {
   get options() {
     return this._options;
   }
+
+  get queue() {
+    return this._queue;
+  }
 }
 
 module.exports = Repeater;
