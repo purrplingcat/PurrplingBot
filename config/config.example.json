@@ -1,6 +1,7 @@
 {
 	"@imports": {
-		"mumblebox": "extras/mumblebox.json"
+		"mumblebox": "extras/mumblebox.json",
+		"catsnack": "extras/catsnack.json"
 	},
 	"cmdPrefix": "!",
 	"pluginsDisabled": [],
@@ -45,10 +46,5 @@
 	"greetings": {
 		"channelID": "300515295821299714",
 		"greetingMessage": "Vítej mezi námi!"
-	},
-	"catsnack": {
-		"overfeedThreshold": 20,
-		"overfeedTimeout": 60,
-		"overfeedFSB": 4
 	}
 }
