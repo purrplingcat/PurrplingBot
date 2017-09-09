@@ -1,6 +1,7 @@
 const PKG = require("./package.json");
 const EventEmmiter = require('events');
 const LOGGER = require("./lib/logger.js");
+const UTILS = require("./lib/utils.js");
 
 var Discord = require('discord.js');
 var moment = require('moment');
@@ -168,46 +169,7 @@ function init() {
   bot.login(config.discord.token);
 }
 
-function print_cmd_help(cmd) {
-  var prefix = config.cmdPrefix;
-  if (cmd.startsWith(prefix)) {
-    cmd = cmd.substring(prefix.length); //Strip a prefix for command, if was set in arg
-  }
-  if (!cmds.hasOwnProperty(cmd)) {
-    logger.info("Requested help for UNKNOWN command: " + prefix + cmd);
-    return "Unknown command: " + prefix + cmd + ". Type " + prefix + "help to list availaible commands.";
-  }
-  var help_text = "Command: " + prefix + cmd;
-  var cmd_context = cmds[cmd];
-  if ("description" in cmd_context) {
-    help_text += "\nDescription: " + cmd_context["description"];
-  }
-  if ("usage" in cmd_context) {
-    help_text += "\nUsage: " + prefix + cmd + " " + cmd_context["usage"];
-  }
-  logger.info("Requested help for command: " + prefix + cmd);
-  return help_text;
-}
 
-function print_help(cmd) {
-  if (cmd.trim().length > 0 && cmd != null) { //cmd is NOT empty and NOT null
-    return print_cmd_help(cmd);
-  }
-  //TODO: Rewrite to StringBuilder
-  var prefix = config.cmdPrefix;
-  var help_text = "Availaible commands: ```\n";
-  var iteration = 0;
-  var _cmds = Object.keys(cmds).concat(Object.keys(aliases));
-  _cmds.forEach(cmd_name => {
-    help_text += prefix + cmd_name;
-    if (iteration != _cmds.length - 1) {
-      help_text += ", ";
-    }
-    iteration++;
-  });
-  help_text += `\n\`\`\`\nFor more information type '${prefix}help <command>'`;
-  return help_text;
-}
 
 /**
 * @param message - Channel message driver
@@ -243,7 +205,14 @@ function check_message_for_command(message) {
       .catch(logger.error);
       return true;
     }
-    message.channel.send(print_help(tail));
+    if (tail) {
+      logger.info("Request help for command %s%s", prefix, tail);
+      message.channel.send(UTILS.printCmdHelp(tail, cmds, prefix));
+    }
+    else {
+      var _cmds = Object.keys(cmds).concat(Object.keys(aliases));
+      message.channel.send(UTILS.printHelp(_cmds, prefix));
+    }
     stats.commandsHandled++;
     eventBus.emit("commandHandled", cmd, tail, message);
     return true;
