@@ -5,7 +5,7 @@ const TWITCHORD_CONFIG = CONFIG.twitchcord || {};
 
 var logger;
 var reconnectCount = 0;
-const RECONNECT_LIMIT = TWITCHORD_CONFIG.reconnectLimit || 32;
+const RECONNECT_LIMIT = TWITCHORD_CONFIG.reconnectLimit || 64;
 
 var tmi = require("tmi.js");
 var tmiClient = new tmi.client({
@@ -31,7 +31,7 @@ tmiClient.on("disconnected", function (reason) {
     if (reconnectCount < RECONNECT_LIMIT) {
       logger.info("Trying to reconnect. Count: %s Limit: %s", reconnectCount, RECONNECT_LIMIT);
       reconnectCount++;
-      tmiClient.connect();
+      setTimeout(tmiClient.connect, 5000);
     } else {
       logger.warn("*** Can't be reconnected - Reconnect limit exceeded! Please restart bot. Limit: %s", RECONNECT_LIMIT);
     }
@@ -65,7 +65,8 @@ PurrplingBot.on("message", function(message, isCmd) {
   if (message.channel.id == TWITCHORD_CONFIG.discordChannelId || "") {
     logger.log("[DISCORD -> TWITCH] Forwarding message ...");
     tmiClient.say(TWITCHORD_CONFIG.twitchChannel || "#test", `<${message.author.username}> ${translateDiscordMentions(message)}`)
-      .then(logger.info("[DISCORD -> TWITCH] Message forwarded to: %s", TWITCHORD_CONFIG.twitchChannel || "#test"));
+      .then(logger.info("[DISCORD -> TWITCH] Message forwarded to: %s", TWITCHORD_CONFIG.twitchChannel || "#test"))
+      .catch(logger.error);
   }
 });
 
