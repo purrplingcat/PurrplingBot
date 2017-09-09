@@ -36,11 +36,11 @@
 	},
 	"announcer": {
 		"antispam": true,
-		"inactivity": "1h",
+		"inactivity": "45m",
 		"repeater": {
 			"enabled": false,
 			"expirePercentTime": 0.25,
-			"handleWait": "5m"
+			"handleWait": "2m"
 		}
 	},
 	"greetings": {
