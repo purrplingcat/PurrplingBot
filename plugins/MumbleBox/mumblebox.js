@@ -162,7 +162,7 @@ PurrplingBot.on("message", function(message, isCmd){
 
 PurrplingBot.on("messageUpdate", function(oldMessage, newMessage, isCmd) {
   if (mumblebox.ignoredChannelIDs && mumblebox.ignoredChannelIDs.indexOf(newMessage.channel.id) > -1) {
-    logger.log("Channel #%s ignored for munmbling!", message.channel.name);
+    logger.log("Channel %s ignored for munmbling!", newMessage.channel.name);
     return; // Channel is in ignore list? Don't match mumbles
   }
   if (!isCmd) {
