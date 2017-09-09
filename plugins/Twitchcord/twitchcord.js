@@ -59,6 +59,17 @@ tmiClient.on("chat", function (channel, userstate, message, self) {
     .catch(logger.error);
 });
 
+tmiClient.on("hosting", function (source, target, viewers) {
+  var channel = client.channels.find('id', TWITCHORD_CONFIG.discordChannelId || "");
+  if (!channel) {
+    logger.error("[TWITCH -> DISCORD] Can't send info about hosting. Channel not found!");
+    return;
+  }
+  channel.send(`<*${source}> now hosting ${target}*`)
+  .then(logger.info("[TWITCH -> DISCORD] Message forwarded to: #%s", channel.name))
+  .catch(logger.error);
+});
+
 PurrplingBot.on("message", function(message, isCmd) {
   if (message.author.id === client.user.id) return;
   if (isCmd) return;
