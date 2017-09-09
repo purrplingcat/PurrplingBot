@@ -65,7 +65,7 @@ tmiClient.on("hosting", function (source, target, viewers) {
     logger.error("[TWITCH -> DISCORD] Can't send info about hosting. Channel not found!");
     return;
   }
-  channel.send(`<*${source}> now hosting ${target}*`)
+  channel.send(`*Channel ${source} now hosting ${target} - <https://www.twitch.tv/${target}>*`)
   .then(logger.info("[TWITCH -> DISCORD] Message forwarded to: #%s", channel.name))
   .catch(logger.error);
 });
