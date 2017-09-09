@@ -32,7 +32,7 @@
 		"password": "oauth:3j98jl1efnoobmeb00tnlshw69ac9x",
 		"twitchChannel": "#purrplingcat",
 		"discordChannelId": "353532218712522753",
-		"reconnectLimit": 32
+		"reconnectLimit": 64
 	},
 	"announcer": {
 		"antispam": true,
