@@ -58,21 +58,10 @@ class Repeater extends EventEmiter {
       } else this._logger.log("%s expired - Not added to queue", announce.name);
       this.emit('process', announce, queue);
     });
-    setTimeout(this._repeatAnnounce, durationParse(this.options.handleWait || "5m"), queue);
+    this._queue = [];
+    setTimeout(_repeatAnnounce, durationParse(this.options.handleWait || "5m"), queue, this);
     this._logger.info("Repeater started! Announces in queue: ", queue.length);
     return queue;
-  }
-
-  _repeatAnnounce(queue) {
-    if (!queue.length) {
-      this._queue = [];
-      this._logger.info("Repeater DONE! Queue is clear! ");
-      return;
-    }
-    var announce = queue.pop();
-    this.emit('repeat', announce);
-    this._logger.log("Announce %s repeated!", announce.name);
-    setTimeout(this._repeatAnnounce, durationParse(this.options.handleWait || "5m"), queue);
   }
 
   get options() {
@@ -84,4 +73,17 @@ class Repeater extends EventEmiter {
   }
 }
 
+// Call only as callback from instance of Repeater
+function _repeatAnnounce(queue, _this) {
+  if (!queue.length) {
+    _this._logger.info("Repeater DONE! Queue is clear! ");
+    return;
+  }
+  var announce = queue.pop();
+  _this.emit('repeat', announce);
+  _this._logger.log("Announce %s repeated!", announce.name);
+  setTimeout(_repeatAnnounce, durationParse(_this.options.handleWait || "5m"), queue, _this);
+}
+
 module.exports = Repeater;
+module.exports.logger = "sdfsdf";
