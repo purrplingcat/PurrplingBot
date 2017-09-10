@@ -155,6 +155,7 @@ exports.livenow = {
               exports.nextstream.exec(message);
             return;
           }
+          var streamInfo = body.stream;
           message.channel.send(`Stream je právě ONLINE! Sleduj to na ${streamInfo.channel.url}\nTitulek streamu: **${streamInfo.channel.status}**\nHraje: **${streamInfo.channel.game}**`, { embed: null})
             .then(logger.info(`Information about stream status sent to #${message.channel.name} requested by: ${message.author.username}`))
             .catch(logger.error);
