@@ -14,7 +14,7 @@ exports.commands = [
 ]
 
 function healKitty() {
-  if (overfeed || overfeedDiscount != overfeedThreshold) {
+  if (overfeeded || overfeedDiscount != overfeedThreshold) {
     overfeedDiscount = overfeedThreshold;
     overfeeded = false;
     logger.info("Kitty overfeed healed!");
