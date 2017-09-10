@@ -20,6 +20,36 @@ Migrate your configs by steps in [Configuration migration](#configuration-migrat
 
 ## Configuration migration
 
+### Migrate 1.3.0-beta -> 1.3.0-beta2
+
+- To your config file add new node:
+
+```json
+"announcer": {
+  "antispam": true,
+  "inactivity": "45m",
+  "repeater": {
+    "enabled": false,
+    "expirePercentTime": 0.25,
+    "handleWait": "2m"
+  }
+}
+```
+
+NOTE: If you want allow Announce repeater, then change key `enabled` to `true` in `announcer/repeater`
+
+- In `Twitchord` change key `reconnectLimit` to:
+
+```json
+"reconnectLimit": 64
+```
+
+- Add to `@imports`:
+
+```json
+"catsnack": "extras/catsnack.json"
+```
+
 ### Migrate: 1.2.3 -> 1.3.0-beta
 
 - Move your _config.json_ to **config/config.json**
