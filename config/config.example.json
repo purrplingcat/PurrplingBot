@@ -23,7 +23,7 @@
 		"twitch_channel_id": "125991922",
 		"twitch_stream_checker": {
 			"enabled": true,
-			"interval": 300,
+			"interval": 120,
 			"announceChannelId": "323516538378256395"
 		}
 	},
