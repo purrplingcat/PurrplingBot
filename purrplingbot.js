@@ -240,10 +240,35 @@ function check_message_for_command(message) {
   return false;
 }
 
+function log_event(msg, type = "Event", level = "INFO") {
+  const eventLoggerConf = config.eventLogger || {};
+  const enabled = eventLoggerConf.enabled || false;
+  const channelID = eventLoggerConf.loggingChannelID;
+  if (!enabled) {
+    logger.log("Can't send log event - EventLogger is DISABLED!");
+    return;
+  }
+  if (!channelID) {
+    logger.error("Can't send log event - loggingChannelID is EMPTY!");
+    return;
+  }
+  var channel = bot.channels.find('id', channelID);
+  if (!channel) {
+    logger.log("Can't send log event - Unknown event logging channel: %s", channelID);
+    return;
+  }
+  if (level == "DEBUG" && DEBUG < 1) return;
+  const currentTime = new Date();
+  channel.send(`_${currentTime}_ [${level}] **${type}** - ${msg}`)
+  .then(logger.log(`Event log ${type}::"${msg}" sent to #${channel.name} level: ${level}`))
+  .catch(logger.error);
+}
+
 bot.on('ready', function() {
   logger.info(`Logged in as ${bot.user.username} - ${bot.user.id} on ${bot.guilds.array().length} servers`);
   stats.numberOfReconnection++;
   eventBus.emit("ready");
+  log_event("PurrplingBot is ready and works!", "BotReady");
   logger.info("PurrplingBot READY!");
 });
 
@@ -332,6 +357,8 @@ exports.getConfiguration = function(){
 exports.getStore = function() {
   return store;
 }
+
+exports.logEvent = log_event;
 
 // createLogger() availaible for all modules
 exports.createLogger = LOGGER.createLogger;

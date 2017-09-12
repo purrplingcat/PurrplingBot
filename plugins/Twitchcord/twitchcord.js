@@ -4,8 +4,6 @@ const CONFIG = PurrplingBot.getConfiguration();
 const TWITCHORD_CONFIG = CONFIG.twitchcord || {};
 
 var logger;
-var reconnectCount = 0;
-const RECONNECT_LIMIT = TWITCHORD_CONFIG.reconnectLimit || 64;
 
 var tmi = require("tmi.js");
 var tmiClient = new tmi.client({
@@ -14,6 +12,9 @@ var tmiClient = new tmi.client({
         password: TWITCHORD_CONFIG.password || ""
     },
     channels: [TWITCHORD_CONFIG.twitchChannel || "#test"],
+    connection: {
+      reconnect: true
+    }
 });
 
 tmiClient.on("connected", function (address, port) {
@@ -28,13 +29,6 @@ tmiClient.on("connecting", function (address, port) {
 tmiClient.on("disconnected", function (reason) {
     logger.warn("Twitch chat DISCONNECTED! Reason: %s", reason);
     logger.log("Twitch chat client state: %s", tmiClient.readyState());
-    if (reconnectCount < RECONNECT_LIMIT) {
-      logger.info("Trying to reconnect. Count: %s Limit: %s", reconnectCount, RECONNECT_LIMIT);
-      reconnectCount++;
-      setTimeout(tmiClient.connect, 5000);
-    } else {
-      logger.warn("*** Can't be reconnected - Reconnect limit exceeded! Please restart bot. Limit: %s", RECONNECT_LIMIT);
-    }
 });
 
 tmiClient.on("ping", function () {
@@ -133,8 +127,7 @@ exports.status = function() {
   return {
     "Twitch client state": tmiClient.readyState(),
     "Twitch channel": TWITCHORD_CONFIG.twitchChannel || "#test",
-    "Discord channel ID": TWITCHORD_CONFIG.discordChannelId,
-    "Reconnect count": reconnectCount + "/" + RECONNECT_LIMIT
+    "Discord channel ID": TWITCHORD_CONFIG.discordChannelId
   }
 }
 
