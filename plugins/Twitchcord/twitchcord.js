@@ -18,7 +18,7 @@ var tmiClient = new tmi.client({
 });
 
 tmiClient.on("connected", function (address, port) {
-    reconnectCount = 0;
+    PurrplingBot.logEvent("Bot connected to Twitch chat. Joined: " + TWITCHORD_CONFIG.twitchChannel || "#test", "Twitchcord:READY");
     logger.log("Twitch chat client state: %s", tmiClient.readyState());
 });
 
@@ -28,6 +28,7 @@ tmiClient.on("connecting", function (address, port) {
 
 tmiClient.on("disconnected", function (reason) {
     logger.warn("Twitch chat DISCONNECTED! Reason: %s", reason);
+    PurrplingBot.logEvent("Twitch chat DISCONNECTED! Reason:" + reason, "Twitchcord:DISCONNECT", "WARN");
     logger.log("Twitch chat client state: %s", tmiClient.readyState());
 });
 

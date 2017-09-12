@@ -258,8 +258,7 @@ function log_event(msg, type = "Event", level = "INFO") {
     return;
   }
   if (level == "DEBUG" && DEBUG < 1) return;
-  const currentTime = new Date();
-  channel.send(`_${currentTime}_ [${level}] **${type}** - ${msg}`)
+  channel.send(`Event: _${level}_ - **${type}** - ${msg}`)
   .then(logger.log(`Event log ${type}::"${msg}" sent to #${channel.name} level: ${level}`))
   .catch(logger.error);
 }
