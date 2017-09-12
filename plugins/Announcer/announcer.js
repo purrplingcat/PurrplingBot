@@ -78,7 +78,7 @@ function handleAnnounce(name, _by) {
         var durationParser = require("duration-parser");
         return (currentTime.getTime() - msg.createdAt.getTime()) < durationParser(announcerConf.inactivity || "1h") && msg.author.id != bot.user.id;
       });
-      if (!msgs.length) {
+      if (msgs.length < announcerConf.activityLinesThreshold || 1) {
         logger.log("Can't handle announce %s - No activity in #%s", announce.name, channel.name);
         repeater.addToQueue(announce);
         return false;

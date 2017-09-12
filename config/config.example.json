@@ -37,6 +37,7 @@
 	"announcer": {
 		"antispam": true,
 		"inactivity": "45m",
+		"activityLinesThreshold": 1,
 		"repeater": {
 			"enabled": false,
 			"expirePercentTime": 0.25,
