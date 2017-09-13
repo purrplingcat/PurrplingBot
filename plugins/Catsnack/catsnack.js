@@ -15,6 +15,9 @@ exports.commands = [
 
 function healKitty() {
   if (overfeeded || overfeedDiscount != overfeedThreshold) {
+    if (overfeeded) {
+      PurrplingBot.logEvent(`Kitty's overfeed gone (overfeed heal)`, "Kitty:Overfeed");
+    }
     overfeedDiscount = overfeedThreshold;
     overfeeded = false;
     logger.info("Kitty overfeed healed!");
@@ -61,6 +64,7 @@ exports.catsnack = {
       const TIMEOUT = catsnackConf.overfeedTimeout || 60; // Post-Overfeed timeout
       setTimeout(healKitty, TIMEOUT * 1000);
       logger.info("Kitty getting overfeed for %s seconds", TIMEOUT);
+      PurrplingBot.logEvent(`Kitty getting overfeed for ${TIMEOUT} seconds`, "Kitty:Overfeed");
     }
     if (overfeeded) {
       message.reply("Jsem přežraná, neotravuj!", {

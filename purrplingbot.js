@@ -240,7 +240,7 @@ function check_message_for_command(message) {
   return false;
 }
 
-function log_event(msg, type = "Event", level = "INFO") {
+function log_event(msg, type = "Bot", level = "INFO") {
   const eventLoggerConf = config.eventLogger || {};
   const enabled = eventLoggerConf.enabled || false;
   const channelID = eventLoggerConf.loggingChannelID;
