@@ -20,6 +20,31 @@ Migrate your configs by steps in [Configuration migration](#configuration-migrat
 
 ## Configuration migration
 
+### Migrate 1.3.0-beta2 -> 1.3.0-beta3
+
+- Add `eventLogger` default config:
+
+```json
+"eventLogger": {
+  "enabled": false,
+  "loggingChannelID": "353532218712522753"
+}
+```
+
+- Add `activityLinesThreshold` to `announcer` config:
+
+```json
+"activityLinesThreshold": 1
+```
+
+- If you want use _CatNature_ plugin, then you add to `@imports`:
+
+```json
+"catnature": "extras/catnature.json"
+```
+
+NOTE: If you want use own CatNature messages, then copy _catnature.json_ from _extras/_ to _config/_ and edit it. After this process update a `@import` line for catnature and link _catnature.json_ from _config/_
+
 ### Migrate 1.3.0-beta -> 1.3.0-beta2
 
 - To your config file add new node:
