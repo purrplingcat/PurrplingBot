@@ -259,7 +259,7 @@ function log_event(msg, type = "Bot", level = "INFO") {
   }
   if (level == "DEBUG" && DEBUG < 1) return;
   channel.send(`Event: _${level}_ - **${type}** - ${msg}`)
-  .then(logger.log(`Event log ${type}::"${msg}" sent to #${channel.name} level: ${level}`))
+  .then(logger.info(`Event log ${type}::"${msg}" sent to #${channel.name} level: ${level}`))
   .catch(logger.error);
 }
 
