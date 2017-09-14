@@ -88,6 +88,7 @@ exports.status = function () {
     "Twitch channel": twitch_channel_name,
     "Stream checker interval": twitch_stream_checker.interval + "s",
     "Stream checker enabled": twitch_stream_checker.enabled,
+    "Stream state": previousStreamState
   }
 }
 
