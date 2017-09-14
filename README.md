@@ -53,7 +53,7 @@ docker run -ti purrplingcat/purrplingbot:<version>
 ```
 
 ### Run via kubelet/static POD for Kubernetes
-1. Download purrplingbot-kubernetes.yaml
+1. Download _extras/purrplingbot-kubernetes.yaml_
 2. Replace `__VERSION__` with desired version
 3. Replace `__CONFIG_PATH__` with path to configs
 4. Replace `__LOG_PATH__` with path to logs
