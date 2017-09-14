@@ -43,6 +43,16 @@ exports.init = function(pluginName) {
   }
 }
 
+exports.status = function() {
+  return {
+    "Announces": Object.keys(announces).length,
+    "Runners": Object.keys(announces).length,
+    "Announces in queue for repeat": repeater.queue.length,
+    "Spam protection enabled": announcerConf.antispam,
+    "Repeater enabled": repeater.options.enabled
+  }
+}
+
 purrplingBot.on('message', function(message){
   if (message.author.id == bot.user.id) return;
   if ((announcerConf.antispam || true))
