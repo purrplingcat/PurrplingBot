@@ -1,7 +1,7 @@
 FROM node:8.2.1-alpine
 
 LABEL com.purrplingcat.name="PurrplingBot"
-LABEL com.purrplingcat.version="1.2.0"
+LABEL com.purrplingcat.version="1.2.5"
 LABEL com.purrplingcat.vendor="PurrplingCat"
 LABEL com.purrplingcat.email="dev@purrplingcat.com"
 LABEL com.purrplingcat.github="https://github.com/EllenFawkes/PurrplingBot"
@@ -21,6 +21,9 @@ RUN npm install
 
 # Copy app bundle
 COPY . .
+
+# Install plugin dependencies
+RUN npm run depmod
 
 # Redirect configs to /data/config
 RUN mv config/config.example.json extras/config.example.json && \

@@ -1,0 +1,9 @@
+{
+  "pluginName": "Announcer",
+  "description": "Announce callouts to your Discord text channels",
+  "type": "plugin",
+  "main": "announcer.js",
+  "dependencies": {
+    "duration-parser": "^1.0.2"
+  }
+}
