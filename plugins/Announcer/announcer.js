@@ -97,7 +97,7 @@ function handleAnnounce(name, _by) {
         return false;
       }
   }
-  purrplingBot.logEvent(`Handle announce '${announce.name}'. Channel: ${channel.name} NeverHandled: ${announce.neverHandled}`, "Announce:Handle");
+  purrplingBot.logEvent(`Handle announce '${announce.name}', Channel: ${channel.name}, HandledBy: ${_by}, NeverHandled: ${announce.neverHandled}`, "Announce:Handle");
   announce.neverHandled = false;
   announce.lastHandle = new Date();
   channel.send(announce.message)
