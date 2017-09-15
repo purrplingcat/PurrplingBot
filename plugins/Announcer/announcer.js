@@ -55,8 +55,10 @@ exports.status = function() {
 
 purrplingBot.on('message', function(message){
   if (message.author.id == bot.user.id) return;
-  if ((announcerConf.antispam || true))
+  let antispam = announcerConf.antispam || true;
+  if (antispam) {
     repeater.processQueue();
+  }
 });
 
 function storeAnnounces() {
@@ -117,6 +119,7 @@ function cancelAnnounce(name) {
     }
     storeAnnounces();
     return true;
+    purrplingBot.logEvent(`Canceled runner of announce '${announce.name}', NeverHandled: ${announce.neverHandled}`, "Announce:Cancel");
   logger.info(`Canceled runner of announce '${name}'`);
   } catch(err) {
     logger.error("Can't cancel announce '%s' - FATAL ERROR", name);
@@ -151,6 +154,7 @@ function resumeAnnounce(name, interval) {
     announceRunners[name] = runner;
     announce.active = true;
     announce.neverHandled = true;
+    purrplingBot.logEvent(`Resumed announce '${announce.name}', Interval: ${announce.interval}, NeverHandled: ${announce.neverHandled}`, "Announce:Resume");
     logger.info(`Resumed announce: ${announce.name} (Interval: ${announce.interval})`);
     storeAnnounces();
     return announce;
