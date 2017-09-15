@@ -46,7 +46,7 @@ exports.init = function(pluginName) {
 exports.status = function() {
   return {
     "Announces": Object.keys(announces).length,
-    "Runners": Object.keys(announces).length,
+    "Runners": Object.keys(announceRunners).length,
     "Announces in queue for repeat": repeater.queue.length,
     "Spam protection enabled": announcerConf.antispam,
     "Repeater enabled": repeater.options.enabled
