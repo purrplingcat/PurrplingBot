@@ -80,7 +80,7 @@ function handleAnnounce(name, _by) {
   var channel = bot.channels.find('id', announce.channel);
   if (!channel) {
     logger.warn("Can't handle announce %s - Unknown channel", name);
-    PurrplingBot.logEvent(`Announce '${announce.name}' can't be handled! Channel '${name}' is UNKNOWN!'`, "Announce:Handle", "ERROR");
+    purrplingBot.logEvent(`Announce '${announce.name}' can't be handled! Channel '${name}' is UNKNOWN!'`, "Announce:Handle", "ERROR");
     return false;
   }
   if ((announcerConf.antispam || true) && _by == INTERVAL_TRIGGER && !announce.neverHandled) {
@@ -89,18 +89,19 @@ function handleAnnounce(name, _by) {
         var durationParser = require("duration-parser");
         return (currentTime.getTime() - msg.createdAt.getTime()) < durationParser(announcerConf.inactivity || "1h") && msg.author.id != bot.user.id;
       });
-      if (msgs.length < announcerConf.activityLinesThreshold || 1) {
+      let activeThres =  announcerConf.activityLinesThreshold || 1;
+      if (msgs.length < activeThres) {
         logger.log("Can't handle announce %s - No activity in #%s", announce.name, channel.name);
-        PurrplingBot.logEvent(`Announce '${announce.name}' not handled - Channel ${channel.name} is inactive! Adding to queue.`, "Announce:ChannelInactive");
+        purrplingBot.logEvent(`Announce '${announce.name}' not handled - Channel ${channel.name} is inactive! Adding to queue.`, "Announce:ChannelInactive");
         repeater.addToQueue(announce);
         return false;
       }
   }
+  purrplingBot.logEvent(`Handle announce '${announce.name}'. Channel: ${channel.name} NeverHandled: ${announce.neverHandled}`, "Announce:Handle");
   announce.neverHandled = false;
   announce.lastHandle = new Date();
   channel.send(announce.message)
   .then(logger.info(`Handled announce: ${announce.name} by: ${_by}`));
-  PurrplingBot.logEvent(`Announce '${announce.name}' handled! Channel: ${channel.name}`, "Announce:Handle");
   return true;
 }
 
@@ -347,6 +348,6 @@ exports.announce = {
 
 // Avoid plugin run standalone
 if (require.main === module) {
-  console.error("This plugin cannot be run standalone! Run 'node purrplingbot.js' instead.");
+  console.error("This plugin cannot be run standalone! Run 'node purrplingBot.js' instead.");
   process.exit(1);
 }
