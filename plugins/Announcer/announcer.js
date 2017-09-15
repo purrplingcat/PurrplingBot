@@ -80,6 +80,7 @@ function handleAnnounce(name, _by) {
   var channel = bot.channels.find('id', announce.channel);
   if (!channel) {
     logger.warn("Can't handle announce %s - Unknown channel", name);
+    PurrplingBot.logEvent(`Announce '${announce.name}' can't be handled! Channel '${name}' is UNKNOWN!'`, "Announce:Handle", "ERROR");
     return false;
   }
   if ((announcerConf.antispam || true) && _by == INTERVAL_TRIGGER && !announce.neverHandled) {
@@ -90,6 +91,7 @@ function handleAnnounce(name, _by) {
       });
       if (msgs.length < announcerConf.activityLinesThreshold || 1) {
         logger.log("Can't handle announce %s - No activity in #%s", announce.name, channel.name);
+        PurrplingBot.logEvent(`Announce '${announce.name}' not handled - Channel ${channel.name} is inactive! Adding to queue.`, "Announce:ChannelInactive");
         repeater.addToQueue(announce);
         return false;
       }
@@ -98,6 +100,7 @@ function handleAnnounce(name, _by) {
   announce.lastHandle = new Date();
   channel.send(announce.message)
   .then(logger.info(`Handled announce: ${announce.name} by: ${_by}`));
+  PurrplingBot.logEvent(`Announce '${announce.name}' handled! Channel: ${channel.name}`, "Announce:Handle");
   return true;
 }
 
