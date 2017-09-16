@@ -9,9 +9,8 @@ A discordbot written primary for server PurrplingCat
 ### Regular download
 
 * Latest stable version 1.2.4: [Release v1.2.4 'Carmilla'](https://github.com/EllenFawkes/PurrplingBot/releases/tag/1.2.4)
-* Maintained stable version 1.1.1: [Release v1.1.1 'Chiara'](https://github.com/EllenFawkes/PurrplingBot/releases/tag/v1.1.1)
-* Beta version 1.3.0-rc: [Release v1.3.0-rc 'Carmilla'](https://github.com/EllenFawkes/PurrplingBot/releases/tag/1.3.0-rc)
-* Develop version 1.3.0-rc2-dev: `git clone https://github.com/EllenFawkes/PurrplingBot.git`
+* Release candidate version 1.3.0-rc: [Release v1.3.0-rc 'Carmilla'](https://github.com/EllenFawkes/PurrplingBot/releases/tag/1.3.0-rc)
+* Develop version 1.4.0-dev: `git clone https://github.com/EllenFawkes/PurrplingBot.git`
 
 ### Get image from DockerHub
 
