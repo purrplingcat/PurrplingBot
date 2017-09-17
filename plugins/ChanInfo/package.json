@@ -1,0 +1,9 @@
+{
+  "pluginName": "ChanInfo",
+  "description": "Get a Discord channel informations",
+  "type": "plugin",
+  "main": "chaninfo.js",
+  "dependencies": {
+    "moment": "^2.18.1"
+  }
+}

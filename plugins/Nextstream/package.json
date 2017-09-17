@@ -1,0 +1,9 @@
+{
+  "pluginName": "Nextstream",
+  "description": "Is your stream live now? When is planned next stream?",
+  "type": "plugin",
+  "main": "nextstream.js",
+  "dependencies": {
+    "moment": "^2.18.1"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "pluginName": "Misc",
+  "description": "Core expansion plugin",
+  "type": "plugin",
+  "main": "misc.js",
+  "dependencies": {
+    "moment": "^2.18.1",
+    "twix": "^1.2.0"
+  }
+}

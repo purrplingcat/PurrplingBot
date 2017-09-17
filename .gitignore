@@ -1,6 +1,7 @@
-node_modules/*
+node_modules
 npm-debug.log
 purrplingbot.log
+package-lock.json
 config/*.json
 config/*.yaml
 config/*.yml

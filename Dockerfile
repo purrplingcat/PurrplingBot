@@ -23,6 +23,9 @@ RUN npm install
 # Copy app bundle
 COPY . .
 
+# Install plugin dependencies
+RUN npm run depmod
+
 # Redirect configs to /data/config
 RUN mv config/config.example.json extras/config.example.json && \
     rm -rf config && \
