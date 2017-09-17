@@ -120,7 +120,7 @@ function init() {
   // Load configuration
   const Configurator = require("./lib/configurator.js");
   try {
-    config = Configurator.loadConfiguration("config/config.json");
+    config = Configurator.loadConfiguration("config/config");
   } catch (err) {
     logger.error("*** Configuration failed to load! Check the config file.");
     logger.error(err);
