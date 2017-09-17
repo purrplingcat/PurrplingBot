@@ -11,6 +11,7 @@ ENV DEBUG=0
 ENV APP_DIR="/opt/PurrplingBot"
 ENV APP_CONFIG_DIR="/data/config"
 ENV APP_LOGS="/data/logs/purrplingbot.log"
+ENV PATH=$APP_DIR/bin:$PATH
 
 # Create app place
 RUN mkdir -p $APP_DIR
