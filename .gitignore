@@ -5,6 +5,7 @@ package-lock.json
 config/*.json
 config/*.yaml
 config/*.yml
+config/*.json.bk
 !config/*.example.json
 !config/*.example.yaml
 !config/*.example.yml

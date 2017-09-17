@@ -258,8 +258,9 @@ function log_event(msg, type = "Bot", level = "INFO") {
     return;
   }
   if (level == "DEBUG" && DEBUG < 1) return;
-  channel.send(`Event: _${level}_ - **${type}** - ${msg}`)
-  .then(logger.log(`Event log ${type}::"${msg}" sent to #${channel.name} level: ${level}`))
+  let timestamp = moment(new Date()).format("MM/DD HH:mm:ss");
+  channel.send(`${timestamp}: _${level}_ - **${type}** - ${msg}`)
+  .then(logger.info(`Event log ${type} - "${msg}" sent to #${channel.name} level: ${level}`))
   .catch(logger.error);
 }
 
