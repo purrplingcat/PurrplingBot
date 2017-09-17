@@ -17,15 +17,11 @@ ENV PATH=$APP_DIR/bin:$PATH
 RUN mkdir -p $APP_DIR
 WORKDIR $APP_DIR
 
-# Install npm dependencies
-COPY package.json .
-RUN npm install
-
-# Copy app bundle
+# Copy bundle, install main&plugin deps, clean npm cache
 COPY . .
-
-# Install plugin dependencies
-RUN npm run depmod
+RUN npm install && \
+    npm run depmod && \
+    npm cache clean
 
 # Redirect configs to /data/config
 RUN mv config/config.example.json extras/config.example.json && \
