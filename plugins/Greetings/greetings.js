@@ -44,6 +44,7 @@ bot.on('guildMemberAdd', function (member) {
     "server": member.guild.name,
     "joinedAt": member.joinedAt
   };
+  PurrplingBot.logEvent(`New user '${member.displayName}' joined server!`, "GuildMemberAdd");
   storeLastUser(); //save last joined user info
 });
 
@@ -62,7 +63,12 @@ bot.on('guildMemberUpdate', function(oldMember, newMember) {
     channel.send(`${oldMember.user} Changed her/his nickname from **${oldMember.nickname ? oldMember.nickname : oldMember.user.username}** to **${newMember.nickname ? newMember.nickname : newMember.user.username}**`)
     .then(logger.info(`Sent info about nickname changed! User: ${oldMember.user.username} From: ${oldMember.nickname} To: ${newMember.nickname}`))
     .catch(logger.error);
+    PurrplingBot.logEvent(`User '${oldMember.displayName}' changed nickname to ${newMember.displayName}`, "NicknameChange");
   }
+});
+
+bot.on('guildMemberRemove', function (member) {
+  PurrplingBot.logEvent(`User '${member.displayName} left server!'`, "GuildMemberRemove");
 });
 
 exports.init = function(pluginName) {

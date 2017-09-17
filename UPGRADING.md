@@ -20,14 +20,25 @@ Migrate your configs by steps in [Configuration migration](#configuration-migrat
 
 ## Configuration migration
 
-### Migrate 1.3.0-beta -> 1.3.0-beta2
+### Migrate: 1.2.3 -> 1.3.0
 
-- To your config file add new node:
+- Move your _config.json_ to **config/config.json**
+- Add `eventLogger` default config:
+
+```json
+"eventLogger": {
+  "enabled": false,
+  "loggingChannelID": "353532218712522753"
+}
+```
+
+- To your config file add new node for configure Announcer plugin:
 
 ```json
 "announcer": {
   "antispam": true,
   "inactivity": "45m",
+  "activityLinesThreshold": 1,
   "repeater": {
     "enabled": false,
     "expirePercentTime": 0.25,
@@ -38,21 +49,6 @@ Migrate your configs by steps in [Configuration migration](#configuration-migrat
 
 NOTE: If you want allow Announce repeater, then change key `enabled` to `true` in `announcer/repeater`
 
-- In `Twitchord` change key `reconnectLimit` to:
-
-```json
-"reconnectLimit": 64
-```
-
-- Add to `@imports`:
-
-```json
-"catsnack": "extras/catsnack.json"
-```
-
-### Migrate: 1.2.3 -> 1.3.0-beta
-
-- Move your _config.json_ to **config/config.json**
 - Add a node `storage`
 
 ```json
@@ -70,8 +66,7 @@ NOTE: If you want allow Announce repeater, then change key `enabled` to `true` i
   "username": "<twitch_username>",
   "password": "oauth:<your oauth token>",
   "twitchChannel": "#<your_twitch>channel>",
-  "discordChannelId": "<your_discord_chanID_to_connect_with_twitch>",
-  "reconnectLimit": 32
+  "discordChannelId": "<your_discord_chanID_to_connect_with_twitch>"
 }
 ```
 
@@ -98,12 +93,16 @@ NOTE: If you want allow Announce repeater, then change key `enabled` to `true` i
 
 ```json
 "@imports": {
-  "mumblebox": "extras/mumblebox.json"
+  "mumblebox": "extras/mumblebox.json",
+  "catsnack": "extras/catsnack.json",
+  "catnature": "extras/catnature.json"
 }
 ```
 
+NOTE: If you want use own extras configs, then copy _<extras_conf>.json_ from _extras/_ to _config/_ and edit it. After this process update a `@import` line for catnature and link _<extras_conf>.json_ from _config/_
+
 NOTE: Don't forget commas `,`
 
-### Migrate: 1.2.1 -> 1.2.2
+### Migrate: 1.2.1 -> 1.2.2 or above from 1.2.x series
 
 - Add a `"ignoredChannelIDs": [],` to a begin of JSON if you used own. You can specify channel IDs to ignore for bot's mumbling

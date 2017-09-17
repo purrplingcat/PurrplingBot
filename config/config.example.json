@@ -1,7 +1,8 @@
 {
 	"@imports": {
 		"mumblebox": "extras/mumblebox.json",
-		"catsnack": "extras/catsnack.json"
+		"catsnack": "extras/catsnack.json",
+		"catnature": "extras/catnature.json"
 	},
 	"cmdPrefix": "!",
 	"pluginsDisabled": [],
@@ -17,13 +18,17 @@
 		"PurrplingCat",
 		"CallMeFoxie"
 	],
+	"eventLogger": {
+  	"enabled": false,
+  	"loggingChannelID": "353532218712522753"
+	},
 	"twitch": {
 		"twitch_token": "l3d809bfd3r20buu2d626ayyg83g64",
 		"twitch_channel_name": "purrplingcat",
 		"twitch_channel_id": "125991922",
 		"twitch_stream_checker": {
 			"enabled": true,
-			"interval": 300,
+			"interval": 120,
 			"announceChannelId": "323516538378256395"
 		}
 	},
@@ -37,6 +42,7 @@
 	"announcer": {
 		"antispam": true,
 		"inactivity": "45m",
+		"activityLinesThreshold": 1,
 		"repeater": {
 			"enabled": false,
 			"expirePercentTime": 0.25,

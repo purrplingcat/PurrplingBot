@@ -2,4 +2,9 @@ node_modules/*
 npm-debug.log
 purrplingbot.log
 config/*.json
+config/*.yaml
+config/*.yml
+config/*.json.bk
 !config/*.example.json
+!config/*.example.yaml
+!config/*.example.yml

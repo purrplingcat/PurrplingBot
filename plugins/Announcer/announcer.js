@@ -43,10 +43,22 @@ exports.init = function(pluginName) {
   }
 }
 
+exports.status = function() {
+  return {
+    "Announces": Object.keys(announces).length,
+    "Runners": Object.keys(announceRunners).length,
+    "Announces in queue for repeat": repeater.queue.length,
+    "Spam protection enabled": announcerConf.antispam,
+    "Repeater enabled": repeater.options.enabled
+  }
+}
+
 purrplingBot.on('message', function(message){
   if (message.author.id == bot.user.id) return;
-  if ((announcerConf.antispam || true))
+  let antispam = announcerConf.antispam || true;
+  if (antispam) {
     repeater.processQueue();
+  }
 });
 
 function storeAnnounces() {
@@ -70,6 +82,7 @@ function handleAnnounce(name, _by) {
   var channel = bot.channels.find('id', announce.channel);
   if (!channel) {
     logger.warn("Can't handle announce %s - Unknown channel", name);
+    purrplingBot.logEvent(`Announce '${announce.name}' can't be handled! Channel '${name}' is UNKNOWN!'`, "Announce:Handle", "ERROR");
     return false;
   }
   if ((announcerConf.antispam || true) && _by == INTERVAL_TRIGGER && !announce.neverHandled) {
@@ -78,12 +91,15 @@ function handleAnnounce(name, _by) {
         var durationParser = require("duration-parser");
         return (currentTime.getTime() - msg.createdAt.getTime()) < durationParser(announcerConf.inactivity || "1h") && msg.author.id != bot.user.id;
       });
-      if (!msgs.length) {
+      let activeThres =  announcerConf.activityLinesThreshold || 1;
+      if (msgs.length < activeThres) {
         logger.log("Can't handle announce %s - No activity in #%s", announce.name, channel.name);
+        purrplingBot.logEvent(`Announce '${announce.name}' not handled - Channel ${channel.name} is inactive! Adding to queue.`, "Announce:ChannelInactive");
         repeater.addToQueue(announce);
         return false;
       }
   }
+  purrplingBot.logEvent(`Handle announce '${announce.name}', Channel: ${channel.name}, HandledBy: ${_by}, NeverHandled: ${announce.neverHandled}`, "Announce:Handle");
   announce.neverHandled = false;
   announce.lastHandle = new Date();
   channel.send(announce.message)
@@ -103,6 +119,7 @@ function cancelAnnounce(name) {
     }
     storeAnnounces();
     return true;
+    purrplingBot.logEvent(`Canceled runner of announce '${announce.name}', NeverHandled: ${announce.neverHandled}`, "Announce:Cancel");
   logger.info(`Canceled runner of announce '${name}'`);
   } catch(err) {
     logger.error("Can't cancel announce '%s' - FATAL ERROR", name);
@@ -137,6 +154,7 @@ function resumeAnnounce(name, interval) {
     announceRunners[name] = runner;
     announce.active = true;
     announce.neverHandled = true;
+    purrplingBot.logEvent(`Resumed announce '${announce.name}', Interval: ${announce.interval}, NeverHandled: ${announce.neverHandled}`, "Announce:Resume");
     logger.info(`Resumed announce: ${announce.name} (Interval: ${announce.interval})`);
     storeAnnounces();
     return announce;
@@ -334,6 +352,6 @@ exports.announce = {
 
 // Avoid plugin run standalone
 if (require.main === module) {
-  console.error("This plugin cannot be run standalone! Run 'node purrplingbot.js' instead.");
+  console.error("This plugin cannot be run standalone! Run 'node purrplingBot.js' instead.");
   process.exit(1);
 }

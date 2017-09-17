@@ -61,12 +61,14 @@ function streamLiveNowAnnounce() {
             .then(logger.info(`Information about stream sent to #${channel.name}`))
             .catch(logger.error);
           } else {
-            logger.error("Can't send info about stream state to channel ID: %s - Channel not found!");
+            logger.error("Can't send info about stream state to channel ID: %s - Channel not found!", twitch_stream_checker.announceChannelId);
+            PurrplingBot.logEvent("Can't send info about stream state - Channel not found!", "StreamCheck", "ERROR");
           }
         }
       } else {
         logger.error("An error occured while fetching stream status! Status code: %s", response.statusCode);
         logger.dir(body);
+        PurrplingBot.logEvent("An error occured while fetching stream status! Status code: " + response.statusCode, "StreamCheck", "ERROR");
       }
   });
 }
@@ -86,6 +88,7 @@ exports.status = function () {
     "Twitch channel": twitch_channel_name,
     "Stream checker interval": twitch_stream_checker.interval + "s",
     "Stream checker enabled": twitch_stream_checker.enabled,
+    "Stream state": previousStreamState
   }
 }
 
@@ -112,7 +115,7 @@ exports.nextstream = {
             logger.info("Stream is live!\t Stream name: %s \t Channel name: %s", e.title, twitch_channel_name);
           }
           else if (currentTime.getTime() < streamStartTime.getTime()) {
-            msg = "Další stream: '" + e.title + "' bude " + moment(streamStartTime).format("DD.MM.YYYY HH:mm:ss") + " - Hrát se bude '" + e.game.name + "' https://www.twitch.tv/events/" + e._id;
+            msg = "Další plánovaný stream: '" + e.title + "' bude " + moment(streamStartTime).format("DD.MM.YYYY HH:mm:ss") + " - Hrát se bude '" + e.game.name + "' https://www.twitch.tv/events/" + e._id;
             logger.info("Next stream comming soon!\t Stream name: %s \t Stream starts: %s", e.title, streamStartTime);
           }
           else {
@@ -148,14 +151,13 @@ exports.livenow = {
         logger.log("Request: %s", request_url);
         message.channel.stopTyping();
         if (!error && response.statusCode === 200) {
-          if (!body.stream) {
-            message.channel.send(`Stream je momentálně OFFLINE. Další informace o plánovaném streamu níže:`)
+          var streamInfo = body.stream;
+          if (!streamInfo) {
+            message.channel.send(`Stream je momentálně OFFLINE. Další informace o plánovaném streamu se dozvíš příkazem \`!nextstream\``)
               .then(logger.info(`Information about stream status sent to #${message.channel.name} requested by: ${message.author.username}`))
               .catch(logger.error);
-              exports.nextstream.exec(message);
             return;
           }
-          var streamInfo = body.stream;
           message.channel.send(`Stream je právě ONLINE! Sleduj to na ${streamInfo.channel.url}\nTitulek streamu: **${streamInfo.channel.status}**\nHraje: **${streamInfo.channel.game}**`, { embed: null})
             .then(logger.info(`Information about stream status sent to #${message.channel.name} requested by: ${message.author.username}`))
             .catch(logger.error);
