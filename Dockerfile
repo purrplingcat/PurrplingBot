@@ -17,14 +17,13 @@ ENV PATH=$APP_DIR/bin:$PATH
 RUN mkdir -p $APP_DIR
 WORKDIR $APP_DIR
 
-# Copy bundle, install main&plugin deps, clean npm cache
+# Copy bundle, install main&plugin deps
 COPY . .
 RUN npm install && \
-    npm run depmod && \
-    npm cache clean
+    npm run depmod
 
 # Redirect configs to /data/config
-RUN mv config/config.example.json extras/config.example.json && \
+RUN mv config/config.example.yaml extras/config.example.yaml && \
     rm -rf config && \
     ln -s $APP_CONFIG_DIR config
 
