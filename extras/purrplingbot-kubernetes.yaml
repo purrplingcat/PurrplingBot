@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: purrplingbot
+spec:
+  containers:
+  - name: purrplingbot
+    image: purrplingcat/purrplingbot:__VERSION__
+    volumeMounts:
+    - name: config
+      mountPath: /data/config
+    - name: logs
+      mountPath: /data/logs
+    - name: tz
+      mountPath: /etc/localtime
+  volumes:
+  - name: config
+    hostPath:
+      path: __CONFIG_PATH__
+  - name: logs
+    hostPath:
+      path: __LOG_PATH__
+  - name: tz   
+    hostPath:
+      path: /etc/localtime
+

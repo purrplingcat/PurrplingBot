@@ -1,7 +1,8 @@
 {
 	"@imports": {
 		"mumblebox": "extras/mumblebox.json",
-		"catsnack": "extras/catsnack.json"
+		"catsnack": "extras/catsnack.json",
+		"catnature": "extras/catnature.json"
 	},
 	"cmdPrefix": "!",
 	"pluginsDisabled": [],
