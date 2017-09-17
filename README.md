@@ -17,13 +17,14 @@ A discordbot written primary for server PurrplingCat
 ```bash
 # x86/x64 images
 docker pull purrplingcat/purrplingbot:1.2.4 # Latest stable version 1.2.4 'Carmilla'
-docker pull purrplingcat/purrplingbot:1.1.1 # Maintained stable version 1.1.1 'Chiara'
-docker pull purrplingcat/purrplingbot:1.3.0-rc # Latest beta version 1.3.0-rc 'Carmilla'
+docker pull purrplingcat/purrplingbot:1.3.0-rc # Latest release candidate version 1.3.0-rc 'Carmilla'
 docker pull purrplingcat/purrplingbot:latest # Latest development version
 
 # arm64 images
 docker pull purrplingcat/purrplingbot-arm64:latest # Latest development version
 ```
+
+**NOTE:** Arm64 images is not always up2date.
 
 **[Docker Setup/Migrate guide](https://gist.github.com/EllenFawkes/75c389714aa92a31a976d02d451e3e9c)**
 
@@ -46,8 +47,7 @@ docker pull purrplingcat/purrplingbot-arm64:latest # Latest development version
 5. Install NPM dependencies for plugins `npm depmod`
 6. Run PurrplingBot `npm start` or `node purrplingbot.js`
 
-NOTE:
-If you run bot via `node purrplingbot.js` you hasn't availaible autoreload after config was changed!
+**NOTE:** If you run bot via `node purrplingbot.js` you hasn't availaible autoreload after config was changed!
 
 ### Run tests (dev)
 
@@ -82,9 +82,9 @@ docker run -ti purrplingcat/purrplingbot:<version>
 
 #### Build your own ARM64 image
 
-1. Same as previous, however you need to `docker build --build-arg baseimage=arm64v8/node:8.5.0-slim -t <yourname>/purrlingbot` or whichever is relevant for your architecture.`
+1. Same as previous, however you need to `docker build --build-arg baseimage=arm64v8/node:8.5.0-slim -t <yourname>/purrlingbot-arm64 .` or whichever is relevant for your architecture.`
 
-NOTE: At --build-arg you can place your own base image for different architectures or own baseimage. **This is not officially supported!**
+**NOTE:** At --build-arg you can place your own base image for different architectures or own baseimage. **This is not officially supported!**
 
 ## Bug reporting
 
