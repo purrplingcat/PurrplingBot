@@ -65,6 +65,10 @@ docker run -ti purrplingcat/purrplingbot:<version>
 3. Build your Docker image `docker build -t <yourname>/purrplingbot .`
 4. Run your container `docker run -ti <yourname>/purrplingbot`
 
+### Build your own non-AMD64 image
+
+1. Same as previous, however you need to `docker build --build-arg baseimage=arm64v8/node:8.5.0-slim -t <yourname>/purrlingbot` or whichever is relevant for your architecture.`
+
 ## Bug reporting
 
 If you find a bug, then report an issue on my github. REMEBER: PurrplingBot is in BETA!

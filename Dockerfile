@@ -1,7 +1,8 @@
-FROM node:8.2.1-alpine
+ARG baseimage=node:8.5.0-alpine
+FROM $baseimage
 
 LABEL com.purrplingcat.name="PurrplingBot"
-LABEL com.purrplingcat.version="1.2.0"
+LABEL com.purrplingcat.version="1.3.0"
 LABEL com.purrplingcat.vendor="PurrplingCat"
 LABEL com.purrplingcat.email="dev@purrplingcat.com"
 LABEL com.purrplingcat.github="https://github.com/EllenFawkes/PurrplingBot"
