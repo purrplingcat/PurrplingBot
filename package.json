@@ -5,7 +5,7 @@
   "description": "A discordbot written primary for server PurrplingCat",
   "main": "purrplingbot.js",
   "scripts": {
-    "depmod": "./node_modules/recursive-install/recursive-install.js --skip-root",
+    "depmod": "npm-recursive-install --skip-root",
     "clean": "/bin/sh -c 'find . -name \"node_modules\" -type d -prune -exec rm -rf \"{}\" \\; ; find . -name \"package-lock.json\" -type f -exec rm \"{}\" \\;'",
     "start": "nodemon --exitcrash --watch config/ purrplingbot.js 2>&1 3>&1 | tee -a purrplingbot.log",
     "test": "ava --verbose"
@@ -36,8 +36,8 @@
     "merge": "^1.2.0",
     "moment": "^2.18.1",
     "npm": "",
-    "recursive-install": "^1.3.0"
-    "nodemon": "^1.12.0",
+    "recursive-install": "^1.3.0",
+    "nodemon": "^1.12.0"
   },
   "devDependencies": {
     "ava": "^0.22.0",
