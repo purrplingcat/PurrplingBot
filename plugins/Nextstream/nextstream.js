@@ -162,7 +162,7 @@ exports.livenow = {
             .then(logger.info(`Information about stream status sent to #${message.channel.name} requested by: ${message.author.username}`))
             .catch(logger.error);
         } else {
-          logger.error("An error occured while fetching stream status! Status code: %s", response.statusCode);
+          logger.error("An error occured while fetching stream status! %s", error);
           message.channel.send(`Omlouvám se, ale něco se rozbilo. :crying_cat_face: Zkus to prosím později. MŇAU!*`)
             .catch(logger.error);
         }
