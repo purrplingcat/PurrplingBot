@@ -1,4 +1,4 @@
-var PurrplingBot = require("./core");
+var PurrplingBot = require("../purrplingbot");
 
 const CONFIG = PurrplingBot.getConfiguration();
 const PLUGIN_DIR = process.env.PLUGIN_DIR || process.cwd() + "/plugins";
