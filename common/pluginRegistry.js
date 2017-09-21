@@ -1,8 +1,7 @@
-var PurrplingBot = require("./purrplingbot.js");
-var eventBus = PurrplingBot.getEventBus();
+var PurrplingBot = require("./core");
 
 const CONFIG = PurrplingBot.getConfiguration();
-const PLUGIN_DIR = "./plugins";
+const PLUGIN_DIR = process.env.PLUGIN_DIR || process.cwd() + "/plugins";
 const DEBUG = process.env.DEBUG || 0;
 
 var plugins = {}; // { pluginName: plugin, ...}
@@ -25,7 +24,7 @@ function preload_plugins(pluginDir) {
         logger.log("Found plugin entry file: %s", pluginPath);
         // TODO: Write NPM install denepdencies (issue #22)
         _pluginList[pluginName] = pluginPath;
-        eventBus.emit("pluginPreloaded", pluginName, pluginPath);
+        PurrplingBot.emit("pluginPreloaded", pluginName, pluginPath);
         logger.info("Enabled plugin: %s", pluginName);
       } else {
         plugins_disabled.push(pluginName);
@@ -50,9 +49,9 @@ function load_plugins(pluginList) {
       logger.info("Trying to load plugin: %s", pluginName);
       const pluginPath = pluginList[pluginName];
       plugins[pluginName] = init_plugin(pluginName, pluginPath); // Init plugin and add it to plugin registry
-      eventBus.emit("pluginLoaded", plugin, pluginName);
+      PurrplingBot.emit("pluginLoaded", plugin, pluginName);
     }
-    eventBus.emit("pluginsLoaded", plugins);
+    PurrplingBot.emit("pluginsLoaded", plugins);
     logger.info("*** Plugin loader process was SUCCESFULL!");
   } catch (err) {
     logger.error("Plugins can't be loaded!")
@@ -85,7 +84,7 @@ function init_plugin(pluginName, pluginPath) {
           _logger.error(err.stack);
           process.exit(12);
         }
-        eventBus.emit("commandRegister", cmd);
+        PurrplingBot.emit("commandRegister", cmd);
       });
     }
     _logger.info("Initialization DONE!");
