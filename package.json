@@ -1,7 +1,7 @@
 {
   "name": "purrplingbot",
   "version": "1.4.0-dev",
-  "codename": "Carmilla",
+  "codename": "Catnip",
   "description": "A discordbot written primary for server PurrplingCat",
   "main": "purrplingbot.js",
   "scripts": {
