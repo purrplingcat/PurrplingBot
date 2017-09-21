@@ -2,9 +2,11 @@ const EventEmmiter = require('events');
 const LOGGER = require("../lib/logger.js");
 const UTILS = require("../lib/utils.js");
 const Commander = require("./commander");
+const PluginRegistry = require("./pluginRegistry.js");
 const Discord = require('discord.js');
 const moment = require('moment');
 const DEBUG = process.env.DEBUG || 0;
+const PLUGIN_DIR = process.env.PLUGIN_DIR || process.cwd() + "/plugins";
 
 var logger = LOGGER.createLogger("Core");
 
@@ -19,7 +21,7 @@ class Core extends EventEmmiter {
     this._checkConf(); // Check configuration
 
     this._commander = new Commander(this, this._config.cmdPrefix);
-    this._pluginRegistry = null;
+    this._pluginRegistry = new PluginRegistry(this, PLUGIN_DIR);
 
     this.stats = {
       commandsHandled: 0,
@@ -41,9 +43,8 @@ class Core extends EventEmmiter {
     // Restore aliases
     this._commander.aliases = this._store.restoreScope("aliases");
 
-    // Load plugin registry and init plugins
-    this._pluginRegistry = require("./pluginRegistry.js");
-    this._pluginRegistry.init();
+    // Init plugins into plugin registry
+    this._pluginRegistry.initPlugins();
 
     // Autosave enabled? Set interval for save storage
     const STORAGE_CONF = config.storage || {};
@@ -152,12 +153,19 @@ class Core extends EventEmmiter {
     return this._config;
   }
 
+  get Commander() {
+    return this._commander;
+  }
+
   getPluginRegistry() {
     return this._pluginRegistry;
   }
 
+  /*
+   * @deprecated
+   */
   getCommandRegistry() {
-    return commander.cmds;
+    return this._commander.cmds;
   }
 
   getDiscordClient() {

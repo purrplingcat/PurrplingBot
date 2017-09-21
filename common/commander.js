@@ -40,7 +40,7 @@ class Commander {
             var status = {};
             if (typeof(plugin.status) == "function") status = plugin.status();
             if (status) {
-              for (statKey in status) {
+              for (var statKey in status) {
                 let statVal = status[statKey];
                 info += statKey + ": " + statVal + "\n";
               }
