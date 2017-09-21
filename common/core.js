@@ -21,13 +21,18 @@ class Core extends EventEmmiter {
     this._commander = new Commander(this, this._config.cmdPrefix);
     this._pluginRegistry = null;
 
-    this._client.on('ready', this._onReady);
-    this._client.on('message', this._onMessage);
-    this._client.on('messageUpdate', this._onMessageUpdate);
-    this._client.on('disconnect', this._onDisconnect);
-    this._client.on('debug', this._onDebug);
-    this._client.on('warn', this._onWarn);
-    this._client.on('reconecting', this._onReconecting);
+    this.stats = {
+      commandsHandled: 0,
+      numberOfReconnection: 0
+    }
+
+    this._client.on('ready', this._onReady.bind(this));
+    this._client.on('message', this._onMessage.bind(this));
+    this._client.on('messageUpdate', this._onMessageUpdate.bind(this));
+    this._client.on('disconnect', this._onDisconnect.bind(this));
+    this._client.on('debug', this._onDebug.bind(this));
+    this._client.on('warn', this._onWarn.bind(this));
+    this._client.on('reconecting', this._onReconecting.bind(this));
   }
 
   run() {
@@ -41,7 +46,7 @@ class Core extends EventEmmiter {
     this._pluginRegistry.init();
 
     // Autosave enabled? Set interval for save storage
-    const STORAGE_CONF = config.storage;
+    const STORAGE_CONF = config.storage || {};
     if (STORAGE_CONF.autosave || true) {
       const INTERVAL = STORAGE_CONF.autosaveInterval || 90; // Interval in seconds
       this._client.setInterval(function (core) {
@@ -103,22 +108,21 @@ class Core extends EventEmmiter {
   }
 
   _onReady() {
-    logger.dir(event);
     logger.info(`Logged in as ${this._client.user.username} - ${this._client.user.id} on ${this._client.guilds.array().length} servers`);
-    stats.numberOfReconnection++;
-    eventBus.emit("ready");
-    log_event("PurrplingBot is ready and works!", "BotReady");
+    this.stats.numberOfReconnection++;
+    this.emit("ready");
+    this.logEvent("PurrplingBot is ready and works!", "BotReady");
     logger.info("PurrplingBot READY!");
   }
 
   _onMessage(message) {
-    var isCmd = commander.check_message_for_command(message); //check and handle cmd
-    eventBus.emit("message", message, isCmd);
+    var isCmd = this._commander.check_message_for_command(message); //check and handle cmd
+    this.emit("message", message, isCmd);
   }
 
   _onMessageUpdate(oldMessage, newMessage) {
-    var isCmd = commander.check_message_for_command(newMessage); //check and handle cmd
-    eventBus.emit("messageUpdate", oldMessage, newMessage, isCmd);
+    var isCmd = this._commander.check_message_for_command(newMessage); //check and handle cmd
+    this.emit("messageUpdate", oldMessage, newMessage, isCmd);
   }
 
   _onDisconnect(event) {
@@ -160,6 +164,9 @@ class Core extends EventEmmiter {
     return this._client;
   }
 
+  /*
+   * @deprecated
+   */
   getStats() {
     return stats;
   }
@@ -198,11 +205,6 @@ class Core extends EventEmmiter {
   getStore() {
     return this._store;
   }
-}
-
-var stats = {
-  commandsHandled: 0,
-  numberOfReconnection: 0
 }
 
 module.exports = Core;

@@ -1,10 +1,12 @@
 const LOGGER = require("../lib/logger");
 const UTILS = require("../lib/utils");
+const PKG = require("../package.json");
+const VERSION = PKG.version;
+const CODENAME = PKG.codename;
 
 var logger = LOGGER.createLogger("Commander");
 
 class Commander {
-
   constructor(core, cmdPrefix) {
     this.core = core;
     this.cmdPrefix = cmdPrefix;
@@ -22,9 +24,9 @@ class Commander {
       "plugins": {
         "description": "Get list of loaded plugins",
         "usage": "[<pluginName>]",
-        "exec": function(message) {
-          var plugins = pluginRegistry.getPlugins();
-          var plugins_disabled = pluginRegistry.getDisabledPlugins();
+        "exec": function(message, tail) {
+          var plugins = core.getPluginRegistry().getPlugins();
+          var plugins_disabled = core.getPluginRegistry().getDisabledPlugins();
           if (tail) {
             var plugin = plugins[tail];
             if (!plugin) {
@@ -33,7 +35,7 @@ class Commander {
               return;
             }
             var info = "Plugin: " + tail + "\n";
-            var prefix = this.cmdPrefix;
+            var prefix = cmdPrefix;
             info += "Registered commands: `" + (plugin.commands ? plugin.commands.map(el => {return prefix + el }).join(', ') : "no commands") + "`\n";
             var status = {};
             if (typeof(plugin.status) == "function") status = plugin.status();
