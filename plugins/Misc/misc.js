@@ -10,15 +10,12 @@ var logger;
 const ALIASES_STORE = "aliases";
 
 exports.commands = [
-  "alias",
-  "alias_remove",
   "hello",
   "say",
   "whois",
   "avatar",
   "status",
-  "users",
-  "uptime",
+  "users"
 ]
 
 exports.init = function(pluginName) {
@@ -206,102 +203,6 @@ exports.users = {
     message.channel.send(memberlist)
     .then(logger.info(`Requested user list sent! List length: ${members.array().length}\t User: ${message.author.username}\t Channel: #${message.channel.name}`))
     .catch(logger.error);
-  }
-}
-
-exports.uptime = {
-  "description": "Get uptime of bot",
-  "exec": function(message) {
-    var bot = message.client;
-    message.channel.send(`Uptime: ${moment(bot.readyAt).twix(new Date()).humanizeLength()} \nReady at: ${moment(bot.readyAt).format("DD.MM.YYYY HH:mm:ss")}`)
-    .then(logger.info(`Uptime sent to #${message.channel.name} requested by: ${message.author.username}`))
-    .catch(logger.error);
-  }
-}
-
-function formatAliasList(aliases) {
-  var prefix = config.cmdPrefix || "";
-  var content = "```\n"
-  for (alias in aliases) {
-    var command = aliases[alias];
-      content += prefix + alias + " => " + prefix + command + "\n"
-  }
-  return content += "```";
-}
-
-exports.alias = {
-  "description": "Create an alias or list aliases",
-  "usage": "[<aliasName> <command>]",
-  "exec": function(message, tail) {
-    if (!tail.length) {
-      var aliases = purrplingBot.getAliases();
-      message.channel.send("List of aliases: " + formatAliasList(aliases))
-      .then(logger.info(`Aliases list sent to #${message.channel.name} requested by: ${message.author.username}`))
-      .catch(logger.error);
-      return;
-    }
-    if (!config.admins || config.admins.indexOf(message.author.username) < 0) {
-      message.reply("You are not permitted for add alias!")
-      .catch(logger.error);
-      logger.info(`User ${message.author.username} is not permitted for add alias!`);
-      return;
-    }
-    var argv = tail.split(' ');
-    var alias = argv.shift();
-    var command = argv.join(' ');
-    var prefix = config.cmdPrefix || "";
-    if (!alias || !command) {
-      message.reply("Missing or wrong some parameters!")
-      .catch(logger.error);
-      logger.info("Missing or wrong parameters for command alias!");
-      return;
-    }
-    // Remove prefix from aliasName
-    if (alias.startsWith(prefix)) {
-      alias = alias.substr(prefix.length);
-    }
-    // Remove prefix from aliased command
-    if (command.startsWith(prefix)) {
-      command = command.substr(prefix.length);
-    }
-    purrplingBot.addAlias(alias, command);
-    storeAliases();
-    logger.log(`User ${message.author.username} created alias '${alias}' to '${command}' in #${message.channel.name}`);
-    message.channel.send(`Alias \`${prefix}${alias}\` to \`${prefix}${command}\` created!`)
-    .catch(logger.error);
-  }
-};
-exports.alias_remove = {
-  "description": "Remove an alias",
-  "usage": "<aliasName>",
-  "exec": function(message, tail) {
-    var prefix = config.cmdPrefix || "";
-    var aliases = purrplingBot.getAliases();
-    if (!config.admins || config.admins.indexOf(message.author.username) < 0) {
-      message.reply("You are not permitted for remove alias!")
-      .catch(logger.error);
-      logger.info(`User ${message.author.username} is not permitted for remove alias!`);
-      return;
-    }
-    if (!tail) {
-      message.reply("Invalid arguments.")
-      .catch(logger.error);
-      logger.info("Invalid parameters for remove an alias!");
-      return;
-    }
-    if (tail in aliases) {
-      delete aliases[tail];
-      storeAliases();
-      logger.info("Removed alias: %s", tail);
-      message.reply(`Alias \`${prefix}${tail}\` removed!`)
-      .then(logger.log(`Sent info about alias SUCCESS remove to #${message.channel.name}`))
-      .catch(logger.error);
-    } else {
-      logger.info("Unknown alias: %s - Can't remove", tail);
-      message.reply(`Alias \`${prefix}${tail}\` is not found! Can't remove.`)
-      .then(logger.log(`Sent info about alias FAILED remove to #${message.channel.name}`))
-      .catch(logger.error);
-    }
   }
 }
 

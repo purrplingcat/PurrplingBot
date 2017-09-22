@@ -2,7 +2,7 @@
  * BuiltIn Command !version
  */
 
-var logger = require("../builtin").logger.derive("Ping");
+var logger = require("../builtin").logger.derive("Version");
 
 module.exports = {
   "description": "core version and codename",
