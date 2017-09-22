@@ -37,7 +37,7 @@ class Core extends EventEmmiter {
     this._client.on('reconecting', this._onReconecting.bind(this));
   }
 
-  run() {
+  run(connect = true) {
     let config = this._config;
 
     // Restore aliases
@@ -62,9 +62,8 @@ class Core extends EventEmmiter {
     logger.info("* Loaded plugins: %s", this._pluginRegistry.countPlugins());
     logger.info("* Disabled plugins: %s", this._pluginRegistry.countDisabledPlugins());
 
-    // Connect bot to Discord!
-    logger.info("*** Trying to connect Discord");
-    this._client.login(config.discord.token);
+     // Connect bot to Discord!
+    if (connect) this.connectBot();
   }
 
   logEvent(msg, type = "Bot", level = "INFO") {
@@ -91,8 +90,16 @@ class Core extends EventEmmiter {
     .catch(logger.error);
   }
 
+  /*
+   * @deprecated
+   */
   createLogger(scope) {
     return LOGGER.createLogger(scope);
+  }
+
+  connectBot() {
+    logger.info("*** Trying to connect Discord");
+    this._client.login(this._config.discord.token);
   }
 
   _checkConf() {
@@ -157,6 +164,10 @@ class Core extends EventEmmiter {
     return this._commander;
   }
 
+  get DiscordClient() {
+    return this._client;
+  }
+
   getPluginRegistry() {
     return this._pluginRegistry;
   }
@@ -168,6 +179,9 @@ class Core extends EventEmmiter {
     return this._commander.cmds;
   }
 
+  /*
+   * @deprecated
+   */
   getDiscordClient() {
     return this._client;
   }

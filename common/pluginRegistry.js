@@ -31,7 +31,7 @@ class PluginRegistry {
       var plugin = require(pluginPath);
       _logger.log("Plugin loaded! Source: %s", pluginPath);
       if ("init" in plugin) {
-        plugin.init(pluginName);
+        plugin.init(pluginName, this.core);
         _logger.log("Triggered init() for plugin");
       }
       if ("commands" in plugin) {
