@@ -203,7 +203,7 @@ class Core extends EventEmmiter {
    * @deprecated
    */
   getStats() {
-    return stats;
+    return this.stats;
   }
 
   /*
