@@ -3,10 +3,12 @@ const LOGGER = require("../lib/logger.js");
 const UTILS = require("../lib/utils.js");
 const Commander = require("./commander");
 const PluginRegistry = require("./pluginRegistry.js");
+const BuiltinCommands = require("./builtin");
 const Discord = require('discord.js');
 const moment = require('moment');
 const DEBUG = process.env.DEBUG || 0;
 const PLUGIN_DIR = process.env.PLUGIN_DIR || process.cwd() + "/plugins";
+const CMD_DIR = process.env.CMD_DIR || process.cwd() + "/common/Commands/";
 const PKG = require("../package.json");
 
 var logger = LOGGER.createLogger("Core");
@@ -40,6 +42,9 @@ class Core extends EventEmmiter {
 
   run(connect = true) {
     let config = this._config;
+
+    // Register builtin commands
+    BuiltinCommands.registerBuiltinCommands(this._commander, CMD_DIR);
 
     // Restore aliases
     this._commander.aliases = this._store.restoreScope("aliases");

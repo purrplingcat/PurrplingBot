@@ -1,6 +1,5 @@
 const LOGGER = require("../lib/logger");
 const UTILS = require("../lib/utils");
-const BuiltinCommands = require("./builtin");
 
 var logger = LOGGER.createLogger("Commander");
 
@@ -11,7 +10,6 @@ class Commander {
     this._commandsHandledCount = 0;
     this.aliases = {};
     this.cmds = {};
-    this.builtin = new BuiltinCommands(this);
   }
 
   /**
