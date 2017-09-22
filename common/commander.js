@@ -1,8 +1,6 @@
 const LOGGER = require("../lib/logger");
 const UTILS = require("../lib/utils");
-const PKG = require("../package.json");
-const VERSION = PKG.version;
-const CODENAME = PKG.codename;
+const BuiltinCommands = require("./builtin");
 
 var logger = LOGGER.createLogger("Commander");
 
@@ -12,62 +10,8 @@ class Commander {
     this.cmdPrefix = cmdPrefix;
     this._commandsHandledCount = 0;
     this.aliases = {};
-    this.cmds = {
-      "ping": {
-        "description": "Ping the bot and get pong.",
-        "exec": function(message) {
-          message.reply("pong")
-          .then(msg => logger.info(`Pong sent to ${msg.author.username} in #${msg.channel.name}`))
-          .catch(logger.error);
-        }
-      },
-      "plugins": {
-        "description": "Get list of loaded plugins",
-        "usage": "[<pluginName>]",
-        "exec": function(message, tail) {
-          var plugins = core.getPluginRegistry().getPlugins();
-          var plugins_disabled = core.getPluginRegistry().getDisabledPlugins();
-          if (tail) {
-            var plugin = plugins[tail];
-            if (!plugin) {
-              logger.info(`Plugin '${tail}' not exists or disabled!`);
-              message.channel.send(`Plugin '${tail}' not exists or disabled!`);
-              return;
-            }
-            var info = "Plugin: " + tail + "\n";
-            var prefix = cmdPrefix;
-            info += "Registered commands: `" + (plugin.commands ? plugin.commands.map(el => {return prefix + el }).join(', ') : "no commands") + "`\n";
-            var status = {};
-            if (typeof(plugin.status) == "function") status = plugin.status();
-            if (status) {
-              for (var statKey in status) {
-                let statVal = status[statKey];
-                info += statKey + ": " + statVal + "\n";
-              }
-            }
-            message.channel.send(info);
-            return;
-          }
-          var plugin_list = "Loaded plugins: ```";
-          plugin_list += Object.keys(plugins).join(', ');
-          plugin_list += "\n```";
-          if (plugins_disabled.length > 0) {
-            plugin_list += "\nDisabled plugins: \n```" + plugins_disabled.join(", ") + "\n```";
-          }
-          message.channel.send(plugin_list)
-          .then(logger.info(`Plugin list sent to: #${message.channel.name}\t Requested by: ${message.author.username}`))
-          .catch(logger.error);
-        }
-      },
-      "version": {
-        "description": "core version and codename",
-        "exec": function(message) {
-          message.channel.send("core version " + VERSION + " '" + CODENAME + "'")
-          .then(logger.info(`Version info sent to ${message.author.username} in ${message.channel.name}`))
-          .catch(logger.error);
-        }
-      }
-    };
+    this.cmds = {};
+    this.builtin = new BuiltinCommands(this);
   }
 
   /**
@@ -120,7 +64,7 @@ class Commander {
     if (this.cmds.hasOwnProperty(cmd)) {
       try {
         logger.info(`Handle command: ${cmd} (${tail})\tUser: ${message.author.username}\t Channel: #${message.channel.name}`);
-        this.cmds[cmd].exec(message, tail);
+        this.cmds[cmd].exec(message, tail, this.core);
         this._commandsHandledCount++;
         this.core.stats.commandsHandled = this._commandsHandledCount; // @deprecated use
         this.core.emit("commandHandled", cmd, tail, message);
@@ -154,6 +98,10 @@ class Commander {
     return this.cmds;
   }
 
+  get Prefix() {
+    return this.cmdPrefix;
+  }
+
   addAlias(aliasName, commandString) {
     try {
       aliases[aliasName] = commandString;
@@ -161,6 +109,11 @@ class Commander {
       logger.error("Failed to add alias: %s to: %s", aliasName, commandString);
       logger.error(err);
     }
+  }
+
+  static get Logger() {
+    console.log("got logger");
+    return logger;
   }
 }
 

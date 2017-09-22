@@ -7,6 +7,7 @@ const Discord = require('discord.js');
 const moment = require('moment');
 const DEBUG = process.env.DEBUG || 0;
 const PLUGIN_DIR = process.env.PLUGIN_DIR || process.cwd() + "/plugins";
+const PKG = require("../package.json");
 
 var logger = LOGGER.createLogger("Core");
 
@@ -166,6 +167,18 @@ class Core extends EventEmmiter {
 
   get DiscordClient() {
     return this._client;
+  }
+
+  get Version() {
+    return PKG.version;
+  }
+
+  get Codename() {
+    return PKG.codename;
+  }
+
+  get ProductName() {
+    return PKG.name
   }
 
   getPluginRegistry() {
