@@ -96,13 +96,17 @@ class Commander {
     return this.cmds;
   }
 
+  get Aliases() {
+    return this.aliases;
+  }
+
   get Prefix() {
     return this.cmdPrefix;
   }
 
   addAlias(aliasName, commandString) {
     try {
-      aliases[aliasName] = commandString;
+      this.aliases[aliasName] = commandString;
     } catch (err) {
       logger.error("Failed to add alias: %s to: %s", aliasName, commandString);
       logger.error(err);

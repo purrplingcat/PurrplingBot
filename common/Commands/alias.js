@@ -2,8 +2,16 @@
 * BuiltIn Command !alias
 */
 
+const ALIASES_STORE = "aliases";
+
 const UTILS = require("../../lib/utils");
 var logger = require("../builtin").logger.derive("Alias");
+
+function storeAliases(core) {
+  var aliases = core.Commander.Aliases;
+  core.Store.storeScope(ALIASES_STORE, aliases)
+  .flush();
+}
 
 module.exports = {
   "description": "Create an alias or list aliases",
@@ -41,7 +49,7 @@ module.exports = {
       command = command.substr(prefix.length);
     }
     core.addAlias(alias, command);
-    storeAliases();
+    storeAliases(core);
     logger.log(`User ${message.author.username} created alias '${alias}' to '${command}' in #${message.channel.name}`);
     message.channel.send(`Alias \`${prefix}${alias}\` to \`${prefix}${command}\` created!`)
     .catch(logger.error);

@@ -7,8 +7,6 @@ require('twix');
 
 var logger;
 
-const ALIASES_STORE = "aliases";
-
 exports.commands = [
   "hello",
   "say",
@@ -45,13 +43,6 @@ function findChannel(channels, knownChanName) {
       knownChanName = knownChanName.substr(2, knownChanName.length - 3);
     }
     return channels.find("id", knownChanName);
-}
-
-// TODO: Write a storage manager
-function storeAliases() {
-  var aliases = purrplingBot.getAliases();
-  store.storeScope(ALIASES_STORE, aliases)
-  .flush();
 }
 
 exports.hello = {

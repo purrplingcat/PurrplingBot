@@ -2,12 +2,19 @@
 * BuiltIn Command !alias_remove
 */
 
+const ALIASES_STORE = "aliases";
 var logger = require("../builtin").logger.derive("AliasRemove");
+
+function storeAliases(core) {
+  var aliases = core.Commander.Aliases;
+  core.Store.storeScope(ALIASES_STORE, aliases)
+  .flush();
+}
 
 module.exports = {
   "description": "Remove an alias",
   "usage": "<aliasName>",
-  "exec": function(message, tail) {
+  "exec": function(message, tail, core) {
     var prefix = core.Commander.Prefix || "";
     var aliases = core.getAliases();
     if (!core.Configuration.admins || core.Configuration.admins.indexOf(message.author.username) < 0) {
@@ -24,7 +31,7 @@ module.exports = {
     }
     if (tail in aliases) {
       delete aliases[tail];
-      storeAliases();
+      storeAliases(core);
       logger.info("Removed alias: %s", tail);
       message.reply(`Alias \`${prefix}${tail}\` removed!`)
       .then(logger.log(`Sent info about alias SUCCESS remove to #${message.channel.name}`))
