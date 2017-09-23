@@ -117,7 +117,6 @@ function cancelAnnounce(name) {
     } else {
       announces[name].active = false;
     }
-    storeAnnounces();
     return true;
     purrplingBot.logEvent(`Canceled runner of announce '${announce.name}', NeverHandled: ${announce.neverHandled}`, "Announce:Cancel");
   logger.info(`Canceled runner of announce '${name}'`);
@@ -156,7 +155,6 @@ function resumeAnnounce(name, interval) {
     announce.neverHandled = true;
     purrplingBot.logEvent(`Resumed announce '${announce.name}', Interval: ${announce.interval}, NeverHandled: ${announce.neverHandled}`, "Announce:Resume");
     logger.info(`Resumed announce: ${announce.name} (Interval: ${announce.interval})`);
-    storeAnnounces();
     return announce;
   } catch (err) {
     logger.error(`Can't resume announce '${name}' - FATAL ERROR:`);
@@ -258,6 +256,7 @@ function execSubCommand(scmd, args, message) {
         return;
       }
       if (cancelAnnounce(name)) {
+        storeAnnounces();
         message.reply(`Announce '${name} canceled!'`)
         .catch(logger.error);
       } else {
@@ -285,6 +284,7 @@ function execSubCommand(scmd, args, message) {
         .catch(logger.error);
         return;
       }
+      storeAnnounces();
       message.channel.send(`Announce '${announce.name}' resumed with interval ${announce.interval}`)
       .then(logger.info(`Announce '${announce.name}' resumed with interval ${announce.interval}\t User: ${message.author.username} in #${message.channel.name}`))
       .catch(logger.error);
