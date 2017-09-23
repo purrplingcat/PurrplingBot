@@ -1,34 +1,40 @@
+echo "Docker image build tool"
+echo "-----------------------"
+echo
+
 ARCH=$(uname -m)
 VENDOR="purrplingcat"
 PRODUCT="purrplingbot"
-NODE_VERSION=${1:-8.5.0}
-TAG=${2:-latest}
+NODE_VERSION="8.5.0"
+TAG=${1:-latest}
+
+echo "Product: $PRODUCT"
+echo "Vendor: $VENDOR"
+echo "Node version: $NODE_VERSION"
+echo "Image tag: $TAG"
+echo "Architecture: $ARCH"
+echo
 
 case $ARCH in
   "x86_x64")
-    DISTRO="alpine"
-    BASE_IMAGE="node:$NODE_VERSION-$DISTRO"
+    BASE_IMAGE="node:$NODE_VERSION-alpine"
     OUTPUT_IMAGE="$VENDOR/$PRODUCT:$TAG"
     ;;
   "i686")
-    DISTRO="alpine"
-    BASE_IMAGE="node:$NODE_VERSION-$DISTRO"
+    BASE_IMAGE="node:$NODE_VERSION-alpine"
     OUTPUT_IMAGE="$VENDOR/$PRODUCT-$ARCH:$TAG"
     ;;
   "aarch64")
     ARCH="arm64"
-    DISTRO="slim"
-    BASE_IMAGE="arm64v8/node:$NODE_VERSION-$DISTRO"
-    OUTPUT_IMAGE="$VENDOR/$PRODUCT-$ARCH"
+    BASE_IMAGE="purrplingcat/node:$NODE_VERSION-alpine_arm64"
+    OUTPUT_IMAGE="$VENDOR/$PRODUCT-$ARCH:$TAG"
     ;;
   *)
     echo "Invalid architecture: $ARCH - Can't build Docker image!"
     exit 2;
 esac
 
-echo "Docker image build tool"
-echo
-echo -e "Target image \e[32m$OUTPUT_IMAGE\e[0m \nBase image \e[31m$BASE_IMAGE\e[0m \nDistribution \e[36m$DISTRO\e[0m \nArchitecture \e[33m$ARCH\e[0m"
+echo -e "Target image \e[32m$OUTPUT_IMAGE\e[0m \nBase image \e[31m$BASE_IMAGE\e[0m \nArchitecture \e[33m$ARCH\e[0m"
 echo
 
 sleep 5
