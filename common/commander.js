@@ -61,6 +61,12 @@ class Commander {
     }
     if (this.cmds.hasOwnProperty(cmd)) {
       try {
+        if (!message.member && this.cmds[cmd].guildChannelOnly === true) {
+          message.reply(`I'm sorry, command \`${prefix}${cmd}\` can't be executed in this channel!`)
+          .then(logger.warn("Command %s%s is guild channel ONLY! Can't execute it in #%s", prefix, cmd, message.channel.name))
+          .catch(logger.error);
+          return true;
+        }
         logger.info(`Handle command: ${cmd} (${tail})\tUser: ${message.author.username}\t Channel: #${message.channel.name}`);
         this.cmds[cmd].exec(message, tail, this.core);
         this._commandsHandledCount++;
