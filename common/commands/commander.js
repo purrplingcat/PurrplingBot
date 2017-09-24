@@ -1,5 +1,6 @@
-const LOGGER = require("../lib/logger");
-const UTILS = require("../lib/utils");
+const LOGGER = require("../../lib/logger");
+const UTILS = require("../../lib/utils");
+const Discord = require('discord.js');
 
 var logger = LOGGER.createLogger("Commander");
 
@@ -9,7 +10,7 @@ class Commander {
     this.cmdPrefix = cmdPrefix;
     this._commandsHandledCount = 0;
     this.aliases = {};
-    this.cmds = {};
+    this.cmds = new Discord.Collection();
   }
 
   /**
@@ -51,7 +52,7 @@ class Commander {
         message.channel.send(UTILS.printCmdHelp(tail, this.cmds, prefix));
       }
       else {
-        var _cmds = Object.keys(this.cmds).concat(Object.keys(this.aliases));
+        var _cmds = Object.keys(this.cmds).concat(Object.keys(this.aliases)).sort();
         message.channel.send(UTILS.printHelp(_cmds, prefix));
       }
       this._commandsHandledCount++;
@@ -92,6 +93,7 @@ class Commander {
   addCommand(cmdName, cmdObject) {
     try {
       this.cmds[cmdName] = cmdObject;
+      logger.log("Command added: %s%s", this.cmdPrefix, cmdName);
     } catch (err) {
       logger.error("Failed to add command: %s", cmdName);
       logger.error(err);
@@ -125,4 +127,5 @@ class Commander {
   }
 }
 
+Commander.logger = logger;
 module.exports = Commander;

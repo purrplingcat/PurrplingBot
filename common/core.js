@@ -1,10 +1,10 @@
 const EventEmmiter = require('events');
 const LOGGER = require("../lib/logger.js");
 const UTILS = require("../lib/utils.js");
-const Commander = require("./commander");
+const Commander = require("./commands/commander");
 const PluginRegistry = require("./pluginRegistry.js");
 const Acl = require("./acl");
-const BuiltinCommands = require("./builtin");
+const BuiltinCommands = require("./commands/builtinCommands");
 const Discord = require('discord.js');
 const moment = require('moment');
 const DEBUG = process.env.DEBUG || 0;
