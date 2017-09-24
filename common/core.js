@@ -3,6 +3,7 @@ const LOGGER = require("../lib/logger.js");
 const UTILS = require("../lib/utils.js");
 const Commander = require("./commander");
 const PluginRegistry = require("./pluginRegistry.js");
+const Acl = require("./acl");
 const BuiltinCommands = require("./builtin");
 const Discord = require('discord.js');
 const moment = require('moment');
@@ -25,6 +26,7 @@ class Core extends EventEmmiter {
 
     this._commander = new Commander(this, this._config.cmdPrefix);
     this._pluginRegistry = new PluginRegistry(this, PLUGIN_DIR);
+    this._acl = new Acl(this, config.admins);
 
     this.stats = {
       commandsHandled: 0,
@@ -172,6 +174,10 @@ class Core extends EventEmmiter {
 
   get DiscordClient() {
     return this._client;
+  }
+
+  get Acl() {
+    return this._acl;
   }
 
   get Version() {
