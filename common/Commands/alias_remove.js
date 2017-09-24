@@ -14,10 +14,11 @@ function storeAliases(core) {
 module.exports = {
   "description": "Remove an alias",
   "usage": "<aliasName>",
+  "guildChannelOnly": true,
   "exec": function(message, tail, core) {
     var prefix = core.Commander.Prefix || "";
     var aliases = core.getAliases();
-    if (!core.Configuration.admins || core.Configuration.admins.indexOf(message.author.username) < 0) {
+    if (!core.Acl.can(message.member, core.Acl.constructor.FLAGS.ADMINISTRATOR)) {
       message.reply("You are not permitted for remove alias!")
       .catch(logger.error);
       logger.info(`User ${message.author.username} is not permitted for remove alias!`);

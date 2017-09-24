@@ -16,6 +16,7 @@ function storeAliases(core) {
 module.exports = {
   "description": "Create an alias or list aliases",
   "usage": "[<aliasName> <command>]",
+  "guildChannelOnly": true,
   "exec": function(message, tail, core) {
     if (!tail.length) {
       var aliases = core.getAliases();
@@ -24,7 +25,7 @@ module.exports = {
       .catch(logger.error);
       return;
     }
-    if (!core.Configuration.admins || core.Configuration.admins.indexOf(message.author.username) < 0) {
+    if (!core.Acl.can(message.member, core.Acl.constructor.FLAGS.ADMINISTRATOR)) {
       message.reply("You are not permitted for add alias!")
       .catch(logger.error);
       logger.info(`User ${message.author.username} is not permitted for add alias!`);
