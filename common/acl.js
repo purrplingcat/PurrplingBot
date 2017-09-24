@@ -12,16 +12,17 @@ class Acl {
     return this._botAdmins.includes(user.id);
   }
 
-  isGuildOwner(member, guild) {
+  isGuildOwner(member) {
     if (!member) throw new Error("Member not specified!");
-    if (typeof member != Discord.GuildMember) throw new Error("Member is not GuildMember!");
-    return member.id == guild.ownerID;
+    if (!(member instanceof Discord.GuildMember)) throw new Error("Member is not GuildMember!");
+    return member.id == member.guild.ownerID;
   }
 
   can(member, permission, channel = null, checkBotAdmin = true) {
     if (!member) throw new Error("Member not specified!");
-    if (typeof member != Discord.GuildMember) throw new Error("Member is not GuildMember!");
-    if (checkBotAdmin && isBotAdmin(member)) return true;
+    if (checkBotAdmin && this.isBotAdmin(member)) return true;
+    if (!(member instanceof Discord.GuildMember)) throw new Error("Member is not GuildMember!");
+    if (this.isGuildOwner(member)) return true;
     if (channel && channel.permissionsFor(member).has(permission)) return true;
     return member.hasPermission(permission);
   }
@@ -29,7 +30,7 @@ class Acl {
   hasRole(member, role) {
     if (!member) throw new Error("Member not specified!");
     if (typeof member != Discord.GuildMember) throw new Error("Member is not GuildMember!");
-    if (typeof role == Discord.Role) role = role.id;
+    if (!(role instanceof Discord.Role)) role = role.id;
     if (member.roles.find('id', role)) return true;
     return false;
   }
