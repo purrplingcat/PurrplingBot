@@ -49,7 +49,15 @@ class Commander {
       }
       if (tail) {
         logger.info("Request help for command %s%s", prefix, tail);
-        message.channel.send(UTILS.printCmdHelp(tail, this.cmds, prefix));
+        let cmd = this.cmds[tail];
+        let help_text = "";
+        if (!cmd) {
+          help_text = "Unknown command: `" + prefix + tail + "`. Type `" + prefix + "help` to list availaible commands.";
+        } else {
+          if (typeof cmd.printHelp === "function") help_text = cmd.printHelp(tail);
+          else help_text = UTILS.printCmdHelp(tail, this.cmds, prefix);
+        }
+        message.channel.send(help_text);
       }
       else {
         var _cmds = Object.keys(this.cmds).concat(Object.keys(this.aliases)).sort();

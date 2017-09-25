@@ -16,6 +16,7 @@ class Command {
     this.guildOwnerOnly = false;
     this.restrictions = null;
     this.tag = null;
+    this.type = "exec_command"
     this._ = this.constructor;
   }
 
@@ -35,6 +36,18 @@ class Command {
     }
     logger.log("Executing command ...");
     this.__exec(message, tail, authority);
+  }
+
+  printHelp(cmd) {
+    var prefix = this.commander.Prefix;
+    var help_text = "Command: **" + prefix + cmd + "**";
+    if (this.description && this.description.length > 0) {
+      help_text += "\nDescription: " + this.description;
+    }
+    if (this.usage && this.usage.length > 0) {
+      help_text += "\n```\n" + prefix + cmd + " " + this.usage + "\n```";
+    }
+    return help_text;
   }
 
   /*
