@@ -37,7 +37,7 @@ class Repeater extends EventEmiter {
     return this;
   }
 
-  processQueue() {
+  processQueue(channel) {
     if (!this.options.enabled) {
       this._logger.log("Repeater is DISABLED!");
       return;
@@ -53,12 +53,17 @@ class Repeater extends EventEmiter {
       let announce = this.announces[announceName];
       let expires = durationParse(announce.interval) * this.options.expirePercentTime || 0.25;
       if ((currentTime.getTime() - announce.lastTry.getTime() < expires)) {
-        queue.push(announce);
+        if (announce.channel == channel.id) {
+          queue.push(announce);
+          this._queue.splice(this._queue.indexOf(announceName));
+        }
         this._logger.log("Added %s to process queue", announce.name);
-      } else this._logger.log("%s expired - Not added to queue", announce.name);
+      } else {
+         this._logger.log("%s expired - Not added to queue", announce.name);
+         this._queue.splice(this._queue.indexOf(announceName));
+       }
       this.emit('process', announce, queue);
     });
-    this._queue = [];
     setTimeout(_repeatAnnounce, durationParse(this.options.handleWait || "5m"), queue, this);
     this._logger.info("Repeater started! Announces in queue: ", queue.length);
     return queue;
