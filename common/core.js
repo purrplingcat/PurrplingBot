@@ -92,6 +92,10 @@ class Core extends EventEmmiter {
       return;
     }
     if (level == "DEBUG" && DEBUG < 1) return;
+    if (level == "ERROR" || level == "WARN") {
+      this._client.user.setStatus("dnd");
+      this._client.user.setGame(`${type} - ${msg}`);
+    }
     let timestamp = moment(new Date()).format("MM/DD HH:mm:ss");
     channel.send(`${timestamp}: _${level}_ - **${type}** - ${msg}`)
     .then(logger.info(`Event log ${type} - "${msg}" sent to #${channel.name} level: ${level}` + (level == "ERROR" ? " @here" : "")))
