@@ -1,4 +1,5 @@
 const Command = require("./command");
+const SimpleCommand = require("./simpleCommand");
 const Discord = require('discord.js');
 const DELIMITER = ":";
 
@@ -41,10 +42,16 @@ class GroupCommand() {
     try {
       this.cmds[cmdName] = cmdObject;
       logger.log("Subcommand added: %s%s", this.commander.Prefix, cmdName);
+      return cmdObject;
     } catch (err) {
       logger.error("Failed to add subcommand: %s", cmdName);
       logger.error(err);
+      return null;
     }
+  }
+
+  createSubcommand(cmdName, callback) {
+    return this.addSubcommand(cmdName, new SimpleCommand(callback, this.commander));
   }
 
   printHelp(cmdPhrase) {

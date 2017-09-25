@@ -102,9 +102,11 @@ class Commander {
     try {
       this.cmds[cmdName] = cmdObject;
       logger.log("Command added: %s%s", this.cmdPrefix, cmdName);
+      return cmdObject;
     } catch (err) {
       logger.error("Failed to add command: %s", cmdName);
       logger.error(err);
+      return null;
     }
   }
 
