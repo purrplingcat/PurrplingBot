@@ -57,7 +57,7 @@ purrplingBot.on('message', function(message){
   if (message.author.id == bot.user.id) return;
   let antispam = announcerConf.antispam || true;
   if (antispam) {
-    repeater.processQueue();
+    repeater.processQueue(message.channel);
   }
 });
 
