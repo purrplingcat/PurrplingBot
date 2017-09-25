@@ -94,7 +94,7 @@ class Core extends EventEmmiter {
     if (level == "DEBUG" && DEBUG < 1) return;
     let timestamp = moment(new Date()).format("MM/DD HH:mm:ss");
     channel.send(`${timestamp}: _${level}_ - **${type}** - ${msg}`)
-    .then(logger.info(`Event log ${type} - "${msg}" sent to #${channel.name} level: ${level}`))
+    .then(logger.info(`Event log ${type} - "${msg}" sent to #${channel.name} level: ${level}` + (level == "ERROR" ? " @here" : "")))
     .catch(logger.error);
   }
 
