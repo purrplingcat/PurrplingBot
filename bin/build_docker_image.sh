@@ -1,3 +1,5 @@
+#!/bin/bash
+
 echo "Docker image build tool"
 echo "-----------------------"
 echo
@@ -12,11 +14,10 @@ echo "Product: $PRODUCT"
 echo "Vendor: $VENDOR"
 echo "Node version: $NODE_VERSION"
 echo "Image tag: $TAG"
-echo "Architecture: $ARCH"
 echo
 
 case $ARCH in
-  "x86_x64")
+  "x86_64")
     BASE_IMAGE="node:$NODE_VERSION-alpine"
     OUTPUT_IMAGE="$VENDOR/$PRODUCT:$TAG"
     ;;
