@@ -1,4 +1,5 @@
 const EventEmmiter = require('events');
+const EventLogger = require("./eventLogger");
 const LOGGER = require("../lib/logger.js");
 const UTILS = require("../lib/utils.js");
 const Commander = require("./commander");
@@ -6,7 +7,6 @@ const PluginRegistry = require("./pluginRegistry.js");
 const Acl = require("./acl");
 const BuiltinCommands = require("./builtin");
 const Discord = require('discord.js');
-const moment = require('moment');
 const Constants = require("./util/constants");
 const DEBUG = Constants.DEBUG;
 
@@ -25,6 +25,7 @@ class Core extends EventEmmiter {
     this._commander = new Commander(this, this._config.cmdPrefix);
     this._pluginRegistry = new PluginRegistry(this, Constants.PLUGIN_DIR);
     this._acl = new Acl(this, config.admins);
+    this._eventLogger = new EventLogger(this, config.eventLogger);
 
     this.stats = {
       commandsHandled: 0,
@@ -72,32 +73,11 @@ class Core extends EventEmmiter {
     if (connect) this.connectBot();
   }
 
-  logEvent(msg, type = "Bot", level = "INFO") {
-    const eventLoggerConf = this._config.eventLogger || {};
-    const enabled = eventLoggerConf.enabled || false;
-    const channelID = eventLoggerConf.loggingChannelID;
-    if (!enabled) {
-      logger.log("Can't send log event - EventLogger is DISABLED!");
-      return;
-    }
-    if (!channelID) {
-      logger.error("Can't send log event - loggingChannelID is EMPTY!");
-      return;
-    }
-    var channel = this._client.channels.find('id', channelID);
-    if (!channel) {
-      logger.log("Can't send log event - Unknown event logging channel: %s", channelID);
-      return;
-    }
-    if (level == "DEBUG" && DEBUG < 1) return;
-    if (level == "ERROR" || level == "WARN") {
-      this._client.user.setStatus("dnd");
-      this._client.user.setGame(`${type} - ${msg}`);
-    }
-    let timestamp = moment(new Date()).format("MM/DD HH:mm:ss");
-    channel.send(`${timestamp}: _${level}_ - **${type}** - ${msg}`)
-    .then(logger.info(`Event log ${type} - "${msg}" sent to #${channel.name} level: ${level}` + (level == "ERROR" ? " @here" : "")))
-    .catch(logger.error);
+  /*
+   * Shortcut to EventLogger.logEvent();
+   */
+  logEvent(msg, type = "Bot", level = EventLogger.LEVELS.INFO) {
+    this._eventLogger.logEvent(msg, type, level);
   }
 
   /*
