@@ -1,4 +1,5 @@
 const Command = require("./command");
+const CommandArgv = require("./commandArgv");
 const SimpleCommand = require("./simpleCommand");
 const Discord = require('discord.js');
 const DELIMITER = ":";
@@ -52,7 +53,7 @@ class GroupCommand() {
 
   printHelp(cmdPhrase) {
     var prefix = this.commander.prefix;
-    var [ cmd, subcmd ] = cmdPhrase.split(' ');
+    var [ cmd, subcmd ] = new CommandArgv(cmdPhrase, prefix).toArray();
     var help_text = "";
     if (subCmd) {
       if (!cmds.hasOwnProperty(cmd)) {

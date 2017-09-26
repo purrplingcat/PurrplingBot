@@ -1,5 +1,6 @@
 const LOGGER = require("../../lib/logger");
 const UTILS = require("../../lib/utils");
+const CommandMessage = require("./commandMessage");
 const Discord = require('discord.js');
 
 var logger = LOGGER.createLogger("Commander");
@@ -17,27 +18,24 @@ class Commander {
   * @param message - Channel message driver
   */
   check_message_for_command(message) {
-    var ex = message.content.split(" ");
     var prefix = this.cmdPrefix;
-    var cmd = ex[0].toLowerCase();
-    if (!cmd.startsWith(prefix)) {
-      return;
-    }
-
-    //Block the bot to react own commands
     if (message.author.id === this.core.getDiscordClient().user.id) {
-      return false;
+      return false; //Block the bot to react own potentially commands
+    }
+    if (!message.content.startsWith(prefix)) {
+      return false; // Skip command handling if message is not a command
     }
 
-    cmd = cmd.substring(prefix.length);
-    var tail = message.content.substring(cmd.length + prefix.length + 1);
+    var cmdMessage = new CommandMessage(message.content, message, prefix);
+    var cmd = cmdMessage.command;
+    var tail = cmdMessage.argsString;
 
     if (cmd in this.aliases) {
       var aliased = this.aliases[cmd];
       logger.info(`Called alias '${cmd}' for '${aliased}' on #${message.channel.name} by: ${message.author.username}`);
-      var argv = aliased.split(' ');
-      cmd = argv.shift();
-      tail = tail + argv.join(' ');
+      cmdMessage = new CommandMessage(aliased + '' + tail, message, prefix);
+      cmd = cmdMessage.command;
+      tail = cmdMessage.argsString;
       logger.log("Aliased cmd: %s Tail: %s", cmd, tail);
     }
     if (cmd == "help") {

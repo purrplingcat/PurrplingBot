@@ -2,11 +2,12 @@ const Acl = require("../acl.js");
 
 class CommandAuthority {
     constructor(acl, message) {
+      // TODO: As it will possible, change message type to CommandMessage
       if (!acl) throw new ReferenceError("Acl undenfined or null!");
       if (!message) throw new ReferenceError("Message undenfined or null!");
       this.acl = acl;
       this.member = message.member;
-      this.user = message.user;
+      this.user = message.author;
       this.channel = message.channel;
     }
 
