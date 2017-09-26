@@ -8,13 +8,13 @@ A discordbot written primary for server PurrplingCat
 
 ### Regular download
 
-* Latest stable version 1.3.1: [Release v1.3.1 'Carmilla'](https://github.com/EllenFawkes/PurrplingBot/releases/tag/1.3.1)
+* Latest stable version 1.3.2: [Release v1.3.2 'Carmilla'](https://github.com/EllenFawkes/PurrplingBot/releases/tag/1.3.2)
 * Develop version: `git clone https://github.com/EllenFawkes/PurrplingBot.git`
 
 ### Get image from DockerHub
 
 ```bash
-docker pull purrplingcat/purrplingbot:1.3.1 # Latest stable version 1.3.1 'Carmilla'
+docker pull purrplingcat/purrplingbot:1.3.2 # Latest stable version 1.3.2 'Carmilla'
 docker pull purrplingcat/purrplingbot:latest # Latest development version
 ```
 
