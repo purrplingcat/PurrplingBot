@@ -1,6 +1,7 @@
 var moment = require('moment');
 var purrplingBot = require("../../purrplingbot.js");
 var pluginRegistry = purrplingBot.getPluginRegistry();
+var client = purrplingBot.getDiscordClient();
 var store = purrplingBot.getStore();
 var config = purrplingBot.getConfiguration();
 require('twix');
@@ -57,40 +58,42 @@ exports.hello = {
 exports.say = {
   "description": "Tell the bot words, where bot say (require admin perms to bot).",
   "usage": "[#<channel>] <message>",
-  "exec": function(message, tail) {
-    if ("admins" in config) {
-      if (config.admins.indexOf(message.author.username) > -1) {
-        var args = tail.split(" ");
-        var channel;
-        if (message.channel.guild) {
-          channel = findChannel(message.channel.guild.channels, args.shift());
-        } else {
-          logger.warn(`Channel ${message.channel} is not a TextChannel!`);
-        }
-        if (!channel) {
-          channel = message.channel;
-        } else {
-          tail = args.join(" ");
-        }
-        channel.send(tail)
-        .then(logger.info(`I said '${tail}' requested by '${message.author.username}' to #${channel.name}`))
-        .catch(err => {
-          message.reply(`Je mi líto, ale zprávu se nepodařilo do kanálu ${channel} odeslat! :crying_cat_face:`)
-          .then(logger.error(`Message can't be sent: ${err}`))
-          .catch(logger.error);
-        });
-        if (channel.id != message.channel.id) {
-          message.channel.send(`Zpráva byla odeslána do kanálu ${channel}`)
-          .then(logger.info(`Reciept sent to #${message.channel.name}`))
-          .catch(logger.error);
-        }
-      } else {
-        message.channel.send("Mňaaaau!! Ty mi nemáš co poroučet, co mám nebo nemám říkat :P")
-        .then(logger.info(`User '%s' has no permissions for command 'say'!`))
-        .catch(logger.error);
-      }
+  "exec": function(message, tail, authority) {
+    if (!purrplingBot.Acl.can(message.member, purrplingBot.Acl.constructor.FLAGS.ADMINISTRATOR)) {
+      message.channel.send("Mňaaaau!! Ty mi nemáš co poroučet, co mám nebo nemám říkat :P")
+      .then(logger.info(`User '%s' has no permissions for command 'say'!`))
+      .catch(logger.error);
+      return;
+    }
+    if (!tail) {
+      message.channel.send("Nějak jsem neslyšela, co to mám vlastně říct.")
+      .then(logger.info(`Nothing to say - args empty!`))
+      .catch(logger.error);
+      return;
+    }
+    var args = tail.split(" ");
+    var channel;
+    if (message.channel.guild) {
+      channel = findChannel(message.channel.guild.channels, args.shift());
     } else {
-      logger.warn("Node 'admins' is not defined in configuration!");
+      logger.warn(`Channel ${message.channel} is not a TextChannel!`);
+    }
+    if (!channel) {
+      channel = message.channel;
+    } else {
+      tail = args.join(" ");
+    }
+    channel.send(tail)
+    .then(logger.info(`I said '${tail}' requested by '${message.author.username}' to #${channel.name}`))
+    .catch(err => {
+      message.reply(`Je mi líto, ale zprávu se nepodařilo do kanálu ${channel} odeslat! :crying_cat_face:`)
+      .then(logger.error(`Message can't be sent: ${err}`))
+      .catch(logger.error);
+    });
+    if (channel.id != message.channel.id) {
+      message.channel.send(`Zpráva byla odeslána do kanálu ${channel}`)
+      .then(logger.info(`Reciept sent to #${message.channel.name}`))
+      .catch(logger.error);
     }
   }
 }
@@ -164,9 +167,13 @@ exports.status = {
     var plugins_disabledCount = pluginRegistry.countDisabledPlugins();
     var cmds = purrplingBot.getCommandRegistry();
     var bot = message.client;
+    var admins = config.admins || [];
+    var adminsString = bot.users.filter(user => admins.includes(user.id))
+                          .map(user => user.username)
+                          .join(', ');
     var stat_info =
         "Connected on: " + bot.guilds.array().length + " servers\n" +
-        "My username is: " + bot.user.username + " <" + bot.user.email + ">\n" +
+        "My username is: " + bot.user.username + (bot.user.email ? " <" + bot.user.email + ">" : "") + "\n" +
         "Presence status: " + bot.user.presence.status.toUpperCase() + "\n" +
         "Discriminator: " + bot.discriminator + "\n" +
         "Count of reconnections: " + stats.numberOfReconnection + "\n" +
@@ -174,7 +181,7 @@ exports.status = {
         "Registered commands: " + Object.keys(cmds).length + "\n" +
         "Loaded plugins: " + pluginsCount + "\n" +
         "Disabled plugins: " + plugins_disabledCount + "\n" +
-        "Admins: " + config.admins + "\n" +
+        "Admins: " + (adminsString.length ? adminsString : "*no admins*") + "\n" +
         "Online since: " + moment(bot.readyAt).format("DD.MM.YYYY HH:mm:ss") + " (Uptime: " + moment(bot.readyAt).twix(new Date()).humanizeLength() +")";
         message.channel.send(stat_info)
         .then(logger.info(`Printed status information to '${message.author.username}' on channel '#${message.channel.name}'`))
