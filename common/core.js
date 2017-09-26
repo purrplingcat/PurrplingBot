@@ -7,10 +7,8 @@ const PluginRegistry = require("./pluginRegistry.js");
 const Acl = require("./acl");
 const BuiltinCommands = require("./builtin");
 const Discord = require('discord.js');
-const DEBUG = process.env.DEBUG || 0;
-const PLUGIN_DIR = process.env.PLUGIN_DIR || process.cwd() + "/plugins";
-const CMD_DIR = process.env.CMD_DIR || process.cwd() + "/common/Commands/";
-const PKG = require("../package.json");
+const Constants = require("./util/constants");
+const DEBUG = Constants.DEBUG;
 
 var logger = LOGGER.createLogger("Core");
 
@@ -25,7 +23,7 @@ class Core extends EventEmmiter {
     this._checkConf(); // Check configuration
 
     this._commander = new Commander(this, this._config.cmdPrefix);
-    this._pluginRegistry = new PluginRegistry(this, PLUGIN_DIR);
+    this._pluginRegistry = new PluginRegistry(this, Constants.PLUGIN_DIR);
     this._acl = new Acl(this, config.admins);
     this._eventLogger = new EventLogger(this, config.eventLogger);
 
@@ -47,7 +45,7 @@ class Core extends EventEmmiter {
     let config = this._config;
 
     // Register builtin commands
-    BuiltinCommands.registerBuiltinCommands(this._commander, CMD_DIR);
+    BuiltinCommands.registerBuiltinCommands(this._commander, Constants.CMD_DIR);
 
     // Restore aliases
     this._commander.aliases = this._store.restoreScope("aliases");
@@ -165,15 +163,15 @@ class Core extends EventEmmiter {
   }
 
   get Version() {
-    return PKG.version;
+    return Constants.PKG.version;
   }
 
   get Codename() {
-    return PKG.codename;
+    return Constants.PKG.codename;
   }
 
   get ProductName() {
-    return PKG.name
+    return Constants.PKG.name
   }
 
   getPluginRegistry() {
