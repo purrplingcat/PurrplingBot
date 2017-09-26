@@ -1,5 +1,7 @@
-const LOGGER = require("../lib/logger");
-const UTILS = require("../lib/utils");
+const LOGGER = require("../../lib/logger");
+const UTILS = require("../../lib/utils");
+const CommandMessage = require("./commandMessage");
+const Discord = require('discord.js');
 
 var logger = LOGGER.createLogger("Commander");
 
@@ -9,34 +11,31 @@ class Commander {
     this.cmdPrefix = cmdPrefix;
     this._commandsHandledCount = 0;
     this.aliases = {};
-    this.cmds = {};
+    this.cmds = new Discord.Collection();
   }
 
   /**
   * @param message - Channel message driver
   */
   check_message_for_command(message) {
-    var ex = message.content.split(" ");
     var prefix = this.cmdPrefix;
-    var cmd = ex[0].toLowerCase();
-    if (!cmd.startsWith(prefix)) {
-      return;
-    }
-
-    //Block the bot to react own commands
     if (message.author.id === this.core.getDiscordClient().user.id) {
-      return false;
+      return false; //Block the bot to react own potentially commands
+    }
+    if (!message.content.startsWith(prefix)) {
+      return false; // Skip command handling if message is not a command
     }
 
-    cmd = cmd.substring(prefix.length);
-    var tail = message.content.substring(cmd.length + prefix.length + 1);
+    var cmdMessage = new CommandMessage(message.content, message, prefix);
+    var cmd = cmdMessage.command;
+    var tail = cmdMessage.argsString;
 
     if (cmd in this.aliases) {
       var aliased = this.aliases[cmd];
       logger.info(`Called alias '${cmd}' for '${aliased}' on #${message.channel.name} by: ${message.author.username}`);
-      var argv = aliased.split(' ');
-      cmd = argv.shift();
-      tail = tail + argv.join(' ');
+      cmdMessage = new CommandMessage(aliased + '' + tail, message, prefix);
+      cmd = cmdMessage.command;
+      tail = cmdMessage.argsString;
       logger.log("Aliased cmd: %s Tail: %s", cmd, tail);
     }
     if (cmd == "help") {
@@ -48,10 +47,18 @@ class Commander {
       }
       if (tail) {
         logger.info("Request help for command %s%s", prefix, tail);
-        message.channel.send(UTILS.printCmdHelp(tail, this.cmds, prefix));
+        let cmd = this.cmds[tail];
+        let help_text = "";
+        if (!cmd) {
+          help_text = "Unknown command: `" + prefix + tail + "`. Type `" + prefix + "help` to list availaible commands.";
+        } else {
+          if (typeof cmd.printHelp === "function") help_text = cmd.printHelp(tail);
+          else help_text = UTILS.printCmdHelp(tail, this.cmds, prefix);
+        }
+        message.channel.send(help_text);
       }
       else {
-        var _cmds = Object.keys(this.cmds).concat(Object.keys(this.aliases));
+        var _cmds = Object.keys(this.cmds).concat(Object.keys(this.aliases)).sort();
         message.channel.send(UTILS.printHelp(_cmds, prefix));
       }
       this._commandsHandledCount++;
@@ -92,9 +99,12 @@ class Commander {
   addCommand(cmdName, cmdObject) {
     try {
       this.cmds[cmdName] = cmdObject;
+      logger.log("Command added: %s%s", this.cmdPrefix, cmdName);
+      return cmdObject;
     } catch (err) {
       logger.error("Failed to add command: %s", cmdName);
       logger.error(err);
+      return null;
     }
   }
 
@@ -125,4 +135,5 @@ class Commander {
   }
 }
 
+Commander.logger = logger;
 module.exports = Commander;
