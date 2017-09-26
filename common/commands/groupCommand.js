@@ -11,20 +11,16 @@ class GroupCommand() {
   }
 
   __exec(message, tail, authority) {
-    let [ cmdPhrase ] = message.content.split(' ');
-    let [ cmd, subcmd ] = cmdPhrase.split(DELIMITER);
     let prefix = this.commander.Prefix;
-    let cmdObject = this.subcomands[subcmd];
+    let [ cmd, subcmd ] = message.content.split(' ');
 
     if (!subcmd) {
-      if (typeof this.__default === "function") {
-        this.__default(message, tail, authority);
-      }
-      else {
-        this.printHelp(cmd);
-      }
-      return;
+        message.channel.send(this.printHelp(cmd))
+        .then(GroupCommand.LOGGER.info("Group help listing printed!"))
+        .catch(GroupCommand.LOGGER.error);
+        return;
     }
+    let cmdObject = this.subcomands[subcmd];
     if (!cmdObject) {
       message.reply(`Unknown subcommand \`${prefix}${cmdPhrase}\``)
       .then(GroupCommand.LOGGER.info(`Unknown subcommand \`${prefix}${cmdPhrase}\``))
@@ -55,8 +51,8 @@ class GroupCommand() {
   }
 
   printHelp(cmdPhrase) {
-    var [ cmd, subcmd ] = cmdPhrase.split(DELIMITER);
     var prefix = this.commander.prefix;
+    var [ cmd, subcmd ] = cmdPhrase.split(' ');
     var help_text = "";
     if (subCmd) {
       if (!cmds.hasOwnProperty(cmd)) {
