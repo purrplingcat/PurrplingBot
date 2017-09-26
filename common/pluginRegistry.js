@@ -1,5 +1,5 @@
 const LOGGER = require("../lib/logger");
-const DEBUG = process.env.DEBUG || 0;
+const DEBUG = require("./util/constants").DEBUG;
 
 var logger = LOGGER.createLogger("PluginRegistry");
 
