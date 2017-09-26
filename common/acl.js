@@ -1,5 +1,4 @@
 const Discord = require('discord.js');
-const BOT_ADMIN = "BOT_ADMINISTRATOR";
 
 class Acl {
   constructor(core, botAdmins) {
@@ -44,7 +43,6 @@ class Acl {
   }
 }
 
-Acl.BOT_ADMIN = BOT_ADMIN;
 Acl.ALL = Discord.Permissions.ALL;
 Acl.DEFAULT = Discord.Permissions.DEFAULT;
 Acl.FLAGS = Discord.Permissions.FLAGS;
