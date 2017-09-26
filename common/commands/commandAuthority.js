@@ -7,7 +7,7 @@ class CommandAuthority {
       if (!message) throw new ReferenceError("Message undenfined or null!");
       this.acl = acl;
       this.member = message.member;
-      this.user = message.author;
+      this.user = message.caller || message.author;
       this.channel = message.channel;
     }
 

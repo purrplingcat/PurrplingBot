@@ -59,7 +59,7 @@ exports.say = {
   "description": "Tell the bot words, where bot say (require admin perms to bot).",
   "usage": "[#<channel>] <message>",
   "exec": function(message, tail, authority) {
-    if (!purrplingBot.Acl.can(message.member, purrplingBot.Acl.constructor.FLAGS.ADMINISTRATOR)) {
+    if (!authority.hasPermission(authority.FLAGS.ADMINISTRATOR)) {
       message.channel.send("Mňaaaau!! Ty mi nemáš co poroučet, co mám nebo nemám říkat :P")
       .then(logger.info(`User '%s' has no permissions for command 'say'!`))
       .catch(logger.error);

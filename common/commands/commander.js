@@ -1,5 +1,6 @@
 const LOGGER = require("../../lib/logger");
 const UTILS = require("../../lib/utils");
+const CommandAuthority = require("./commandAuthority");
 const CommandMessage = require("./commandMessage");
 const Discord = require('discord.js');
 
@@ -75,7 +76,7 @@ class Commander {
           return true;
         }
         logger.info(`Handle command: ${cmd} (${tail})\tUser: ${message.author.username}\t Channel: #${message.channel.name}`);
-        this.cmds[cmd].exec(message, tail, this.core);
+        this.cmds[cmd].exec(message, tail, new CommandAuthority(this.core.Acl, cmdMessage));
         this._commandsHandledCount++;
         this.core.stats.commandsHandled = this._commandsHandledCount; // @deprecated use
         this.core.emit("commandHandled", cmd, tail, message);
@@ -91,6 +92,7 @@ class Commander {
         message.channel.send(`Unknown command: ${prefix}${cmd}`)
         .then(logger.info(`Unknown command: ${cmd} \tUser: ${message.author.username}\t Channel: #${message.channel.name}`))
         .catch(logger.error);
+        return true;
       }
     }
     return false;

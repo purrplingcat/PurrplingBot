@@ -329,8 +329,8 @@ function execSubCommand(scmd, args, message) {
 exports.announce = {
   "description": "Control an Announcer",
   "usage": "<add|rm|list|resume|cancel|handle|help> [options/args]",
-  "exec": function(message, tail) {
-    if (!purrplingBot.Acl.isBotAdmin(message.author)) {
+  "exec": function(message, tail, authority) {
+    if (!authority.isBotAdmin) {
       message.reply("You are not permitted to use this command!")
       .then(logger.info(`User '${message.author.username}' has no permissions for command 'announce'!`))
       .catch(logger.error);
