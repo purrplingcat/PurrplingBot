@@ -127,7 +127,7 @@ function cancelAnnounce(name) {
   }
 }
 
-function resumeAnnounce(name, interval) {
+function resumeAnnounce(name, interval, neverHandledFlag = false) {
   var announce = announces[name];
   if (!announce) {
     logger.info(`Announce '${name}' not exists - Can't resume!`);
@@ -152,7 +152,7 @@ function resumeAnnounce(name, interval) {
     var runner = bot.setInterval(handleAnnounce, duration, name, INTERVAL_TRIGGER);
     announceRunners[name] = runner;
     announce.active = true;
-    announce.neverHandled = true;
+    if (neverHandledFlag) announce.neverHandled = true;
     purrplingBot.logEvent(`Resumed announce '${announce.name}', Interval: ${announce.interval}, NeverHandled: ${announce.neverHandled}`, "Announce:Resume");
     logger.info(`Resumed announce: ${announce.name} (Interval: ${announce.interval})`);
     return announce;
@@ -273,7 +273,7 @@ function execSubCommand(scmd, args, message) {
       }
       var name = args[0];
       var interval = args[1];
-      var announce = resumeAnnounce(name, interval);
+      var announce = resumeAnnounce(name, interval, true);
       if (!announce) {
         message.reply(`Can't resume Announce '${name}' - Unknown error`)
         .catch(logger.error);
