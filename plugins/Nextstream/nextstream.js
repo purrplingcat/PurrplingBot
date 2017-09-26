@@ -66,7 +66,7 @@ function streamLiveNowAnnounce() {
           }
         }
       } else {
-        logger.error("An error occured while fetching stream status! Status code: %s", response.statusCode);
+        logger.error("An error occured while fetching stream status! %s", error);
         logger.dir(body);
         PurrplingBot.logEvent("An error occured while fetching stream status! " + error, "StreamCheck", "ERROR");
       }
@@ -131,7 +131,7 @@ exports.nextstream = {
         .catch(logger.error);
       } else {
         message.channel.send("Ooops! Něco se rozbilo! Zkus to prosím za chvíli.")
-        .then(logger.error("An error occured while fetching stream events! Status code: %s", response.statusCode))
+        .then(logger.error("An error occured while fetching stream events! %s", error))
         .catch(logger.error);
       }
     });
