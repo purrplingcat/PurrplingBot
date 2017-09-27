@@ -47,6 +47,9 @@ class Command {
     if (this.usage && this.usage.length > 0) {
       help_text += "\n```\n" + prefix + cmd + " " + this.usage + "\n```";
     }
+    if (this.botAdminOnly || this.guildOwnerOnly || this.restrictions) {
+      help_text += "\n\n! RESTRICTED COMMAND !";
+    }
     return help_text;
   }
 
