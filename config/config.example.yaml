@@ -2,6 +2,7 @@
   mumblebox: extras/mumblebox.yaml
   catsnack: extras/catsnack.yaml
   catnature: extras/catnature.yaml
+  # cron: config/cron.yaml
 cmdPrefix: "!"
 pluginsDisabled: []
 storage:
