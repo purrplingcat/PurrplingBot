@@ -9,7 +9,6 @@ class CommandMessage extends CommandArgv {
     super(cmdLine, prefix);
     this._discordMessage = discordMessage;
     this._handledAt = new Date();
-    this._prefix = prefix;
     this._id = Discord.Snowflake.generate();
   }
 
@@ -19,6 +18,10 @@ class CommandMessage extends CommandArgv {
 
   shift() {
     return new CommandMessage(this.argsString, this._discordMessage, this._prefix);
+  }
+
+  toArgv() {
+    return new CommandArgv(this.toString(), this.prefix);
   }
 
   get discordMessage() {
