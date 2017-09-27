@@ -51,3 +51,5 @@ class SimpleCommand extends Command {
     return this;
   }
 }
+
+module.exports = SimpleCommand;
