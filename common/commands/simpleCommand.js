@@ -1,11 +1,6 @@
 const Command = require("./command");
 
-this. = false;
-this. = false;
-this. = false;
-this.restrictions = null;
-
-class SimpleCommand() {
+class SimpleCommand extends Command {
   constructor(callback, commander) {
     if (!typeof callback !== "function")
       throw new Error("Invalid or none callback given!");

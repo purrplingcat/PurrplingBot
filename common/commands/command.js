@@ -6,7 +6,7 @@ var logger = LOGGER.createLogger("CommandBase"); // Command Controler
 class Command {
   constructor(commander) {
     if (!commander) throw new Error("Commander not given or is null!");
-    this.constructor.LOGGER = logger = LOGGER.createLogger(this.constructor.name);
+    this.logger = this.constructor.LOGGER = logger = LOGGER.createLogger(this.constructor.name);
     this.commander = commander;
     this.core = commander.core;
     this.usage = "";

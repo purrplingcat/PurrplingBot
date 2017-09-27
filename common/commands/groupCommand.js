@@ -4,7 +4,7 @@ const SimpleCommand = require("./simpleCommand");
 const Discord = require('discord.js');
 const DELIMITER = ":";
 
-class GroupCommand() {
+class GroupCommand extends Command {
   constructor(commander) {
     super(commander);
     this.subcomands = new Discord.Collection();
@@ -16,20 +16,20 @@ class GroupCommand() {
     let [ cmd, subcmd ] = message.content.split(' ');
 
     if (!subcmd) {
-        message.channel.send(this.printHelp(cmd))
-        .then(GroupCommand.LOGGER.info("Group help listing printed!"))
-        .catch(GroupCommand.LOGGER.error);
+        message.channel.send(this.printHelp(cmd.substr(prefix.length, cmd.length - 1)))
+        .then(this.logger.info("Group help listing printed!"))
+        .catch(this.logger.error);
         return;
     }
     let cmdObject = this.subcomands[subcmd];
     if (!cmdObject) {
       message.reply(`Unknown subcommand \`${prefix}${cmdPhrase}\``)
-      .then(GroupCommand.LOGGER.info(`Unknown subcommand \`${prefix}${cmdPhrase}\``))
-      .catch(GroupCommand.LOGGER.error);
+      .then(this.logger.info(`Unknown subcommand \`${prefix}${cmdPhrase}\``))
+      .catch(this.logger.error);
       return;
     }
     if (typeof cmdObject.exec !== "function") {
-      GroupCommand.LOGGER.error("Subcommand %s has'nt valid exec() method!");
+      this.logger.error("Subcommand %s has'nt valid exec() method!");
       message.reply(`An error occured while executing subcommand \`${prefix}${cmdPhrase}\``);
     }
     cmdObject.exec(message, tail);
@@ -53,7 +53,7 @@ class GroupCommand() {
 
   printHelp(cmdPhrase) {
     var prefix = this.commander.prefix;
-    var [ cmd, subcmd ] = new CommandArgv(cmdPhrase, prefix).toArray();
+    var [ cmd, subCmd ] = new CommandArgv(cmdPhrase, prefix).toArray();
     var help_text = "";
     if (subCmd) {
       if (!cmds.hasOwnProperty(cmd)) {
@@ -81,8 +81,6 @@ class GroupCommand() {
   get Subcommands() {
     return this.subcomands;
   }
-}
-
 }
 
 GroupCommand.DELIMITER = DELIMITER;
