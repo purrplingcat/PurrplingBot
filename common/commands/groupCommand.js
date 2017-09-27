@@ -7,8 +7,8 @@ const DELIMITER = ":";
 class GroupCommand extends Command {
   constructor(commander) {
     super(commander);
-    this.subcomands = new Discord.Collection();
     this.type = "group_command"
+    this.cmds = new Discord.Collection();
   }
 
   __exec(message, tail, authority) {
@@ -38,11 +38,11 @@ class GroupCommand extends Command {
   addSubcommand(cmdName, cmdObject) {
     try {
       this.cmds[cmdName] = cmdObject;
-      logger.log("Subcommand added: %s%s", this.commander.Prefix, cmdName);
+      this.logger.log("Subcommand added: %s%s", this.commander.Prefix, cmdName);
       return cmdObject;
     } catch (err) {
-      logger.error("Failed to add subcommand: %s", cmdName);
-      logger.error(err);
+      this.logger.error("Failed to add subcommand: %s", cmdName);
+      this.logger.error(err);
       return null;
     }
   }
@@ -52,11 +52,11 @@ class GroupCommand extends Command {
   }
 
   printHelp(cmdPhrase) {
-    var prefix = this.commander.prefix;
+    var prefix = this.commander.Prefix;
     var [ cmd, subCmd ] = new CommandArgv(cmdPhrase, prefix).toArray();
     var help_text = "";
     if (subCmd) {
-      if (!cmds.hasOwnProperty(cmd)) {
+      if (!this.cmds.hasOwnProperty(cmd)) {
         return "Unknown subcommand: " + prefix + cmdPhrase + ". Type " + prefix + "help "+ cmd + " to list availaible subcommands.";
       }
       help_text = "Subcommand: " + prefix + cmd;
@@ -69,17 +69,17 @@ class GroupCommand extends Command {
       }
     } else {
       help_text = super.printHelp(cmd);
-      help_text += "\n\nAvailaible subcomands: \n\n"
-      for (var subCmdName in this.subcomands) {
-        let subCmd = this.subcommand[subCmdName];
-        help_text += `\`${prefix}${subCmdName} ${subCmd.Usage}\` - ${subCmd.Description}\n`;
+      help_text += "\n\nAvailaible subcomands: \n"
+      for (var subCmdName in this.cmds) {
+        let subCmd = this.cmds[subCmdName];
+        help_text += `\`${prefix}${cmd} ${subCmdName} ${subCmd.Usage}\` - ${subCmd.Description}\n`;
       }
     }
     return help_text;
   }
 
   get Subcommands() {
-    return this.subcomands;
+    return this.cmds;
   }
 }
 
