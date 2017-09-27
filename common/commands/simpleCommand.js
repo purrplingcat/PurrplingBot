@@ -9,7 +9,7 @@ class SimpleCommand extends Command {
   }
 
   __exec(message, tail, authority) {
-    if (!typeof this.callback !== "function")
+    if (typeof this.callback !== "function")
       throw new Error("Invalid or none callback for execute command!");
     this.callback(message, tail, authority);
   }

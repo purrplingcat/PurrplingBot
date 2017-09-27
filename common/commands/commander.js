@@ -48,10 +48,11 @@ class Commander {
       }
       if (tail) {
         logger.info("Request help for command %s%s", prefix, tail);
-        let cmd = this.cmds[tail];
+        let sh = cmdMessage.shift();
+        let cmd = this.cmds[sh.command];
         let help_text = "";
         if (!cmd) {
-          help_text = "Unknown command: `" + prefix + tail + "`. Type `" + prefix + "help` to list availaible commands.";
+          help_text = "Unknown command: `" + prefix + sh.command + "`. Type `" + prefix + "help` to list availaible commands.";
         } else {
           if (typeof cmd.printHelp === "function") help_text = cmd.printHelp(tail);
           else help_text = UTILS.printCmdHelp(tail, this.cmds, prefix);

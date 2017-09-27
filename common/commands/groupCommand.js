@@ -13,15 +13,17 @@ class GroupCommand extends Command {
 
   __exec(message, tail, authority) {
     let prefix = this.commander.Prefix;
-    let [ cmd, subcmd ] = message.content.split(' ');
+    let argv = new CommandArgv(message.content, prefix);
+    let [ cmd, subCmd ] = argv.toArray();
 
-    if (!subcmd) {
-        message.channel.send(this.printHelp(cmd.substr(prefix.length, cmd.length - 1)))
+    if (!subCmd || subCmd == "help") {
+        let sh = argv.shift();
+        message.channel.send(this.printHelp(cmd + " " + sh.argsString))
         .then(this.logger.info("Group help listing printed!"))
         .catch(this.logger.error);
         return;
     }
-    let cmdObject = this.subcomands[subcmd];
+    let cmdObject = this.cmds[subCmd];
     if (!cmdObject) {
       message.reply(`Unknown subcommand \`${prefix}${cmdPhrase}\``)
       .then(this.logger.info(`Unknown subcommand \`${prefix}${cmdPhrase}\``))
@@ -54,13 +56,14 @@ class GroupCommand extends Command {
   printHelp(cmdPhrase) {
     var prefix = this.commander.Prefix;
     var [ cmd, subCmd ] = new CommandArgv(cmdPhrase, prefix).toArray();
+    console.dir(subCmd);
     var help_text = "";
     if (subCmd) {
-      if (!this.cmds.hasOwnProperty(cmd)) {
+      if (!this.cmds.hasOwnProperty(subCmd)) {
         return "Unknown subcommand: " + prefix + cmdPhrase + ". Type " + prefix + "help "+ cmd + " to list availaible subcommands.";
       }
-      help_text = "Subcommand: " + prefix + cmd;
-      var cmd_context = this.subcommands[subcmd];
+      help_text = "Subcommand: " + prefix + cmd + ' ' + subCmd;
+      var cmd_context = this.cmds[subCmd];
       if (cmd_context.description && cmd_context.description.length > 0) {
         help_text += "\nDescription: " + this.description;
       }
