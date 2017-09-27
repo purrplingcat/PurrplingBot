@@ -25,14 +25,14 @@ class GroupCommand extends Command {
     }
     let cmdObject = this.cmds[subCmd];
     if (!cmdObject) {
-      message.reply(`Unknown subcommand \`${prefix}${cmdPhrase}\``)
-      .then(this.logger.info(`Unknown subcommand \`${prefix}${cmdPhrase}\``))
+      message.reply(`Unknown command \`${argv.toString(true)}\``)
+      .then(this.logger.info(`Unknown subcommand \`${argv.toString(true)}\``))
       .catch(this.logger.error);
       return;
     }
     if (typeof cmdObject.exec !== "function") {
       this.logger.error("Subcommand %s has'nt valid exec() method!");
-      message.reply(`An error occured while executing subcommand \`${prefix}${cmdPhrase}\``);
+      message.reply(`An error occured while executing subcommand \`${argv.toString(true)}\``);
     }
     cmdObject.exec(message, tail);
   }
