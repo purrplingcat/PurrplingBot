@@ -1,4 +1,6 @@
 const PurrplingBot = require("../../purrplingbot.js");
+const SimpleCommand = require("../../common/commands/simpleCommand");
+const CronCommand = require("./cronCommand");
 const Discord = require('discord.js');
 const schedule = require('node-schedule');
 const moment = require('moment');
@@ -14,19 +16,24 @@ const cronConf = CONFIG.cron || {};
 var actions = new Discord.Collection();
 var schedules = new Discord.Collection();
 
+exports.commands = [
+  "cron"
+];
+
 function scheduleJob(name, plan) {
   if (!actions.has(plan.action)) {
-    logger.error("Job '%s' not scheduled - Action %s not exists!", plan.action);
+    logger.error("Job '%s' not scheduled - Action %s not exists!", name, plan.action);
     PurrplingBot.logEvent(`Job '${name}' not scheduled - Action ${plan.action} not exists`, "Cron:ScheduleJob", "ERROR");
     return;
   }
   var planFormat = plan.format || "Cron"
   if (!FORMATS.includes(planFormat)) throw new Error(`Invalid plan format: ${planFormat}`);
+  var scheduled = plan.schedule;
   if (planFormat == "DateTime") {
-    plan.schedule = moment(plan.schedule, "YYYY-MM-DD HH:mm:ss");
+    scheduled = moment(plan.schedule, "YYYY-MM-DD HH:mm:ss");
   }
   var a = actions.get(plan.action);
-  var j = schedule.scheduleJob(plan.schedule, execJob.bind(this, a, name, plan));
+  var j = schedule.scheduleJob(scheduled, execJob.bind(this, a, name, plan));
   schedules.set(name, plan);
   logger.info("Job '%s' scheduled at '%s'", name, plan.schedule);
   PurrplingBot.logEvent(`Job '${name}' scheduled at '${plan.schedule}'`, "Cron:ScheduleJob", "INFO");
@@ -39,6 +46,7 @@ function execJob(action, jobName, plan) {
 }
 
 PurrplingBot.on('ready', function(){
+  if (!cronConf.enabled) return;
   logger.info("Scheduling cron jobs ...");
   const plan = cronConf.plan || {};
   for (var p in plan) {
@@ -60,6 +68,9 @@ exports.status = function() {
     "Action list": actions.keyArray().join(', ')
   };
 }
+
+exports.cron = new CronCommand(PurrplingBot.Commander, actions, cronConf.plan || {});
+exports.execJob = execJob;
 
 // Avoid plugin run standalone
 if (require.main === module) {
