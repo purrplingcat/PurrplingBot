@@ -17,7 +17,7 @@ class Command {
     this.guildOwnerOnly = false;
     this.restrictions = null;
     this.tag = null;
-    this.type = "exec_command"
+    this.type = "exec_command";
     this._ = this.constructor;
   }
 
@@ -46,9 +46,9 @@ class Command {
       help_text += "\n\n*" + this.description + "*";
     }
     if (this.usage && this.usage.length > 0) {
-      let example;
+      let example = "";
       if (this.example && this.example.length > 0) {
-        example = "\n\nExample:\n" + this.example.replace("%cmd%", prefix + cmd);
+        example = "\n\nExample:\n" + this.example.replace(/%cmd%/g, prefix + cmd);
       }
       help_text += "\n\n```\nUsage:\n" + prefix + cmd + " " + this.usage + example + "\n```";
     }
