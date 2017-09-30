@@ -329,7 +329,7 @@ exports.announce = {
   "description": "Control an Announcer",
   "usage": "<add|rm|list|resume|cancel|handle|help> [options/args]",
   "exec": function(message, tail, authority) {
-    if (!authority.isBotAdmin) {
+    if (!authority.BotAdmin) {
       message.reply("You are not permitted to use this command!")
       .then(logger.info(`User '${message.author.username}' has no permissions for command 'announce'!`))
       .catch(logger.error);
