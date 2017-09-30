@@ -1,7 +1,7 @@
 class CommandArgv {
   constructor(cmdLine, prefix = "!") {
-    var args = cmdLine.split(' ');
-    var cmd = args.shift();
+    var args = this.constructor.parseArgs(cmdLine);
+    var cmd = args.shift() || "";
     if (cmd.startsWith(prefix)) {
       cmd = cmd.substring(prefix.length);
     }
@@ -19,7 +19,11 @@ class CommandArgv {
   }
 
   toString(withPrefix = false) {
-    return (withPrefix ? this.prefix : "") + this.toArray().join(' ');
+    return (withPrefix ? this.prefix : "") + this.constructor.buildArgsString(this.toArray());
+  }
+
+  isEmpty() {
+    return !this._command.length && !this._args.length;
   }
 
   get command() {
@@ -31,11 +35,40 @@ class CommandArgv {
   }
 
   get argsString() {
-    return this._args.join(' ');
+    return this.constructor.buildArgsString(this._args);
   }
 
   get prefix() {
     return this._prefix;
+  }
+
+  // 3rd party code. Thx Gawdl3x https://github.com/Gawdl3y/discord.js-commando/blob/master/src/commands/message.js#L487
+  static parseArgs(argString, argCount, allowSingleQuote = true) {
+		const re = allowSingleQuote ? /\s*(?:("|')([^]*?)\1|(\S+))\s*/g : /\s*(?:(")([^]*?)"|(\S+))\s*/g;
+		const result = [];
+		let match = [];
+		// Large enough to get all items
+		argCount = argCount || argString.length;
+		// Get match and push the capture group that is not null to the result
+		while(--argCount && (match = re.exec(argString))) result.push(match[2] || match[3]);
+		// If text remains, push it to the array as-is (except for wrapping quotes, which are removed)
+		if(match && re.lastIndex < argString.length) {
+			const re2 = allowSingleQuote ? /^("|')([^]*)\1$/g : /^(")([^]*)"$/g;
+			result.push(argString.substr(re.lastIndex).replace(re2, '$2'));
+		}
+		return result;
+  }
+  
+  static buildArgsString(args, quote = "'") {
+    var _args = [];
+    args.forEach(arg => {
+      if (arg.split(' ').length > 1) {
+        _args.push(quote + arg + quote);
+      } else {
+        _args.push(arg);
+      }
+    });
+    return _args.join(' ');
   }
 }
 

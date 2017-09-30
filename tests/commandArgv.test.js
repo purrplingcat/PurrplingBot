@@ -35,6 +35,19 @@ test('Shift', t => {
   t.deepEqual(cmdArgvShifted.args, ["cc", "dd"]);
 });
 
+test('Shift empty args', t => {
+  var cmdArgv = new CommandArgv("!aa");
+  var cmdArgvShifted = cmdArgv.shift();
+  t.is(cmdArgv.command, "aa");
+  t.is(cmdArgv.argsString, "");
+  t.deepEqual(cmdArgv.args, []);
+  t.false(cmdArgv.isEmpty());
+  t.is(cmdArgvShifted.command, "");
+  t.is(cmdArgvShifted.argsString, "");
+  t.deepEqual(cmdArgvShifted.args, []);
+  t.true(cmdArgvShifted.isEmpty());
+});
+
 test('toArray()', t => {
   var cmdArgv = new CommandArgv("!a b c");
   t.deepEqual(cmdArgv.toArray(), ['a', 'b', 'c']);
@@ -44,4 +57,22 @@ test('toString()', t => {
   var cmdArgv = new CommandArgv("!a b c");
   t.is(cmdArgv.toString(), "a b c");
   t.is(cmdArgv.toString(true), "!a b c");
+});
+
+test('Multiword args (double quotes)', t => {
+  var cmdArgv = new CommandArgv("command one \"two three\" four");
+  t.is(cmdArgv.command, "command");
+  t.deepEqual(cmdArgv.args, [ 'one', 'two three', 'four']);
+});
+
+test('Multiword args (simple quotes)', t => {
+  var cmdArgv = new CommandArgv("command one 'two three' four");
+  t.is(cmdArgv.command, "command");
+  t.deepEqual(cmdArgv.args, [ 'one', 'two three', 'four']);
+});
+
+test('Multiword args back to String', t => {
+  var cmdArgv = new CommandArgv("command one 'two three' four");
+  t.is(cmdArgv.command, "command");
+  t.is(cmdArgv.argsString, "one 'two three' four");
 });
