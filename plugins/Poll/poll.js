@@ -49,7 +49,8 @@ function execPoll(cmdMessage) {
 
 exports.poll = new SimpleCommand(execPoll, PurrplingBot.Commander)
   .setDescription("Start a poll question and vote choice! Max choices is 10")
-  .setUsage("<question> <choice1> [<choice2> ...]");
+  .setUsage("<question> <choice1> [<choice2> ...]")
+  .setExample("%cmd% 'Which game to play on stream?' 'Stardew Valley' 'Half Life 2' 'Life is Strange'");
 
 // Avoid plugin run standalone
 if (require.main === module) {
