@@ -8,7 +8,7 @@ class CronCommand extends GroupCommand {
     this._plans = plans;
     this._schedules = schedules;
     this.description = "Informations about cron jobs (Define cron jobs in your config file!)";
-    //this.botAdminOnly = true;
+    this.botAdminOnly = true;
     this.createSubcommand("list", this._execList.bind(this))
         .setDescription("List a cron jobs");
     this.createSubcommand("force", this._execForce.bind(this))
