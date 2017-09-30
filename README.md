@@ -55,7 +55,7 @@ If you want run tests, then run `npm test`. It requires installed _devDependenci
 
 #### Docker Quickstart
 
-**Docker Setup/Migrate guide](https://gist.github.com/EllenFawkes/75c389714aa92a31a976d02d451e3e9c)**
+**[Docker Setup/Migrate guide](https://gist.github.com/EllenFawkes/75c389714aa92a31a976d02d451e3e9c)**
 
 #### Pull image from DockerHub
 
