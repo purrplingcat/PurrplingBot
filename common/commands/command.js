@@ -20,22 +20,21 @@ class Command {
     this._ = this.constructor;
   }
 
-  exec(message, tail) {
-    var authority = new CommandAuthority(this.core.Acl, message);
-    if (!message.member && this.guildChannelOnly === true) {
-      message.reply(`I'm sorry, command \`${prefix}${cmd}\` can't be executed in this channel!`)
-      .then(logger.warn("This command is guild channel ONLY! Can't execute it in #%s", message.channel.name))
+  exec(cmdMessage, authority) {
+    if (!cmdMessage.member && this.guildChannelOnly === true) {
+      cmdMessage.reply(`I'm sorry, command \`${prefix}${cmd}\` can't be executed in this channel!`)
+      .then(logger.warn("This command is guild channel ONLY! Can't execute it in #%s", cmdMessage.channel.name))
       .catch(logger.error);
       return;
     }
     if (!this._isExecPermitted(authority)) {
-      message.reply("You are not permitted for execute this command!")
+      cmdMessage.reply("You are not permitted for execute this command!")
       .then(logger.warn("Permission denied for execute command!"))
       .catch(logger.error);
       return;
     }
     logger.log("Executing command ...");
-    this.__exec(message, tail, authority);
+    this.__exec(cmdMessage, authority);
   }
 
   printHelp(cmd) {

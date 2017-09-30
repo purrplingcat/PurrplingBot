@@ -33,26 +33,26 @@ class AliasBuiltin extends Command {
     this.tag = "builtin";
   }
 
-  __exec(message, tail, authority) {
-    if (!tail.length) {
+  __exec(cmdMessage, authority) {
+    if (!cmdMessage.hasArgs()) {
       var aliases = this.commander.Aliases;
-      message.channel.send("List of aliases: " + UTILS.formatAliasList(aliases, this.commander.Prefix))
-      .then(AliasBuiltin.LOGGER.info(`Aliases list sent to #${message.channel.name} requested by: ${message.author.username}`))
+      cmdMessage.channel.send("List of aliases: " + UTILS.formatAliasList(aliases, this.commander.Prefix))
+      .then(AliasBuiltin.LOGGER.info(`Aliases list sent to #${cmdMessage.channel.name} requested by: ${cmdMessage.caller.username}`))
       .catch(AliasBuiltin.LOGGER.error);
       return;
     }
     if (!authority.hasPermission(authority.constructor.FLAGS.ADMINISTRATOR)) {
-      message.reply("You are not permitted for add alias!")
+      cmdMessage.reply("You are not permitted for add alias!")
       .catch(AliasBuiltin.LOGGER.error);
-      AliasBuiltin.LOGGER.info(`User ${message.author.username} is not permitted for add alias!`);
+      AliasBuiltin.LOGGER.info(`User ${cmdMessage.caller.username} is not permitted for add alias!`);
       return;
     }
-    var argv = tail.split(' ');
-    var alias = argv.shift();
-    var command = argv.join(' ');
+    var argv = cmdMessage.toArgv().shift();
+    var alias = argv.command;
+    var aliasedCommand = argv.argsString;
     var prefix = this.commander.Prefix || "";
-    if (!alias || !command) {
-      message.reply("Missing or wrong some parameters!")
+    if (!alias || !aliasedCommand) {
+      cmdMessage.reply("Missing or wrong some parameters!")
       .catch(AliasBuiltin.LOGGER.error);
       AliasBuiltin.LOGGER.info("Missing or wrong parameters for command alias!");
       return;
@@ -62,13 +62,13 @@ class AliasBuiltin extends Command {
       alias = alias.substr(prefix.length);
     }
     // Remove prefix from aliased command
-    if (command.startsWith(prefix)) {
-      command = command.substr(prefix.length);
+    if (aliasedCommand.startsWith(prefix)) {
+      aliasedCommand = aliasedCommand.substr(prefix.length);
     }
-    this.core.addAlias(alias, command);
+    this.core.addAlias(alias, aliasedCommand);
     this.storeAliases();
-    AliasBuiltin.LOGGER.log(`User ${message.author.username} created alias '${alias}' to '${command}' in #${message.channel.name}`);
-    message.channel.send(`Alias \`${prefix}${alias}\` to \`${prefix}${command}\` created!`)
+    AliasBuiltin.LOGGER.log(`User ${cmdMessage.caller.username} created alias '${alias}' to '${aliasedCommand}' in #${cmdMessage.channel.name}`);
+    cmdMessage.channel.send(`Alias \`${prefix}${alias}\` to \`${prefix}${aliasedCommand}\` created!`)
     .catch(AliasBuiltin.LOGGER.error);
   }
 
@@ -85,18 +85,13 @@ class AliasRemoveBuiltin extends AliasBuiltin {
     this.description = "Remove an alias";
     this.usage = "<aliasName>";
     this.guildChannelOnly = true;
+    this.restrictions = "ADMINISTRATOR";
     this.tag = "builtin";
   }
 
-  __exec(message, tail, authority) {
-    if (!authority.hasPermission(authority.FLAGS.ADMINISTRATOR)) {
-      message.reply("You are not permitted for remove alias!")
-      .catch(AliasRemoveBuiltin.LOGGER.error);
-      AliasRemoveBuiltin.LOGGER.info(`User ${message.author.username} is not permitted for remove alias!`);
-      return;
-    }
-    if (!tail) {
-      message.reply("Invalid arguments.")
+  __exec(cmdMessage) {
+    if (!cmdMessage.hasArgs()) {
+      cmdMessage.reply("Invalid arguments.")
       .catch(AliasRemoveBuiltin.LOGGER.error);
       AliasRemoveBuiltin.LOGGER.info("Invalid parameters for remove an alias!");
       return;
@@ -104,17 +99,18 @@ class AliasRemoveBuiltin extends AliasBuiltin {
 
     var prefix = this.commander.Prefix || "";
     var aliases = this.commander.Aliases;
-    if (tail in aliases) {
-      delete aliases[tail];
+    var [ alias ] = cmdMessage.args;
+    if (alias in aliases) {
+      delete aliases[alias];
       this.storeAliases();
-      AliasRemoveBuiltin.LOGGER.info("Removed alias: %s", tail);
-      message.reply(`Alias \`${prefix}${tail}\` removed!`)
-      .then(AliasRemoveBuiltin.LOGGER.log(`Sent info about alias SUCCESS remove to #${message.channel.name}`))
+      AliasRemoveBuiltin.LOGGER.info("Removed alias: %s", alias);
+      cmdMessage.reply(`Alias \`${prefix}${alias}\` removed!`)
+      .then(AliasRemoveBuiltin.LOGGER.log(`Sent info about alias SUCCESS remove to #${cmdMessage.channel.name}`))
       .catch(AliasRemoveBuiltin.LOGGER.error);
     } else {
-      AliasRemoveBuiltin.LOGGER.info("Unknown alias: %s - Can't remove", tail);
-      message.reply(`Alias \`${prefix}${tail}\` is not found! Can't remove.`)
-      .then(AliasRemoveBuiltin.LOGGER.log(`Sent info about alias FAILED remove to #${message.channel.name}`))
+      AliasRemoveBuiltin.LOGGER.info("Unknown alias: %s - Can't remove", alias);
+      cmdMessage.reply(`Alias \`${prefix}${alias}\` is not found! Can't remove.`)
+      .then(AliasRemoveBuiltin.LOGGER.log(`Sent info about alias FAILED remove to #${cmdMessage.channel.name}`))
       .catch(AliasRemoveBuiltin.LOGGER.error);
     }
   }
@@ -127,9 +123,9 @@ class PingBuiltin extends Command {
     this.tag = "builtin";
   }
 
-  __exec(message) {
-    message.reply("pong")
-    .then(msg => PingBuiltin.LOGGER.info(`Pong sent to ${msg.author.username} in #${msg.channel.name}`))
+  __exec(cmdMessage) {
+    cmdMessage.reply("pong")
+    .then(msg => PingBuiltin.LOGGER.info(`Pong sent to ${msg.caller.username} in #${msg.channel.name}`))
     .catch(PingBuiltin.LOGGER.error);
   }
 }
@@ -142,17 +138,18 @@ class PluginsBuiltin extends Command {
     this.tag = "builtin";
   }
 
-  __exec(message, tail) {
+  __exec(cmdMessage) {
     var plugins = this.core.getPluginRegistry().Plugins;
     var plugins_disabled = this.core.getPluginRegistry().DisabledPlugins;
-    if (tail) {
-      var plugin = plugins[tail];
+    if (cmdMessage.hasArgs()) {
+      var [ pluginName ] = cmdMessage.args;
+      var plugin = plugins[pluginName];
       if (!plugin) {
         PluginsBuiltin.LOGGER.info(`Plugin '${tail}' not exists or disabled!`);
-        message.channel.send(`Plugin '${tail}' not exists or disabled!`);
+        cmdMessage.channel.send(`Plugin '${tail}' not exists or disabled!`);
         return;
       }
-      var info = "Plugin: " + tail + "\n";
+      var info = "Plugin: " + pluginName + "\n";
       var prefix = this.commander.Prefix;
       info += "Registered commands: `" + (plugin.commands ? plugin.commands.map(el => {return prefix + el }).sort().join(', ') : "no commands") + "`\n";
       var status = {};
@@ -163,7 +160,7 @@ class PluginsBuiltin extends Command {
           info += statKey + ": " + statVal + "\n";
         }
       }
-      message.channel.send(info);
+      cmdMessage.channel.send(info);
       return;
     }
     var plugin_list = "Loaded plugins: ```";
@@ -172,8 +169,8 @@ class PluginsBuiltin extends Command {
     if (plugins_disabled.length > 0) {
       plugin_list += "\nDisabled plugins: \n```" + plugins_disabled.sort().join(", ") + "\n```";
     }
-    message.channel.send(plugin_list)
-    .then(PluginsBuiltin.LOGGER.info(`Plugin list sent to: #${message.channel.name}\t Requested by: ${message.author.username}`))
+    cmdMessage.channel.send(plugin_list)
+    .then(PluginsBuiltin.LOGGER.info(`Plugin list sent to: #${cmdMessage.channel.name}\t Requested by: ${cmdMessage.caller.username}`))
     .catch(PluginsBuiltin.LOGGER.error);
   }
 }
@@ -185,10 +182,10 @@ class UptimeBuiltin extends Command {
     this.tag = "builtin";
   }
 
-  __exec(message) {
-    var bot = message.client;
-    message.channel.send(`Uptime: ${moment(bot.readyAt).twix(new Date()).humanizeLength()} \nReady at: ${moment(bot.readyAt).format("DD.MM.YYYY HH:mm:ss")}`)
-    .then(UptimeBuiltin.LOGGER.info(`Uptime sent to #${message.channel.name} requested by: ${message.author.username}`))
+  __exec(cmdMessage) {
+    var bot = this.core.DiscordClient;
+    cmdMessage.channel.send(`Uptime: ${moment(bot.readyAt).twix(new Date()).humanizeLength()} \nReady at: ${moment(bot.readyAt).format("DD.MM.YYYY HH:mm:ss")}`)
+    .then(UptimeBuiltin.LOGGER.info(`Uptime sent to #${cmdMessage.channel.name} requested by: ${cmdMessage.caller.username}`))
     .catch(UptimeBuiltin.LOGGER.error);
   }
 }
@@ -200,9 +197,9 @@ class VersionBuiltin extends Command {
     this.tag = "builtin";
   }
 
-  __exec(message) {
-    message.channel.send("PurrplingBot version " + this.core.Version + " '" + this.core.Codename + "'")
-    .then(VersionBuiltin.LOGGER.info(`Version info sent to ${message.author.username} in ${message.channel.name}`))
+  __exec(cmdMessage) {
+    cmdMessage.channel.send("PurrplingBot version " + this.core.Version + " '" + this.core.Codename + "'")
+    .then(VersionBuiltin.LOGGER.info(`Version info sent to ${cmdMessage.caller.username} in ${cmdMessage.channel.name}`))
     .catch(VersionBuiltin.LOGGER.error);
   }
 }

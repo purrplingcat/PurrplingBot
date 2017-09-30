@@ -18,12 +18,16 @@ class CommandArgv {
     return [ this.command ].concat(this.args);
   }
 
-  toString(withPrefix = false) {
-    return (withPrefix ? this.prefix : "") + this.constructor.buildArgsString(this.toArray());
+  toString(withPrefix = false, quote = "'") {
+    return (withPrefix ? this.prefix : "") + this.constructor.buildArgsString(this.toArray(), quote);
   }
 
   isEmpty() {
     return !this._command.length && !this._args.length;
+  }
+
+  hasArgs() {
+    return this._args.length > 0;
   }
 
   get command() {
@@ -59,8 +63,11 @@ class CommandArgv {
 		return result;
   }
   
-  static buildArgsString(args, quote = "'") {
+  static buildArgsString(args, quote) {
     var _args = [];
+    if (!quote) {
+      quote = "'";
+    }
     args.forEach(arg => {
       if (arg.split(' ').length > 1) {
         _args.push(quote + arg + quote);

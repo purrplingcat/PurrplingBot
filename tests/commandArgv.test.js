@@ -76,3 +76,9 @@ test('Multiword args back to String', t => {
   t.is(cmdArgv.command, "command");
   t.is(cmdArgv.argsString, "one 'two three' four");
 });
+
+test('hasArgs()', t => {
+  var cmdArgv = new CommandArgv("command arg");
+  t.true(cmdArgv.hasArgs());
+  t.false(cmdArgv.shift().hasArgs());
+});

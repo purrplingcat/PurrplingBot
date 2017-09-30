@@ -16,7 +16,7 @@ class CronCommand extends GroupCommand {
         .setUsage("<jobName>");
   }
 
-  _execList(message) {
+  _execList(cmdMessage) {
     var text = "Scheduled crontab:\n\n"
     if (!Object.keys(this._plans).length) {
       text += "*No cron jobs is planned!*\n";
@@ -28,26 +28,26 @@ class CronCommand extends GroupCommand {
         text += "```\n" + plan.args.join(", ") + "\n```\n";
       }
     }
-    message.channel.send(text)
-    .then(this.logger.info("List printed to #%s by %s", message.channel.name, message.author.username))
+    cmdMessage.channel.send(text)
+    .then(this.logger.info("List printed to #%s by %s", cmdMessage.channel.name, cmdMessage.caller.username))
     .catch(this.logger.error);
   }
 
-  _execForce(message, tail) {
+  _execForce(cmdMessage, tail) {
     if (!tail) {
-      this.logger.info("No cron job name given in #%s by %s", message.channel.name, message.author.username);
-      message.reply("Specify me a cron job name.");
+      this.logger.info("No cron job name given in #%s by %s", cmdMessage.channel.name, cmdMessage.caller.username);
+      cmdMessage.reply("Specify me a cron job name.");
       return;
     }
     var plan = this._plans[tail];
     if (!plan) {
-      message.reply(`Job '${tail}' not exists!`);
-      this.logger.info("Job '%s' not exists in #%s by %s", tail, message.channel.name, message.author.username);
+      cmdMessage.reply(`Job '${tail}' not exists!`);
+      this.logger.info("Job '%s' not exists in #%s by %s", tail, cmdMessage.channel.name, cmdMessage.caller.username);
       return;
     }
     if (!this._actions.has(plan.action)) {
       this.logger.error("Job '%s' can't be executed - Action %s not exists!", tail, plan.action);
-      message.reply(`Job ${tail} has invalid action - Can't execute it!`);
+      cmdMessage.reply(`Job ${tail} has invalid action - Can't execute it!`);
       return;
     }
     var a = this._actions.get(plan.action);

@@ -11,30 +11,30 @@ class GroupCommand extends Command {
     this.cmds = new Discord.Collection();
   }
 
-  __exec(message, tail, authority) {
+  __exec(cmdMessage, authority) {
     let prefix = this.commander.Prefix;
-    let argv = new CommandArgv(message.content, prefix);
-    let [ cmd, subCmd ] = argv.toArray();
+    let cmd = cmdMessage.command;
+    let [ subCmd ] = cmdMessage.args;
 
     if (!subCmd || subCmd == "help") {
-        let sh = argv.shift();
-        message.channel.send(this.printHelp(cmd + " " + sh.argsString))
+        let shArgv = cmdMessage.toArgv().shift();
+        cmdMessage.channel.send(this.printHelp(cmd + " " + shArgv.argsString))
         .then(this.logger.info("Group help listing printed!"))
         .catch(this.logger.error);
         return;
     }
     let cmdObject = this.cmds[subCmd];
     if (!cmdObject) {
-      message.reply(`Unknown command \`${argv.toString(true)}\``)
+      cmdMessage.reply(`Unknown command \`${argv.toString(true)}\``)
       .then(this.logger.info(`Unknown subcommand \`${argv.toString(true)}\``))
       .catch(this.logger.error);
       return;
     }
     if (typeof cmdObject.exec !== "function") {
       this.logger.error("Subcommand %s has'nt valid exec() method!");
-      message.reply(`An error occured while executing subcommand \`${argv.toString(true)}\``);
+      cmdMessage.reply(`An error occured while executing subcommand \`${argv.toString(true)}\``);
     }
-    cmdObject.exec(message, argv.shift().argsString);
+    cmdObject.exec(cmdMessage.shift(), authority);
   }
 
   addSubcommand(cmdName, cmdObject) {

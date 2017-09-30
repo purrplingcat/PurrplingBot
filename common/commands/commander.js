@@ -2,6 +2,7 @@ const LOGGER = require("../../lib/logger");
 const UTILS = require("../../lib/utils");
 const CommandAuthority = require("./commandAuthority");
 const CommandMessage = require("./commandMessage");
+const Command = require("./command");
 const Discord = require('discord.js');
 
 var logger = LOGGER.createLogger("Commander");
@@ -77,7 +78,13 @@ class Commander {
           return true;
         }
         logger.info(`Handle command: ${cmd} (${tail})\tUser: ${message.author.username}\t Channel: #${message.channel.name}`);
-        this.cmds[cmd].exec(message, tail, new CommandAuthority(this.core.Acl, cmdMessage));
+        let cmdObj = this.cmds[cmd];
+        // Compatibility cmd exec switch
+        if (cmdObj instanceof Command) {
+          cmdObj.exec(cmdMessage, new CommandAuthority(this.core.Acl, cmdMessage));
+        } else {
+          cmdObj.exec(message, tail, new CommandAuthority(this.core.Acl, cmdMessage));
+        }
         this._commandsHandledCount++;
         this.core.stats.commandsHandled = this._commandsHandledCount; // @deprecated use
         this.core.emit("commandHandled", cmd, tail, message);
