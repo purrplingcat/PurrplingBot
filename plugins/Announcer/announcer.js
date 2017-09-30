@@ -256,7 +256,7 @@ function execSubCommand(scmd, args, message) {
       }
       if (cancelAnnounce(name)) {
         storeAnnounces();
-        message.reply(`Announce '${name} canceled!'`)
+        message.reply(`Announce '${name}' canceled!`)
         .catch(logger.error);
       } else {
         message.reply(`Can't cancel announce '${name}'`)
