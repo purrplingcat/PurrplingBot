@@ -68,7 +68,7 @@ function streamLiveNowAnnounce() {
       } else {
         logger.error("An error occured while fetching stream status! %s", error);
         logger.dir(body);
-        PurrplingBot.logEvent("An error occured while fetching stream status! " + error, "StreamCheck", "ERROR");
+        PurrplingBot.logEvent("An error occured while fetching stream status! " + error, "StreamCheck", "WARN");
       }
   });
 }

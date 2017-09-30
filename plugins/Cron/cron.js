@@ -50,9 +50,15 @@ function scheduleJob(name, plan) {
 }
 
 function execJob(action, jobName, plan) {
+  try {
   action.exec(jobName, plan.args || []);
   logger.info("Job '%s' executed! Action: %s", jobName, plan.action);
   PurrplingBot.logEvent(`Job '${jobName}' executed! Action: ${plan.action}`, "Cron:ExecJob", "INFO");
+  } catch (err) {
+    logger.error("Can't execute cron job '%s' with action '%s' - %s", jobName, plan.action, err);
+    logger.log(err);
+    PurrplingBot.logEvent(`Job '${jobName}' can't be executed! Action: ${plan.action}`, "Cron:ExecJob", "ERROR");
+  }
 }
 
 PurrplingBot.on('ready', function(){

@@ -29,7 +29,7 @@ tmiClient.on("connecting", function (address, port) {
 
 tmiClient.on("disconnected", function (reason) {
     logger.warn("Twitch chat DISCONNECTED! Reason: %s", reason);
-    PurrplingBot.logEvent("Twitch chat DISCONNECTED! Reason:" + reason, "Twitchcord:DISCONNECT", "WARN");
+    PurrplingBot.logEvent("Twitch chat DISCONNECTED! Reason:" + reason, "Twitchcord:DISCONNECT", "ERROR");
     logger.log("Twitch chat client state: %s", tmiClient.readyState());
 });
 
