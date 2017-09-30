@@ -4,6 +4,7 @@ var client = PurrplingBot.DiscordClient;
 
 function registerDefaultActions(actions, logger) {
   actions.set('sendMessage', new SendMessage(logger));
+  actions.set('changeAvatar', new ChangeAvatar(logger));
 }
 
 class SendMessage extends Action {
@@ -15,7 +16,20 @@ class SendMessage extends Action {
       return;
     }
     channel.send(message)
-    .then(this.logger.log("Message sent to #%s", channel.name))
+    .then(this.logger.info("Message sent to #%s", channel.name))
+    .catch(this.logger.error);
+  }
+}
+
+class ChangeAvatar extends Action {
+  exec(name, args) {
+    var [ avatar ] = args;
+    if (!avatar) {
+      this.logger.error("Cant' change avatar to empty or null");
+      return;
+    }
+    client.user.setAvatar(avatar)
+    .then(this.logger.info("Changed bot's avatar to: %s", avatar))
     .catch(this.logger.error);
   }
 }

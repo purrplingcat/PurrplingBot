@@ -1,3 +1,4 @@
+# For scheduling cron time see: https://www.npmjs.com/package/node-schedule
 actions:
   foobar: plugins/Cron/actions/foobar.js
 enabled: true
@@ -20,9 +21,15 @@ plan:
     format: range
     schedule: 
       start: '2017-09-30 12:45'
-      end: '2017-09-27 14:45'
+      end: '2017-09-30 14:00'
       rule: '*/5 * * * * *'
     action: sendMessage
     args:
       - '323516538378256395'
       - cron test range
+  cron4:
+    format: cron
+    schedule: '15 * * * *'
+    action: changeAvatar
+    args:
+      - https://img.buzzfeed.com/buzzfeed-static/static/2015-06/22/20/campaign_images/webdr01/reasons-why-carmilla-is-underrated-2-4700-1435020565-6_dblbig.jpg

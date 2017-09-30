@@ -45,7 +45,7 @@ function scheduleJob(name, plan) {
   var a = actions.get(plan.action);
   var j = schedule.scheduleJob(scheduled, execJob.bind(this, a, name, plan));
   schedules.set(name, plan);
-  logger.info("Job '%s' scheduled at '%s'", name, plan.schedule);
+  logger.info("Job '%s' scheduled at %s", name, JSON.stringify(plan.schedule));
   PurrplingBot.logEvent(`Job '${name}' scheduled at '${plan.schedule}'`, "Cron:ScheduleJob", "INFO");
 }
 
