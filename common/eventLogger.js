@@ -49,7 +49,7 @@ class EventLogger extends EventEmiter {
     channel.send(`${timestamp}: _${level}_ - **${type}** - ${msg}`
     + (level == LEVELS.ERROR ? " @here" : "")
     + (level == LEVELS.FATAL ? " BOT ABORT! @here" : ""))
-    .then(logger.info(`Event log ${type} - "${msg}" sent to #${channel.name} level: ${level}`))
+    .then(logger.log(`Event log ${type} - "${msg}" sent to #${channel.name} level: ${level}`))
     .catch(logger.error);
     if (level == LEVELS.FATAL) {
       logger.error("Bot runtime aborted, because logged FATAL event: %s", msg);
