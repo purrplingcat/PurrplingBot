@@ -16,6 +16,7 @@ var logger = LOGGER.createLogger("EventLogger");
 class EventLogger extends EventEmiter {
   constructor(core, config) {
     super();
+    if (!config) config = {};
     this.enabled = config.enabled || false;
     this.loggingChannelID = config.loggingChannelID;
     this.core = core;
