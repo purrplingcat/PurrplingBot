@@ -16,7 +16,7 @@ admins:
 - CallMeFoxie
 eventLogger:
   enabled: false
-  loggingChannelID: '353532218712522753'
+  loggingChannelID: '323516538378256395'
 twitch:
   twitch_token: l3d809bfd3r20buu2d626ayyg83g64
   twitch_channel_name: purrplingcat
@@ -29,7 +29,7 @@ twitchcord:
   username: purrplingbot
   password: oauth:3j98jl1efnoobmeb00tnlshw69ac9x
   twitchChannel: "#purrplingcat"
-  discordChannelId: '353532218712522753'
+  discordChannelId: '323516538378256395'
   reconnectLimit: 64
 announcer:
   antispam: true
@@ -40,5 +40,5 @@ announcer:
     expirePercentTime: 0.25
     handleWait: 2m
 greetings:
-  channelID: '300515295821299714'
+  channelID: '323516538378256395'
   greetingMessage: Vítej mezi námi!
