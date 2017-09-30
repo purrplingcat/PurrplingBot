@@ -1,16 +1,17 @@
 actions:
   foobar: plugins/Cron/actions/foobar.js
+enabled: true
 plan:
   cron1:
     schedule: '1 * * * * *' # s m H D M E (* - represents any value of segment)
     action: sendMessage
     args:
-      - '300515295821299714'
+      - '323516538378256395'
       - cron test
   cron2:
     format: DateTime
     schedule: '2017-09-27 12:04'
     action: sendMessage
     args:
-      - '300515295821299714'
+      - '323516538378256395'
       - cron test DateTime

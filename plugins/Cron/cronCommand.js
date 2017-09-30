@@ -17,9 +17,13 @@ class CronCommand extends GroupCommand {
 
   _execList(message) {
     var text = "Scheduled crontab:\n\n"
-    for (var planName in this._plans) {
-      let plan = this._plans[planName];
-      text += `${planName}  - \`${plan.schedule}\` - ${plan.action}(${plan.args.join(", ")})`;
+    if (!Object.keys(this._plans).length) {
+      text += "*No cron jobs is planned!*\n";
+    } else {
+      for (var planName in this._plans) {
+        let plan = this._plans[planName];
+        text += `${planName}  - \`${plan.schedule}\` - ${plan.action}(${plan.args.join(", ")})`;
+      }
     }
     message.channel.send(text)
     .then(this.logger.info("List printed to #%s by %s", message.channel.name, message.author.username))

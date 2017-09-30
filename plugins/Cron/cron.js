@@ -26,8 +26,10 @@ function scheduleJob(name, plan) {
     PurrplingBot.logEvent(`Job '${name}' not scheduled - Action ${plan.action} not exists`, "Cron:ScheduleJob", "ERROR");
     return;
   }
-  var planFormat = plan.format || "Cron"
-  if (!FORMATS.includes(planFormat)) throw new Error(`Invalid plan format: ${planFormat}`);
+  var planFormat = plan.format || "Cron";
+  if (!FORMATS.includes(planFormat)) {
+    throw new Error(`Invalid plan format: ${planFormat}`);
+  }
   var scheduled = plan.schedule;
   if (planFormat == "DateTime") {
     scheduled = moment(plan.schedule, "YYYY-MM-DD HH:mm:ss");
