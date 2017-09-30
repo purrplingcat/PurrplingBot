@@ -46,10 +46,10 @@ class EventLogger extends EventEmiter {
       client.user.setGame(`${type} - ${msg}`);
     }
     let timestamp = moment(new Date()).format("MM/DD HH:mm:ss");
-    channel.send(`${timestamp}: _${level}_ - **${type}** - ${msg}`)
-    .then(logger.info(`Event log ${type} - "${msg}" sent to #${channel.name} level: ${level}`
+    channel.send(`${timestamp}: _${level}_ - **${type}** - ${msg}`
     + (level == LEVELS.ERROR ? " @here" : "")
-    + (level == LEVELS.FATAL ? " BOT ABORT! @here" : "")))
+    + (level == LEVELS.FATAL ? " BOT ABORT! @here" : ""))
+    .then(logger.info(`Event log ${type} - "${msg}" sent to #${channel.name} level: ${level}`))
     .catch(logger.error);
     if (level == LEVELS.FATAL) {
       logger.error("Bot runtime aborted, because logged FATAL event: %s", msg);
