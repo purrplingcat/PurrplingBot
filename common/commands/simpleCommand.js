@@ -24,6 +24,11 @@ class SimpleCommand extends Command {
     return this;
   }
 
+  setExample(example) {
+    this.example = example;
+    return this;
+  }
+
   setGuildChannelOnly(val = true) {
     this.guildChannelOnly = val;
     return this;

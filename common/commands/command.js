@@ -11,6 +11,7 @@ class Command {
     this.core = commander.core;
     this.usage = "";
     this.description = "";
+    this.example = "";
     this.guildChannelOnly = false;
     this.botAdminOnly = false;
     this.guildOwnerOnly = false;
@@ -39,15 +40,17 @@ class Command {
 
   printHelp(cmd) {
     var prefix = this.commander.Prefix;
-    var help_text = "Command: **" + prefix + cmd + "**";
+    var help_text = "Help for command: **" + prefix + cmd + "**" 
+      + (this.botAdminOnly || this.guildOwnerOnly || this.restrictions ? " (RESTRICTED)" : "");
     if (this.description && this.description.length > 0) {
-      help_text += "\nDescription: " + this.description;
+      help_text += "\n\n*" + this.description + "*";
     }
     if (this.usage && this.usage.length > 0) {
-      help_text += "\n```\n" + prefix + cmd + " " + this.usage + "\n```";
-    }
-    if (this.botAdminOnly || this.guildOwnerOnly || this.restrictions) {
-      help_text += "\n\n! RESTRICTED COMMAND !";
+      let example;
+      if (this.example && this.example.length > 0) {
+        example = "\n\nExample:\n" + this.example.replace("%cmd%", prefix + cmd);
+      }
+      help_text += "\n\n```\nUsage:\n" + prefix + cmd + " " + this.usage + example + "\n```";
     }
     return help_text;
   }
@@ -73,6 +76,10 @@ class Command {
 
   get Description() {
     return this.description;
+  }
+
+  get Example() {
+    return this.example;
   }
 
   get GuildChannelOnly() {

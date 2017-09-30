@@ -56,27 +56,20 @@ class GroupCommand extends Command {
   printHelp(cmdPhrase) {
     var prefix = this.commander.Prefix;
     var [ cmd, subCmd ] = new CommandArgv(cmdPhrase, prefix).toArray();
-    console.dir(subCmd);
     var help_text = "";
     if (subCmd) {
       if (!this.cmds.hasOwnProperty(subCmd)) {
         return "Unknown subcommand: " + prefix + cmdPhrase + ". Type " + prefix + "help "+ cmd + " to list availaible subcommands.";
       }
-      help_text = "Subcommand: " + prefix + cmd + ' ' + subCmd;
-      var cmd_context = this.cmds[subCmd];
-      if (cmd_context.description && cmd_context.description.length > 0) {
-        help_text += "\nDescription: " + this.description;
-      }
-      if (cmd_context.usage && cmd_context.usage.length > 0) {
-        help_text += "\n```\n" + prefix + cmd + " " + cmd_context.usage + "\n```";
-      }
+      help_text = this.cmds[subCmd].printHelp(cmdPhrase);
     } else {
       help_text = super.printHelp(cmd);
-      help_text += "\n\nAvailaible subcomands: \n"
+      help_text += "\n\nAvailaible subcomands: \n```";
       for (var subCmdName in this.cmds) {
         let subCmd = this.cmds[subCmdName];
-        help_text += `\`${prefix}${cmd} ${subCmdName} ${subCmd.Usage}\` - ${subCmd.Description}\n`;
+        help_text += `${prefix}${cmd} ${subCmdName}${subCmd.Usage ? " "+ subCmd.Usage : ""} - ${subCmd.Description}\n`;
       }
+      help_text += "\n```";
     }
     return help_text;
   }
