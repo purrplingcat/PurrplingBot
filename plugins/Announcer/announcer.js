@@ -27,7 +27,6 @@ exports.init = function(pluginName) {
     restoreAnnounces();
     for (name in announces) {
       var announce = announces[name];
-      announce.neverHandled = true; // Mark announce as never handled at bot starts
       if (announce.active) {
         resumeAnnounce(announce.name);
       }
