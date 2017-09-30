@@ -1,9 +1,10 @@
-var moment = require('moment');
-var purrplingBot = require("../../purrplingbot.js");
-var pluginRegistry = purrplingBot.getPluginRegistry();
-var client = purrplingBot.getDiscordClient();
-var store = purrplingBot.getStore();
-var config = purrplingBot.getConfiguration();
+const moment = require('moment');
+const PurrplingBot = require("../../purrplingbot.js");
+const SimpleCommand = require("../../common/commands/simpleCommand");
+var pluginRegistry = PurrplingBot.getPluginRegistry();
+var client = PurrplingBot.getDiscordClient();
+var store = PurrplingBot.getStore();
+var config = PurrplingBot.getConfiguration();
 require('twix');
 
 var logger;
@@ -18,7 +19,7 @@ exports.commands = [
 ]
 
 exports.init = function(pluginName) {
-  logger = purrplingBot.createLogger(pluginName);
+  logger = PurrplingBot.createLogger(pluginName);
 }
 
 function findMember(members, knownName) {
@@ -46,163 +47,155 @@ function findChannel(channels, knownChanName) {
     return channels.find("id", knownChanName);
 }
 
-exports.hello = {
-  "description": "Greeting the bot and get greeting back!",
-  "exec": function(message) {
-    message.channel.send(`Hello, ${message.author}`).
-    then(logger.info(`Greeting ${message.author.username} in #${message.channel.name}`))
+function execHello(cmdMessage) {
+  cmdMessage.channel.send(`Hello, ${cmdMessage.caller}`).
+  then(logger.info(`Greeting ${cmdMessage.caller.username} in #${cmdMessage.channel.name}`))
+  .catch(logger.error);
+}
+
+function execSay(cmdMessage) {
+  if (!cmdMessage.hasArgs()) {
+    cmdMessage.channel.send("Nějak jsem neslyšela, co to mám vlastně říct.")
+    .then(logger.info(`Nothing to say - args empty!`))
+    .catch(logger.error);
+    return;
+  }
+  var tail = cmdMessage.argsString;
+  var [ chanName ] = cmdMessage.args;
+  var channel = findChannel(cmdMessage.channel.guild.channels, chanName);
+  if (!channel) {
+    channel = cmdMessage.channel;
+  } else {
+    tail = cmdMessage.shift().argsString;
+  }
+  channel.send(tail)
+  .then(logger.info(`I said '${tail}' requested by '${cmdMessage.caller.username}' to #${channel.name}`))
+  .catch(err => {
+    cmdMessage.reply(`Je mi líto, ale zprávu se nepodařilo do kanálu ${channel} odeslat! :crying_cat_face:`)
+    .then(logger.error(`Message can't be sent: ${err}`))
+    .catch(logger.error);
+  });
+  if (channel.id != cmdMessage.channel.id) {
+    cmdMessage.channel.send(`Zpráva byla odeslána do kanálu ${channel}`)
+    .then(logger.info(`Reciept sent to #${channel.name}`))
     .catch(logger.error);
   }
 }
 
-exports.say = {
-  "description": "Tell the bot words, where bot say (require admin perms to bot).",
-  "usage": "[#<channel>] <message>",
-  "exec": function(message, tail, authority) {
-    if (!authority.hasPermission(authority.FLAGS.ADMINISTRATOR)) {
-      message.channel.send("Mňaaaau!! Ty mi nemáš co poroučet, co mám nebo nemám říkat :P")
-      .then(logger.info(`User '%s' has no permissions for command 'say'!`))
-      .catch(logger.error);
-      return;
-    }
-    if (!tail) {
-      message.channel.send("Nějak jsem neslyšela, co to mám vlastně říct.")
-      .then(logger.info(`Nothing to say - args empty!`))
-      .catch(logger.error);
-      return;
-    }
-    var args = tail.split(" ");
-    var channel;
-    if (message.channel.guild) {
-      channel = findChannel(message.channel.guild.channels, args.shift());
-    } else {
-      logger.warn(`Channel ${message.channel} is not a TextChannel!`);
-    }
-    if (!channel) {
-      channel = message.channel;
-    } else {
-      tail = args.join(" ");
-    }
-    channel.send(tail)
-    .then(logger.info(`I said '${tail}' requested by '${message.author.username}' to #${channel.name}`))
-    .catch(err => {
-      message.reply(`Je mi líto, ale zprávu se nepodařilo do kanálu ${channel} odeslat! :crying_cat_face:`)
-      .then(logger.error(`Message can't be sent: ${err}`))
-      .catch(logger.error);
-    });
-    if (channel.id != message.channel.id) {
-      message.channel.send(`Zpráva byla odeslána do kanálu ${channel}`)
-      .then(logger.info(`Reciept sent to #${message.channel.name}`))
-      .catch(logger.error);
-    }
+function execWhois(cmdMessage) {
+  var [ userID ] = cmdMessage.args; 
+  var requestedWhois = userID; //Save original user ID as requested WHOIS string
+  if (!cmdMessage.hasArgs()) {
+    userID = cmdMessage.caller.id; //take message caller id => requested user is ME
+    requestedWhois = cmdMessage.caller.username; //Save my user name as requested WHOIS
   }
-}
-
-exports.whois = {
-  "description": "Prints info about user",
-  "usage": "[<user>]",
-  "exec": function(message, tail) {
-    var requestedWhois = tail; //Save original tail as requested WHOIS string
-    if (!tail.length && tail != null) {
-      tail = message.author.id; //take message author id => requested user is ME
-      requestedWhois = message.author.username; //Save my user name as requested WHOIS
-    }
-    member = findMember(message.channel.guild.members, tail);
-    //logger.log(member);
-    if (!member) {
-      //Member not found
-      message.reply("Takovýho uživatele tady neznám :(")
-      .then(logger.info(`Unknown user: ${requestedWhois} - Can't print info about it!`))
-      .catch(logger.error);
-      return;
-    }
-    var user_info = "WHOIS " + requestedWhois + "\n" +
-        "User ID: " + member.id + "\n" +
-        "Username: " + member.user.username + "\n" +
-        "Is bot: " + (member.user.bot ? "Yes" : "No") + "\n" +
-        "Highest role: " + (member.highestRole.name != "@everyone" ? member.highestRole.name : "no role") + "\n" +
-        "Nickname: " + (member.nickname ? member.nickname : member.user.username) + "\n" +
-        "Status: " + member.presence.status.toUpperCase() + "\n" +
-        "Game: " + (member.presence.game ? member.presence.game.name : "User not playing now!") + "\n" +
-        "Joined at: " + moment(member.joinedAt).format("DD.MM.YYYY HH:mm:ss");
-    message.channel.send(user_info)
-    .then(logger.info(`Printing user's '${member.user.username}' info to channel #${message.channel.name}, requested by: ${message.author.username}`))
+  member = findMember(cmdMessage.channel.guild.members, userID);
+  if (!member) {
+    //Member not found
+    cmdMessage.reply("Takovýho uživatele tady neznám :(")
+    .then(logger.info(`Unknown user: ${requestedWhois} - Can't print info about it!`))
     .catch(logger.error);
+    return;
   }
+  var user_info = "WHOIS " + requestedWhois + "\n" +
+      "User ID: " + member.id + "\n" +
+      "Username: " + member.user.username + "\n" +
+      "Is bot: " + (member.user.bot ? "Yes" : "No") + "\n" +
+      "Highest role: " + (member.highestRole.name != "@everyone" ? member.highestRole.name : "no role") + "\n" +
+      "Nickname: " + (member.nickname ? member.nickname : member.user.username) + "\n" +
+      "Status: " + member.presence.status.toUpperCase() + "\n" +
+      "Game: " + (member.presence.game ? member.presence.game.name : "User not playing now!") + "\n" +
+      "Joined at: " + moment(member.joinedAt).format("DD.MM.YYYY HH:mm:ss");
+  cmdMessage.channel.send(user_info)
+  .then(logger.info(`Printing user's '${member.user.username}' info to channel #${cmdMessage.channel.name}, requested by: ${cmdMessage.caller.username}`))
+  .catch(logger.error);
 }
 
-exports.avatar = {
-  "description": "Get an avatar URL of user",
-  "usage": "[<user>]",
-  "exec": function(message, tail) {
-    var requestedWhois = tail; //Save original tail as requested WHOIS string
-    if (!tail.length && tail != null) {
-      tail = message.author.id; //take message author id => requested user is ME
-      requestedWhois = message.author.username; //Save my user name as requested WHOIS
-    }
-    var member = findMember(message.channel.guild.members, tail);
-    //logger.log(member);
-    if (!member) {
-      //Member not found
-      message.reply("Takovýho uživatele tady neznám :(")
-      .then(logger.info(`Unknown user: ${requestedWhois} - Can't get user's avatar!`))
+function execAvatar(cmdMessage) {
+  var [ userID ] = cmdMessage.args;
+  var requestedWhois = userID; //Save original userID as requested WHOIS string
+  if (!cmdMessage.hasArgs()) {
+    userID = cmdMessage.caller.id; //take message caller id => requested user is ME
+    requestedWhois = cmdMessage.caller.username; //Save my user name as requested WHOIS
+  }
+  var member = findMember(cmdMessage.channel.guild.members, userID);
+  if (!member) {
+    //Member not found
+    cmdMessage.reply("Takovýho uživatele tady neznám :(")
+    .then(logger.info(`Unknown user: ${requestedWhois} - Can't get user's avatar!`))
+    .catch(logger.error);
+    return;
+  }
+  var avatar = member.user.defaultAvatarURL;
+  if (member.user.avatar) {
+    avatar = member.user.avatarURL;
+  }
+  cmdMessage.channel.send(avatar)
+  .then(logger.info(`Sending user's '${member.user.username}' avatar to channel #${cmdMessage.channel.name}, requested by: ${cmdMessage.caller.username}`))
+  .catch(logger.error);
+}
+
+function execStatus(cmdMessage) {
+  var stats = PurrplingBot.getStats();
+  var pluginsCount = pluginRegistry.countPlugins();
+  var plugins_disabledCount = pluginRegistry.countDisabledPlugins();
+  var cmds = PurrplingBot.Commander.Commands;
+  var bot = PurrplingBot.DiscordClient;
+  var admins = config.admins || [];
+  var adminsString = bot.users.filter(user => admins.includes(user.id))
+                        .map(user => user.username)
+                        .join(', ');
+  var stat_info =
+      "Connected on: " + bot.guilds.array().length + " servers\n" +
+      "My username is: " + bot.user.username + (bot.user.email ? " <" + bot.user.email + ">" : "") + "\n" +
+      "Presence status: " + bot.user.presence.status.toUpperCase() + "\n" +
+      "Discriminator: " + bot.discriminator + "\n" +
+      "Count of reconnections: " + stats.numberOfReconnection + "\n" +
+      "Count of handled commands: " + stats.commandsHandled + "\n" +
+      "Registered commands: " + Object.keys(cmds).length + "\n" +
+      "Loaded plugins: " + pluginsCount + "\n" +
+      "Disabled plugins: " + plugins_disabledCount + "\n" +
+      "Admins: " + (adminsString.length ? adminsString : "*no admins*") + "\n" +
+      "Online since: " + moment(bot.readyAt).format("DD.MM.YYYY HH:mm:ss") + " (Uptime: " + moment(bot.readyAt).twix(new Date()).humanizeLength() +")";
+      cmdMessage.channel.send(stat_info)
+      .then(logger.info(`Printed status information to '${cmdMessage.caller.username}' on channel '#${cmdMessage.channel.name}'`))
       .catch(logger.error);
-      return;
-    }
-    var avatar = member.user.defaultAvatarURL;
-    if (member.user.avatar) {
-      avatar = member.user.avatarURL;
-    }
-    message.channel.send(avatar)
-    .then(logger.info(`Sending user's '${member.user.username}' avatar to channel #${message.channel.name}, requested by: ${message.author.username}`))
-    .catch(logger.error);
-  }
 }
 
-exports.status = {
-  "description": "Get a status info about bot",
-  "exec": function (message) {
-    var stats = purrplingBot.getStats();
-    var pluginsCount = pluginRegistry.countPlugins();
-    var plugins_disabledCount = pluginRegistry.countDisabledPlugins();
-    var cmds = purrplingBot.getCommandRegistry();
-    var bot = message.client;
-    var admins = config.admins || [];
-    var adminsString = bot.users.filter(user => admins.includes(user.id))
-                          .map(user => user.username)
-                          .join(', ');
-    var stat_info =
-        "Connected on: " + bot.guilds.array().length + " servers\n" +
-        "My username is: " + bot.user.username + (bot.user.email ? " <" + bot.user.email + ">" : "") + "\n" +
-        "Presence status: " + bot.user.presence.status.toUpperCase() + "\n" +
-        "Discriminator: " + bot.discriminator + "\n" +
-        "Count of reconnections: " + stats.numberOfReconnection + "\n" +
-        "Count of handled commands: " + stats.commandsHandled + "\n" +
-        "Registered commands: " + Object.keys(cmds).length + "\n" +
-        "Loaded plugins: " + pluginsCount + "\n" +
-        "Disabled plugins: " + plugins_disabledCount + "\n" +
-        "Admins: " + (adminsString.length ? adminsString : "*no admins*") + "\n" +
-        "Online since: " + moment(bot.readyAt).format("DD.MM.YYYY HH:mm:ss") + " (Uptime: " + moment(bot.readyAt).twix(new Date()).humanizeLength() +")";
-        message.channel.send(stat_info)
-        .then(logger.info(`Printed status information to '${message.author.username}' on channel '#${message.channel.name}'`))
-        .catch(logger.error);
-  }
+function execUsers(cmdMessage) {
+  var members = cmdMessage.channel.guild.members;
+  var memberlist = "Members joined on this server: " + members.array().length + "\n\n";
+  members.forEach(member => {
+    var user = member.user;
+    memberlist += user.username + (member.nickname ? "(" + member.nickname + "" : "") + " [" + ( member.presence.status ? member.presence.status.toUpperCase() : "OFFLINE") + "]" + ", In game: " + (user.presence.game ? "Yes": "No") + "\n";
+  });
+  cmdMessage.channel.send(memberlist)
+  .then(logger.info(`Requested user list sent! List length: ${members.array().length}\t User: ${cmdMessage.caller.username}\t Channel: #${cmdMessage.channel.name}`))
+  .catch(logger.error);
 }
 
-exports.users = {
-  "description": "Get a user list on this server",
-  "exec": function(message) {
-    var members = message.channel.guild.members;
-    var memberlist = "Members joined on this server: " + members.array().length + "\n\n";
-    members.forEach(member => {
-      var user = member.user;
-      memberlist += user.username + (member.nickname ? "(" + member.nickname + "" : "") + " [" + ( member.presence.status ? member.presence.status.toUpperCase() : "OFFLINE") + "]" + ", In game: " + (user.presence.game ? "Yes": "No") + "\n";
-    });
-    message.channel.send(memberlist)
-    .then(logger.info(`Requested user list sent! List length: ${members.array().length}\t User: ${message.author.username}\t Channel: #${message.channel.name}`))
-    .catch(logger.error);
-  }
-}
+exports.hello = new SimpleCommand(execHello, PurrplingBot.Commander)
+  .setDescription("Greeting the bot and get greeting back!");
+
+exports.say = new SimpleCommand(execSay, PurrplingBot.Commander)
+  .setDescription("Tell the bot words, where bot say (require admin perms to bot).")
+  .setUsage("[#<channel>] <message>")
+  .setExample("%cmd% I love cats!\n%cmd% #general Cats is best!")
+  .setRestrictions("ADMINISTRATOR");
+
+exports.whois = new SimpleCommand(execWhois, PurrplingBot.Commander)
+  .setDescription("Prints info about user")
+  .setUsage("[<user>]");
+
+exports.avatar = new SimpleCommand(execAvatar, PurrplingBot.Commander)
+  .setDescription("Get an avatar URL of user")
+  .setUsage("[<user>]");
+
+exports.status = new SimpleCommand(execStatus, PurrplingBot.Commander)
+  .setDescription("Get a status info about bot");
+
+exports.users = new SimpleCommand(execUsers, PurrplingBot.Commander)
+  .setDescription("Get a user list on this server");
 
 // Avoid plugin run standalone
 if (require.main === module) {
