@@ -19,7 +19,7 @@ WORKDIR $APP_DIR
 
 # Copy bundle, install main&plugin deps
 COPY . .
-RUN npm install && \
+RUN npm install --only=production && \
     npm run depmod
 
 # Redirect configs to /data/config
