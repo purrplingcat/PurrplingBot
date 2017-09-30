@@ -4,6 +4,7 @@ const CONFIG = PurrplingBot.getConfiguration();
 const TWITCHORD_CONFIG = CONFIG.twitchcord || {};
 
 var logger;
+var hostingChannel;
 
 var tmi = require("tmi.js");
 var tmiClient = new tmi.client({
@@ -60,9 +61,26 @@ tmiClient.on("hosting", function (source, target, viewers) {
     logger.error("[TWITCH -> DISCORD] Can't send info about hosting. Channel not found!");
     return;
   }
+  if (hostingChannel == target) {
+    logger.info("[TWITCH -> DISCORD] Info about hosting '%s' already sent!", target);
+    return;
+  }
+  hostingChannel = target;
   channel.send(`*Channel ${source} now hosting ${target} - <https://www.twitch.tv/${target}>*`)
-  .then(logger.info("[TWITCH -> DISCORD] Message forwarded to: #%s", channel.name))
+  .then(logger.info("[TWITCH -> DISCORD] Message about hosting '%s' forwarded to: #%s", target, channel.name))
   .catch(logger.error);
+});
+
+tmiClient.on("unhost", function (channel, viewers) {
+  var channel = client.channels.find('id', TWITCHORD_CONFIG.discordChannelId || "");
+  if (!channel) {
+    logger.error("[TWITCH -> DISCORD] Can't send info about hosting. Channel not found!");
+    return;
+  }
+  channel.send(`*Channel ${source} ends hosting ${hostingChannel}*`)
+  .then(logger.info("[TWITCH -> DISCORD] Message about stop hosting '%s' forwarded to: #%s", hostingChannel, channel.name))
+  .catch(logger.error);
+  hostingChannel = null;
 });
 
 PurrplingBot.on("message", function(message, isCmd) {
