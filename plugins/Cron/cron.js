@@ -7,8 +7,9 @@ const moment = require('moment');
 const registerDefaultActions = require("./actions.js");
 const CONFIG = PurrplingBot.Configuration;
 const FORMATS = [
-  'Cron',
-  'DateTime'
+  'cron',
+  'datetime',
+  'range'
 ];
 var logger;
 
@@ -26,14 +27,21 @@ function scheduleJob(name, plan) {
     PurrplingBot.logEvent(`Job '${name}' not scheduled - Action ${plan.action} not exists`, "Cron:ScheduleJob", "ERROR");
     return;
   }
-  var planFormat = plan.format || "Cron";
+  var planFormat = plan.format || "cron";
   if (!FORMATS.includes(planFormat)) {
     throw new Error(`Invalid plan format: ${planFormat}`);
   }
   var scheduled = plan.schedule;
-  if (planFormat == "DateTime") {
+  if (planFormat == "datetime") {
     scheduled = moment(plan.schedule, "YYYY-MM-DD HH:mm:ss");
   }
+  if (planFormat == "range") {
+    scheduled = {
+      start: moment(plan.schedule.start, "YYYY-MM-DD HH:mm:ss"),
+      end: moment(plan.schedule.end, "YYYY-MM-DD HH:mm:ss"),
+      rule: plan.schedule.rule
+    };
+  } 
   var a = actions.get(plan.action);
   var j = schedule.scheduleJob(scheduled, execJob.bind(this, a, name, plan));
   schedules.set(name, plan);
@@ -48,19 +56,27 @@ function execJob(action, jobName, plan) {
 }
 
 PurrplingBot.on('ready', function(){
-  if (!cronConf.enabled) return;
-  logger.info("Scheduling cron jobs ...");
-  const plan = cronConf.plan || {};
-  for (var p in plan) {
-    scheduleJob(p, plan[p]);
+  try {
+    if (!cronConf.enabled) return;
+    logger.info("Scheduling cron jobs ...");
+    const plan = cronConf.plan || {};
+    for (var p in plan) {
+      scheduleJob(p, plan[p]);
+    }
+    logger.info("Scheduling DONE!");
+  } catch (err) {
+    logger.error(err);
   }
-  logger.info("Scheduling DONE!");
 });
 
 exports.init = function(pluginName) {
-  logger = PurrplingBot.createLogger(pluginName);
-  registerDefaultActions(actions, logger);
-  logger.info("Registered default actions!");
+  try {
+    logger = PurrplingBot.createLogger(pluginName);
+    registerDefaultActions(actions, logger);
+    logger.info("Registered default actions!");
+  } catch (err) {
+    logger.error(err);
+  }
 }
 
 exports.status = function() {
@@ -71,7 +87,7 @@ exports.status = function() {
   };
 }
 
-exports.cron = new CronCommand(PurrplingBot.Commander, actions, cronConf.plan || {});
+exports.cron = new CronCommand(PurrplingBot.Commander, actions, schedules, cronConf.plan || {});
 exports.execJob = execJob;
 
 // Avoid plugin run standalone

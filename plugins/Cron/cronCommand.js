@@ -2,10 +2,11 @@ const GroupCommand = require("../../common/commands/groupCommand");
 const CronPlugin = require("./cron");
 
 class CronCommand extends GroupCommand {
-  constructor(commander, actions, plans) {
+  constructor(commander, actions, schedules, plans) {
     super(commander);
     this._actions = actions;
     this._plans = plans;
+    this._schedules = schedules;
     this.description = "Informations about cron jobs (Define cron jobs in your config file!)";
     //this.botAdminOnly = true;
     this.createSubcommand("list", this._execList.bind(this))
@@ -22,7 +23,9 @@ class CronCommand extends GroupCommand {
     } else {
       for (var planName in this._plans) {
         let plan = this._plans[planName];
-        text += `${planName}  - \`${plan.schedule}\` - ${plan.action}(${plan.args.join(", ")})`;
+        text += `${planName}  - \`${JSON.stringify(plan.schedule)}\` - ${plan.action}`;
+        text += (this._schedules.keyArray().includes(planName) ? " ACTIVE" : " INACTIVE") + "\n";
+        text += "```\n" + plan.args.join(", ") + "\n```\n";
       }
     }
     message.channel.send(text)
@@ -38,7 +41,7 @@ class CronCommand extends GroupCommand {
     }
     var plan = this._plans[tail];
     if (!plan) {
-      message.reply(`Job '${tail}'' not exists!`);
+      message.reply(`Job '${tail}' not exists!`);
       this.logger.info("Job '%s' not exists in #%s by %s", tail, message.channel.name, message.author.username);
       return;
     }
@@ -47,7 +50,7 @@ class CronCommand extends GroupCommand {
       message.reply(`Job ${tail} has invalid action - Can't execute it!`);
       return;
     }
-    var a = actions.get(plan.action);
+    var a = this._actions.get(plan.action);
     CronPlugin.execJob(a, tail, plan);
   }
 }
