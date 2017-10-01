@@ -1,5 +1,6 @@
-var moment = require('moment');
-var PurrplingBot = require("../../purrplingbot.js");
+const moment = require('moment');
+const PurrplingBot = require("../../purrplingbot.js");
+const SimpleCommand = require("../../common/commands/simpleCommand");
 var config = PurrplingBot.getConfiguration();
 var logger;
 
@@ -47,27 +48,28 @@ function parseChannelID(channelSlug) {
   return channelSlug;
 }
 
+function execChaninfo(cmdMessage) {
+  var channel;
+  var [ channelID ] = cmdMessage.args;
+  if (!channelID || !cmdMessage.guild) channel = cmdMessage.channel;
+  else {
+    channelID = parseChannelID(channelID);
+    channel = cmdMessage.guild.channels.find('name', channelID);
+    if (!channel) channel = cmdMessage.guild.channels.find('id', channelID);
+    if (!channel) {
+      cmdMessage.channel.send(`Unknown channel ${tail}`);
+      return;
+    }
+  }
+  cmdMessage.channel.send(getChanInfo(channel));
+}
+
 exports.init = function(pluginName) {
   logger = PurrplingBot.createLogger(pluginName);
 }
 
-exports.chaninfo = {
-  "description": "Get an informations about channel",
-  "exec": function(message, tail) {
-    var channel, channelID;
-    if (!tail || !message.guild) channel = message.channel;
-    else {
-      channelID = parseChannelID(tail);
-      channel = message.guild.channels.find('name', channelID);
-      if (!channel) channel = message.guild.channels.find('id', channelID);
-      if (!channel) {
-        message.channel.send(`Unknown channel ${tail}`);
-        return;
-      }
-    }
-    message.channel.send(getChanInfo(channel));
-  }
-};
+exports.chaninfo = new SimpleCommand(execChaninfo, PurrplingBot.Commander)
+  .setDescription("Get an informations about channel");
 
 // Avoid plugin run standalone
 if (require.main === module) {
