@@ -1,4 +1,5 @@
-var PurrplingBot = require("../../purrplingbot.js");
+const PurrplingBot = require("../../purrplingbot.js");
+const SimpleCommand = require("../../common/commands/simpleCommand");
 var bot = PurrplingBot.getDiscordClient();
 var store = PurrplingBot.getStore();
 const CONFIG = PurrplingBot.getConfiguration();
@@ -24,18 +25,18 @@ function restoreLastUser() {
 }
 
 bot.on('guildMemberAdd', function (member) {
-  var greeting_message = "Welcome!";
+  var greeting_cmdMessage = "Welcome!";
   if (!CONFIG.greetings) {
     channel = member.guild.defaultChannel;
   } else {
     channel = member.guild.channels.find('id', CONFIG.greetings.channelID);
-    greeting_message = CONFIG.greetings.greetingMessage || greeting_message;
+    greeting_cmdMessage = CONFIG.greetings.greetingMessage || greeting_cmdMessage;
   }
   if (!channel) {
     logger.error("Greeting channel was not set or not found!");
     return;
   }
-  channel.send(`${member.user} ${greeting_message}`)
+  channel.send(`${member.user} ${greeting_cmdMessage}`)
   .then(logger.info(`Greeting new user: ${member.user.username}`))
   .catch(logger.error);
   lastuser[member.guild.id] = {
@@ -79,26 +80,26 @@ exports.init = function(pluginName) {
   } catch (err) {
     logger.warn("Last user can't be restored! " + err);
   }
-}
+};
 
-exports.lastuser = {
-  "description": "Print last username and user's joined at",
-  "exec": function(message) {
-    var luser = lastuser[message.channel.guild.id];
-    if (!luser && lastuser.id) {
-      luser = lastuser; // Back compatibility with store from old version (v1.2.2 and lower)
-    }
-    if (luser) {
-      message.channel.send(`Last joined user is: ${luser.username}\nUser joined at: ${luser.joinedAt}`)
-      .then(logger.info(`Printed info about joined user: ${luser.username} JoinedAt: ${luser.joinedAt} Server ${luser.server}`))
-      .catch(logger.error);
-    } else {
-      message.channel.send("I don't know about last joined user! Maybe nothing joined this server.")
-      .then(logger.info(`No user joined to server: ${message.channel.guild}`))
-      .catch(logger.error);
-    }
+function execLastuser(cmdMessage) {
+  var luser = lastuser[cmdMessage.channel.guild.id];
+  if (!luser && lastuser.id) {
+    luser = lastuser; // Back compatibility with store from old version (v1.2.2 and lower)
+  }
+  if (luser) {
+    cmdMessage.channel.send(`Last joined user is: ${luser.username}\nUser joined at: ${luser.joinedAt}`)
+    .then(logger.info(`Printed info about joined user: ${luser.username} JoinedAt: ${luser.joinedAt} Server ${luser.server}`))
+    .catch(logger.error);
+  } else {
+    cmdMessage.channel.send("I don't know about last joined user! Maybe nothing joined this server.")
+    .then(logger.info(`No user joined to server: ${cmdMessage.channel.guild}`))
+    .catch(logger.error);
   }
 }
+
+exports.lastuser = new SimpleCommand(execLastuser, PurrplingBot.Commander)
+  .setDescription("Print last username and user's joined at");
 
 // Avoid plugin run standalone
 if (require.main === module) {
