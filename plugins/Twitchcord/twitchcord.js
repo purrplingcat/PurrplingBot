@@ -71,7 +71,7 @@ tmiClient.on("hosting", function (source, target, viewers) {
   .catch(logger.error);
 });
 
-tmiClient.on("unhost", function (channel, viewers) {
+tmiClient.on("unhost", function (source, viewers) {
   var channel = client.channels.find('id', TWITCHORD_CONFIG.discordChannelId || "");
   if (!channel) {
     logger.error("[TWITCH -> DISCORD] Can't send info about hosting. Channel not found!");
