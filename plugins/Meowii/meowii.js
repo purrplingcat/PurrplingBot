@@ -1,5 +1,6 @@
-var request = require("request");
-var PurrplingBot = require("../../purrplingbot.js");
+const request = require("request");
+const PurrplingBot = require("../../purrplingbot.js");
+const SimpleCommand = require("../../common/commands/simpleCommand");
 var logger;
 
 exports.commands = [
@@ -11,16 +12,16 @@ exports.init = function(pluginName) {
   logger = PurrplingBot.createLogger(pluginName);
 }
 
-function fetchAndSendMyGif(message, tag) {
+function fetchAndSendMyGif(cmdMessage, tag) {
   var request_url = "http://api.giphy.com/v1/gifs/random?api_key=dc6zaTOxFJmzC&tag=" + tag;
   logger.log("Request url: " + request_url + "\ttag: " + tag);
-  message.channel.startTyping();
+  cmdMessage.channel.startTyping();
   request({
     url: request_url,
     json: true,
   }, function (error, response, body) {
     var result = null;
-    message.channel.stopTyping();
+    cmdMessage.channel.stopTyping();
     if (!error && response.statusCode === 200) {
       result = body.data.url;
     }
@@ -28,25 +29,21 @@ function fetchAndSendMyGif(message, tag) {
       result = "Je mi líto, ale něco se rozbilo. Zkus to prosím později.";
       logger.warn("An error occured while get request. Status code: " + response.statusCode);
     }
-    message.channel.send(result)
+    cmdMessage.channel.send(result)
     .then(logger.info(`GIF SENT! result: ${result}\ttag: ${tag}`))
     .catch(logger.error);
   });
 }
 
-exports.meow = {
-  "description": "Get a funny cat!",
-  "exec": function(message) {
-    fetchAndSendMyGif(message, "cat");
-  }
-};
+exports.meow = new SimpleCommand(function(cmdMessage) {
+  fetchAndSendMyGif(cmdMessage, "cat");
+}, PurrplingBot.Commander)
+  .setDescription("Get a funny cat!");
 
-exports.hwaii = {
-  "description": "Get a funny fox!",
-  "exec": function(message) {
-    fetchAndSendMyGif(message, "cute+fox");
-  }
-};
+exports.hwaii = new SimpleCommand(function(cmdMessage) {
+  fetchAndSendMyGif(cmdMessage, "cute+fox");
+}, PurrplingBot.Commander)
+  .setDescription("Get a funny fox!");
 
 // Avoid plugin run standalone
 if (require.main === module) {
