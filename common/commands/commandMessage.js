@@ -47,6 +47,10 @@ class CommandMessage extends CommandArgv {
   get id() {
     return this._id;
   }
+
+  get guild() {
+    return this._discordMessage.guild;
+  }
 }
 
 module.exports = CommandMessage;
