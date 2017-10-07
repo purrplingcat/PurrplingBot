@@ -59,7 +59,7 @@ class Command {
    * @protected
    * @magic
    */
-  __exec(message, tail, authority = null) {
+  __exec(message, authority) {
     throw new Error('You have to implement the method exec()!');
   }
 

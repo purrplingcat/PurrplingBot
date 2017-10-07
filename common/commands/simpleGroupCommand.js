@@ -1,17 +1,8 @@
-const Command = require("./command");
+const GroupCommand = require("./groupCommand");
 
-class SimpleCommand extends Command {
-  constructor(callback, commander) {
-    if (typeof callback !== "function")
-      throw new Error("Invalid or none callback given!");
+class SimpleGroupCommand extends GroupCommand {
+  constructor(commander) {
     super(commander);
-    this.callback = callback;
-  }
-
-  __exec(message, authority) {
-    if (typeof this.callback !== "function")
-      throw new Error("Invalid or none callback for execute command!");
-    this.callback(message, tail, authority);
   }
 
   setDescription(desc) {
@@ -50,4 +41,4 @@ class SimpleCommand extends Command {
   }
 }
 
-module.exports = SimpleCommand;
+module.exports = SimpleGroupCommand;
