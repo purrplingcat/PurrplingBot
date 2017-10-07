@@ -1,8 +1,9 @@
-var purrplingBot = require("../../purrplingbot.js");
-var durationParse = require("duration-parser");
-var bot = purrplingBot.getDiscordClient();
-var store = purrplingBot.getStore();
-var config = purrplingBot.getConfiguration();
+const PurrplingBot = require("../../purrplingbot.js");
+const SimpleGroupCommand = require("../../common/commands/simpleGroupCommand");
+const durationParse = require("duration-parser");
+var bot = PurrplingBot.getDiscordClient();
+var store = PurrplingBot.getStore();
+var config = PurrplingBot.getConfiguration();
 const Repeater = require("./repeater.js");
 
 const utils = require("./utils.js");
@@ -22,7 +23,7 @@ exports.commands = [
 ];
 
 exports.init = function(pluginName) {
-  logger = purrplingBot.createLogger(pluginName);
+  logger = PurrplingBot.createLogger(pluginName);
   try {
     restoreAnnounces();
     for (name in announces) {
@@ -31,7 +32,7 @@ exports.init = function(pluginName) {
         resumeAnnounce(announce.name);
       }
     }
-    repeater = new Repeater(announces, repeaterConf, purrplingBot.createLogger(pluginName + ":Repeater"));
+    repeater = new Repeater(announces, repeaterConf, PurrplingBot.createLogger(pluginName + ":Repeater"));
     repeater.on('repeat', function(announce){
       if ((announcerConf.antispam || true))
         handleAnnounce(announce.name, REPEATER_TRIGGER);
@@ -52,7 +53,7 @@ exports.status = function() {
   }
 }
 
-purrplingBot.on('message', function(message){
+PurrplingBot.on('message', function(message){
   if (message.author.id == bot.user.id) return;
   let antispam = announcerConf.antispam || true;
   if (antispam) {
@@ -81,7 +82,7 @@ function handleAnnounce(name, _by) {
   var channel = bot.channels.find('id', announce.channel);
   if (!channel) {
     logger.warn("Can't handle announce %s - Unknown channel", name);
-    purrplingBot.logEvent(`Announce '${announce.name}' can't be handled! Channel '${name}' is UNKNOWN!'`, "Announce:Handle", "ERROR");
+    PurrplingBot.logEvent(`Announce '${announce.name}' can't be handled! Channel '${name}' is UNKNOWN!'`, "Announce:Handle", "ERROR");
     return false;
   }
   if ((announcerConf.antispam || true) && _by == INTERVAL_TRIGGER && !announce.neverHandled) {
@@ -93,12 +94,12 @@ function handleAnnounce(name, _by) {
       let activeThres =  announcerConf.activityLinesThreshold || 1;
       if (msgs.length < activeThres) {
         logger.log("Can't handle announce %s - No activity in #%s", announce.name, channel.name);
-        purrplingBot.logEvent(`Announce '${announce.name}' not handled - Channel ${channel.name} is inactive! Adding to queue.`, "Announce:ChannelInactive");
+        PurrplingBot.logEvent(`Announce '${announce.name}' not handled - Channel ${channel.name} is inactive! Adding to queue.`, "Announce:ChannelInactive");
         repeater.addToQueue(announce);
         return false;
       }
   }
-  purrplingBot.logEvent(`Handle announce '${announce.name}', Channel: ${channel.name}, HandledBy: ${_by}, NeverHandled: ${announce.neverHandled}`, "Announce:Handle");
+  PurrplingBot.logEvent(`Handle announce '${announce.name}', Channel: ${channel.name}, HandledBy: ${_by}, NeverHandled: ${announce.neverHandled}`, "Announce:Handle");
   announce.neverHandled = false;
   announce.lastHandle = new Date();
   channel.send(announce.message)
@@ -117,7 +118,7 @@ function cancelAnnounce(name) {
       announces[name].active = false;
     }
     return true;
-    purrplingBot.logEvent(`Canceled runner of announce '${announce.name}', NeverHandled: ${announce.neverHandled}`, "Announce:Cancel");
+    PurrplingBot.logEvent(`Canceled runner of announce '${announce.name}', NeverHandled: ${announce.neverHandled}`, "Announce:Cancel");
   logger.info(`Canceled runner of announce '${name}'`);
   } catch(err) {
     logger.error("Can't cancel announce '%s' - FATAL ERROR", name);
@@ -152,7 +153,7 @@ function resumeAnnounce(name, interval, neverHandledFlag = false) {
     announceRunners[name] = runner;
     announce.active = true;
     if (neverHandledFlag) announce.neverHandled = true;
-    purrplingBot.logEvent(`Resumed announce '${announce.name}', Interval: ${announce.interval}, NeverHandled: ${announce.neverHandled}`, "Announce:Resume");
+    PurrplingBot.logEvent(`Resumed announce '${announce.name}', Interval: ${announce.interval}, NeverHandled: ${announce.neverHandled}`, "Announce:Resume");
     logger.info(`Resumed announce: ${announce.name} (Interval: ${announce.interval})`);
     return announce;
   } catch (err) {
@@ -162,170 +163,179 @@ function resumeAnnounce(name, interval, neverHandledFlag = false) {
   }
 }
 
-function execSubCommand(scmd, args, message) {
-  switch (scmd) {
-    case 'add':
-      if (args.length < 4) {
-        message.reply("Invalid parameters!")
-        .then(logger.info(`Invalid parameters for ADD User: ${message.author.username} in #${message.channel.name}`))
-        .catch(logger.error);
-        return;
-      }
-      var name = args.shift();
-      var interval = args.shift();
-      var channel = args.shift();
-      var _message = args.join(' ');
-      if (announces[name]) {
-        logger.info(`Announce '${name}' already exists! User: ${message.author.username} in #${message.channel.name}`);
-        message.reply(`Can't add announce '${name}' - Announce already exists!`)
-        .catch(logger.error);
-        return;
-      }
-      if (!message.guild.channels.find('id', utils.parseChannelID(channel))) {
-        var _channel = message.guild.channels.find('name', channel);
-        if (_channel) {
-          channel = _channel.id;
-        } else {
-          logger.info(`Invalid channel '${channel}' for announce! User: ${message.author.username} in #${message.channel.name}`);
-          message.reply(`Invalid channel '${channel}' for announce!`)
-          .catch(logger.error);
-          return;
-        }
-      }
-      announces[name] = {
-        "name": name,
-        "interval": interval,
-        "channel": utils.parseChannelID(channel),
-        "message": _message,
-        "active": false,
-        "neverHandled": true
-      };
-      storeAnnounces();
-      message.channel.send(`Announce '${name}' added! Activate it by '!announce resume ${name}'`)
-      .then(logger.info(`Announce '${name}' added! User: ${message.author.username} in #${message.channel.name}}`))
-      .catch(logger.error);
-    break;
-    case 'rm':
-      if (args.length < 1) {
-        message.reply("Invalid arguments!")
-        .then(logger.info(`Invalid arguments for remove announce! User: ${message.author.username} in #${message.channel.name}`))
-        .catch(logger.error);
-        return;
-      }
-      var name = args[0];
-      var runner = announceRunners[name];
-      if (runner) {
-        cancelAnnounce(name);
-      }
-      delete announces[name];
-      storeAnnounces();
-      message.channel.send(`Announce '${name}'' removed!`)
-      .then(logger.info(`Announce '${name}'' removed! User: ${message.author.username} in #${message.channel.name}`))
-      .catch(logger.error);
-    break;
-    case 'list':
-      if (!Object.keys(announces).length) {
-        message.channel.send(`Announces list is empty!`)
-        .then(logger.info(`Announces list is empty! User: ${message.author.username} in #${message.channel.name}`))
-        .catch(logger.error);
-        return;
-      }
-      var announces_print = "";
-      for (announceName in announces) {
-        var announce = announces[announceName];
-        announces_print += "Announce '" + announce.name + "' (" + announce.interval + ") in <#" + announce.channel + "> - " + (announce.active ? "ACTIVE" : "INACTIVE") + (announceRunners[announce.name] ? " [RUNNING]" : " [STOPPED]") + "\n";
-      }
-      message.channel.send(announces_print)
-      .then(logger.info(`Announces list sent! Announces count: ${Object.keys(announces).length}\t User: ${message.author.username} in #${message.channel.name}`))
-      .catch(logger.error);
-    break;
-    case 'cancel':
-      if (args.length < 1) {
-        message.reply("Invalid arguments!")
-        .then(logger.info(`Invalid arguments for cancel announce! User: ${message.author.username} in #${message.channel.name}`))
-        .catch(logger.error);
-        return;
-      }
-      var name = args[0];
-      var runner = announceRunners[name];
-      if (!runner) {
-        message.reply(`Announce '${name}' not active and not running!`)
-        .then(logger.info(`Announce '${name}' not active and not running! User: ${message.author.username} in #${message.channel.name}`))
-        .catch(logger.error);
-        return;
-      }
-      if (cancelAnnounce(name)) {
-        storeAnnounces();
-        message.reply(`Announce '${name}' canceled!`)
-        .catch(logger.error);
-      } else {
-        message.reply(`Can't cancel announce '${name}'`)
-        .catch(logger.error);
-      }
-    break;
-    case 'resume':
-      if (args.length < 1) {
-        message.reply("Invalid arguments!")
-        .then(logger.info(`Invalid arguments for resume announce! User: ${message.author.username} in #${message.channel.name}`))
-        .catch(logger.error);
-        return;
-      }
-      var name = args[0];
-      var interval = args[1];
-      var announce = resumeAnnounce(name, interval, true);
-      if (!announce) {
-        message.reply(`Can't resume Announce '${name}' - Unknown error`)
-        .catch(logger.error);
-        return;
-      }
-      if (announce.error) {
-        message.reply(`${announce.message}`)
-        .catch(logger.error);
-        return;
-      }
-      storeAnnounces();
-      message.channel.send(`Announce '${announce.name}' resumed with interval ${announce.interval}`)
-      .then(logger.info(`Announce '${announce.name}' resumed with interval ${announce.interval}\t User: ${message.author.username} in #${message.channel.name}`))
-      .catch(logger.error);
-    break;
-    case 'handle':
-      if (args.length < 1) {
-        message.reply("Invalid arguments!")
-        .then(logger.info(`Invalid arguments for handle announce! User: ${message.author.username} in #${message.channel.name}`))
-        .catch(logger.error);
-        return;
-      }
-      var name = args[0];
-      if (handleAnnounce(name, message.author.username)) {
-        message.reply(`Announce '${name}' handled!`)
-        .catch(logger.error);
-        return;
-      }
-      message.reply(`Can't handle Announce '${name}'!`)
-      .catch(logger.error);
-    break;
-    case 'help':
-      var help_text = "Availaible subcomands: \n\n"
-      + "`add <name> <interval> <channel> <message>` - Add an announcer. Interval examples: 10s, 5m, 1h25m, 1h45m30s.\n"
-      + "`rm <name>` - Remove an announcer\n"
-      + "`list` - List announces\n"
-      + "`resume <name> [<interval>]` - Resume an announcer to ACTIVE state and start the runner. Interval examples: 10s, 5m, 1h25m, 1h45m30s.\n"
-      + "`cancel <name>` - Cancel an announcer to INACTIVE atate and stop the runner.\n"
-      + "`handle <name>` - Manually handle an announcer.\n"
-      + "`help` - This help message\n";
-      message.channel.send(help_text)
-      .then(logger.log(`Announces help sent! User: ${message.author.username} in #${message.channel.name}`))
+function execAdd(cmdMessage) {
+  if (cmdMessage.args.length < 4) {
+    cmdMessage.reply("Invalid parameters!")
+    .then(logger.info(`Invalid parameters for ADD User: ${cmdMessage.caller.username} in #${cmdMessage.channel.name}`))
+    .catch(logger.error);
+    return;
+  }
+  var name = cmdMessage.args.shift();
+  var interval = cmdMessage.args.shift();
+  var channel = cmdMessage.args.shift();
+  var _message = cmdMessage.args.join(' ');
+  if (announces[name]) {
+    logger.info(`Announce '${name}' already exists! User: ${cmdMessage.caller.username} in #${cmdMessage.channel.name}`);
+    cmdMessage.reply(`Can't add announce '${name}' - Announce already exists!`)
+    .catch(logger.error);
+    return;
+  }
+  if (!cmdMessage.guild.channels.find('id', utils.parseChannelID(channel))) {
+    var _channel = cmdMessage.guild.channels.find('name', channel);
+    if (_channel) {
+      channel = _channel.id;
+    } else {
+      logger.info(`Invalid channel '${channel}' for announce! User: ${cmdMessage.caller.username} in #${cmdMessage.channel.name}`);
+      cmdMessage.reply(`Invalid channel '${channel}' for announce!`)
       .catch(logger.error);
       return;
-    break;
-    default:
-      message.reply(`Unknown announcer subcommand: ${scmd}`)
-      .then(logger.info(`Unknown announcer subcommand: ${scmd}`))
-      .catch(logger.error);
+    }
+  }
+  announces[name] = {
+    "name": name,
+    "interval": interval,
+    "channel": utils.parseChannelID(channel),
+    "message": _message,
+    "active": false,
+    "neverHandled": true
+  };
+  storeAnnounces();
+  cmdMessage.channel.send(`Announce '${name}' added! Activate it by '!announce resume ${name}'`)
+  .then(logger.info(`Announce '${name}' added! User: ${cmdMessage.caller.username} in #${cmdMessage.channel.name}}`))
+  .catch(logger.error);
+}
+
+function execResume(cmdMessage) {
+  if (cmdMessage.args.length < 1) {
+    cmdMessage.reply("Invalid arguments!")
+    .then(logger.info(`Invalid arguments for resume announce! User: ${cmdMessage.caller.username} in #${cmdMessage.channel.name}`))
+    .catch(logger.error);
+    return;
+  }
+  var name = cmdMessage.args[0];
+  var interval = cmdMessage.args[1];
+  var announce = resumeAnnounce(name, interval, true);
+  if (!announce) {
+    cmdMessage.reply(`Can't resume Announce '${name}' - Unknown error`)
+    .catch(logger.error);
+    return;
+  }
+  if (announce.error) {
+    cmdMessage.reply(`${announce.cmdMessage}`)
+    .catch(logger.error);
+    return;
+  }
+  storeAnnounces();
+  cmdMessage.channel.send(`Announce '${announce.name}' resumed with interval ${announce.interval}`)
+  .then(logger.info(`Announce '${announce.name}' resumed with interval ${announce.interval}\t User: ${cmdMessage.caller.username} in #${cmdMessage.channel.name}`))
+  .catch(logger.error);
+}
+
+function execCancel(cmdMessage) {
+  if (cmdMessage.args.length < 1) {
+    cmdMessage.reply("Invalid arguments!")
+    .then(logger.info(`Invalid arguments for cancel announce! User: ${cmdMessage.caller.username} in #${cmdMessage.channel.name}`))
+    .catch(logger.error);
+    return;
+  }
+  var name = cmdMessage.args[0];
+  var runner = announceRunners[name];
+  if (!runner) {
+    cmdMessage.reply(`Announce '${name}' not active and not running!`)
+    .then(logger.info(`Announce '${name}' not active and not running! User: ${cmdMessage.caller.username} in #${cmdMessage.channel.name}`))
+    .catch(logger.error);
+    return;
+  }
+  if (cancelAnnounce(name)) {
+    storeAnnounces();
+    cmdMessage.reply(`Announce '${name}' canceled!`)
+    .catch(logger.error);
+  } else {
+    cmdMessage.reply(`Can't cancel announce '${name}'`)
+    .catch(logger.error);
   }
 }
 
-exports.announce = {
+function execList(cmdMessage) {
+  if (!Object.keys(announces).length) {
+    cmdMessage.channel.send(`Announces list is empty!`)
+    .then(logger.info(`Announces list is empty! User: ${cmdMessage.caller.username} in #${cmdMessage.channel.name}`))
+    .catch(logger.error);
+    return;
+  }
+  var announces_print = "";
+  for (announceName in announces) {
+    var announce = announces[announceName];
+    announces_print += "Announce '" + announce.name + "' (" + announce.interval + ") in <#" + announce.channel + "> - " + (announce.active ? "ACTIVE" : "INACTIVE") + (announceRunners[announce.name] ? " [RUNNING]" : " [STOPPED]") + "\n";
+  }
+  cmdMessage.channel.send(announces_print)
+  .then(logger.info(`Announces list sent! Announces count: ${Object.keys(announces).length}\t User: ${cmdMessage.caller.username} in #${cmdMessage.channel.name}`))
+  .catch(logger.error);
+}
+
+function execHandle(cmdMessage) {
+  if (cmdMessage.args.length < 1) {
+    cmdMessage.reply("Invalid arguments!")
+    .then(logger.info(`Invalid arguments for handle announce! User: ${cmdMessage.caller.username} in #${cmdMessage.channel.name}`))
+    .catch(logger.error);
+    return;
+  }
+  var name = cmdMessage.args[0];
+  if (handleAnnounce(name, cmdMessage.caller.username)) {
+    cmdMessage.reply(`Announce '${name}' handled!`)
+    .catch(logger.error);
+    return;
+  }
+  cmdMessage.reply(`Can't handle Announce '${name}'!`)
+  .catch(logger.error);
+}
+
+function execRm(cmdMessage) {
+  if (cmdMessage.args.length < 1) {
+    cmdMessage.reply("Invalid arguments!")
+    .then(logger.info(`Invalid arguments for remove announce! User: ${cmdMessage.caller.username} in #${cmdMessage.channel.name}`))
+    .catch(logger.error);
+    return;
+  }
+  var name = cmdMessage.args[0];
+  var runner = announceRunners[name];
+  if (runner) {
+    cancelAnnounce(name);
+  }
+  delete announces[name];
+  storeAnnounces();
+  cmdMessage.channel.send(`Announce '${name}'' removed!`)
+  .then(logger.info(`Announce '${name}'' removed! User: ${cmdMessage.caller.username} in #${cmdMessage.channel.name}`))
+  .catch(logger.error);
+}
+
+function createAnnounceCommand() {
+  var announceCmd = new SimpleGroupCommand(PurrplingBot.Commander)
+    .setDescription("Control an Announcer")
+    .setUsage("<add|rm|list|resume|cancel|handle|help> [options/args]")
+    .setBotAdminOnly(true);
+  announceCmd.createSubcommand("add", execAdd)
+    .setDescription("Add an announcer. Interval examples: 10s, 5m, 1h25m, 1h45m30s.")
+    .setUsage("<name> <interval> <channel> <message>");
+  announceCmd.createSubcommand("rm", execRm)
+    .setDescription("Remove an announce.")
+    .setUsage("<name>");
+  announceCmd.createSubcommand("list", execList)
+    .setDescription("List announces");
+  announceCmd.createSubcommand("resume", execResume)
+    .setDescription("Resume an announcer to ACTIVE state and start the runner. Interval examples: 10s, 5m, 1h25m, 1h45m30s.")
+    .setUsage("<name> [<interval>]");
+  announceCmd.createSubcommand("cancel", execCancel)
+    .setDescription("Cancel an announcer to INACTIVE atate and stop the runner.")
+    .setUsage("<name>");
+  announceCmd.createSubcommand("handle", execHandle)
+    .setDescription("Manually handle an announce.")
+    .setUsage("<name>");
+  return announceCmd;
+}
+
+exports.announce = createAnnounceCommand();
+/*exports.announce = {
   "description": "Control an Announcer",
   "usage": "<add|rm|list|resume|cancel|handle|help> [options/args]",
   "exec": function(message, tail, authority) {
@@ -343,10 +353,10 @@ exports.announce = {
     logger.log(`Handle subcommand: ${tail} on #${message.channel.name} by ${message.author.username}`);
     execSubCommand(scmd, args, message);
   }
-}
+}*/
 
 // Avoid plugin run standalone
 if (require.main === module) {
-  console.error("This plugin cannot be run standalone! Run 'node purrplingBot.js' instead.");
+  console.error("This plugin cannot be run standalone! Run 'node PurrplingBot.js' instead.");
   process.exit(1);
 }
