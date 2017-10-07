@@ -11,7 +11,7 @@ class SimpleCommand extends Command {
   __exec(message, authority) {
     if (typeof this.callback !== "function")
       throw new Error("Invalid or none callback for execute command!");
-    this.callback(message, tail, authority);
+    this.callback(message, authority);
   }
 
   setDescription(desc) {

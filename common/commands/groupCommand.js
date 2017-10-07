@@ -25,8 +25,8 @@ class GroupCommand extends Command {
     }
     let cmdObject = this.cmds[subCmd];
     if (!cmdObject) {
-      cmdMessage.reply(`Unknown command \`${argv.toString(true)}\``)
-      .then(this.logger.info(`Unknown subcommand \`${argv.toString(true)}\``))
+      cmdMessage.reply(`Unknown command \`${prefix}${cmd} ${subCmd}\``)
+      .then(this.logger.info(`Unknown subcommand \`${prefix}${cmd} ${subCmd}\``))
       .catch(this.logger.error);
       return;
     }
