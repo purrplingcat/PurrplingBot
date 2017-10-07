@@ -116,9 +116,9 @@ function cancelAnnounce(name) {
     } else {
       announces[name].active = false;
     }
-    return true;
     purrplingBot.logEvent(`Canceled runner of announce '${announce.name}', NeverHandled: ${announce.neverHandled}`, "Announce:Cancel");
-  logger.info(`Canceled runner of announce '${name}'`);
+    logger.info(`Canceled runner of announce '${name}'`);
+    return true;
   } catch(err) {
     logger.error("Can't cancel announce '%s' - FATAL ERROR", name);
     logger.error(err);
