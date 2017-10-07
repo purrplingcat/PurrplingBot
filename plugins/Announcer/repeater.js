@@ -69,6 +69,10 @@ class Repeater extends EventEmiter {
     return queue;
   }
 
+  isInQueue(announceName) {
+    return this._queue[announceName] != null;
+  }
+
   get options() {
     return this._options;
   }
@@ -76,6 +80,7 @@ class Repeater extends EventEmiter {
   get queue() {
     return this._queue;
   }
+
 }
 
 // Call only as callback from instance of Repeater

@@ -1,6 +1,7 @@
 const PurrplingBot = require("../../purrplingbot.js");
 const SimpleGroupCommand = require("../../common/commands/simpleGroupCommand");
 const durationParse = require("duration-parser");
+const moment = require('moment');
 var bot = PurrplingBot.getDiscordClient();
 var store = PurrplingBot.getStore();
 var config = PurrplingBot.getConfiguration();
@@ -117,9 +118,9 @@ function cancelAnnounce(name) {
     } else {
       announces[name].active = false;
     }
-    return true;
     PurrplingBot.logEvent(`Canceled runner of announce '${announce.name}', NeverHandled: ${announce.neverHandled}`, "Announce:Cancel");
-  logger.info(`Canceled runner of announce '${name}'`);
+    logger.info(`Canceled runner of announce '${name}'`);
+    return true;
   } catch(err) {
     logger.error("Can't cancel announce '%s' - FATAL ERROR", name);
     logger.error(err);
@@ -309,10 +310,37 @@ function execRm(cmdMessage) {
   .catch(logger.error);
 }
 
+function execShow(cmdMessage) {
+  if (cmdMessage.args.length < 1) {
+    cmdMessage.reply("Invalid arguments!")
+    .then(logger.info(`Invalid arguments for show announce! User: ${cmdMessage.caller.username} in #${cmdMessage.channel.name}`))
+    .catch(logger.error);
+    return;
+  }
+  var name = cmdMessage.args[0];
+  var announce = announces[name];
+  if (!announce) {
+    cmdMessage.reply(`Announce ${name} not exists!`)
+    .then(logger.info("Can't show information about unexisted announce! Channel: #%s by %s", cmdMessage.channel.name, cmdMessage.caller.username))
+    .catch(logger.error);
+    return;
+  }
+  var announce_print = "Announce: " + announce.name 
+      + "\nInterval: " + announce.interval 
+      + "\nChannel: <#" + announce.channel + ">" 
+      + "\nStatus: " + (announce.active ? "ACTIVE" : "INACTIVE") + (announceRunners[announce.name] ? " [RUNNING]" : " [STOPPED]")
+      + "\nLast try: " + (announce.lastTry ? moment(announce.lastTry).format("DD.MM.YYYY HH:mm:ss") : "never")
+      + "\nLast handle: " + (announce.lastHandle ? moment(announce.lastHandle).format("DD.MM.YYYY HH:mm:ss") : "never")
+      + "\nIn repeater queue: " + (repeater.isInQueue(announce.name) ? "yes" : "no")
+      + "\nMessage: " + announce.message;
+  cmdMessage.channel.send(announce_print)
+  .then(logger.log("Announce info '%s' sent to #%s requested by: %s", announce.name, cmdMessage.channel.name, cmdMessage.caller.username))
+  .catch(logger.error);
+}
+
 function createAnnounceCommand() {
   var announceCmd = new SimpleGroupCommand(PurrplingBot.Commander)
     .setDescription("Control an Announcer")
-    .setUsage("<add|rm|list|resume|cancel|handle|help> [options/args]")
     .setBotAdminOnly(true);
   announceCmd.createSubcommand("add", execAdd)
     .setDescription("Add an announcer. Interval examples: 10s, 5m, 1h25m, 1h45m30s.")
@@ -330,6 +358,9 @@ function createAnnounceCommand() {
     .setUsage("<name>");
   announceCmd.createSubcommand("handle", execHandle)
     .setDescription("Manually handle an announce.")
+    .setUsage("<name>");
+  announceCmd.createSubcommand("show", execShow)
+    .setDescription("Show announce information")
     .setUsage("<name>");
   return announceCmd;
 }
