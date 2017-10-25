@@ -1,5 +1,7 @@
 # PurrplingBot
 
+[![CircleCI](https://circleci.com/gh/EllenFawkes/PurrplingBot.svg?style=svg)](https://circleci.com/gh/EllenFawkes/PurrplingBot)
+
 A discordbot written primary for server PurrplingCat
 
 **This project is under development!**
