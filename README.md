@@ -111,9 +111,17 @@ docker run -ti purrplingcat/purrplingbot:<version>
 
 #### Build your own ARM64 image
 
-1. Same as previous, however you need to `docker build --build-arg baseimage=arm64v8/node:8.5.0-slim -t <yourname>/purrlingbot-arm64 .` or whichever is relevant for your architecture.`
+1. Same as previous, however you need to `docker build --build-arg baseimage=arm64v8/node:8.5.0-slim -t <yourname>/purrlingbot-arm64 .` or whichever is relevant for your architecture.
 
 **NOTE:** At --build-arg you can place your own base image for different architectures or own baseimage. **This is not officially supported!**
+
+## Maintenance
+
+| Version | Released   | EOL       | Maintained |
+|---------|------------|-----------|------------|
+| 1.3     | 2017-09-23 | Dec, 2017 | YES        |
+| 1.2     | 2017-07-30 | Oct, 2017 | NO         |
+| 1.1     | 2017-07-26 | Sep, 2017 | NO         |
 
 ## Bug reporting
 
