@@ -117,12 +117,12 @@ docker run -ti purrplingcat/purrplingbot:<version>
 
 ## Maintenance
 
-| Version | Released   | EOL       | Maintained |
-|---------|------------|-----------|------------|
-| 1.3     | 2017-09-23 | Dec, 2017 | YES        |
-| 1.2     | 2017-07-30 | Oct, 2017 | NO         |
-| 1.1     | 2017-07-26 | Sep, 2017 | NO         |
-| 1.0     | 2017-06-11 | Jul, 2017 | NO         |
+| Version | Codename | Released   | EOL       | Maintained |
+|---------|----------|------------|-----------|------------|
+| 1.3     | Carmilla | 2017-09-23 | Dec, 2017 | YES        |
+| 1.2     | Carmilla | 2017-07-30 | Oct, 2017 | NO         |
+| 1.1     | Chiara   | 2017-07-26 | Sep, 2017 | NO         |
+| 1.0     |          | 2017-06-11 | Jul, 2017 | NO         |
 
 ## Bug reporting
 
