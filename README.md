@@ -2,9 +2,38 @@
 
 [![CircleCI](https://circleci.com/gh/EllenFawkes/PurrplingBot.svg?style=svg)](https://circleci.com/gh/EllenFawkes/PurrplingBot)
 
-A discordbot written primary for server PurrplingCat
+A customizable discordbot written primary for server PurrplingCat
 
 **This project is under development!**
+
+## Main features
+
+- Extensible and customizable via plugins (plugins can be enabled or disabled optionally)
+- Chat bridge betwen Discord and Twitch chat
+- Twitch stream checker (Automatically check when you are streaming, or check it via `!livenow`)
+- Announcer (send a message in intervals, announcer can be handled when channel is active. Setup announce via !announce)
+- Own cron sheduler for bot actions (send message, change avatar) - You can write your own cron handler
+- Funny functions: Give a snack for bot, bot mumbling, cat nature - Yes this bot is cat!
+- Itegrates Urbandictionary `!urban`, Giphy `!giphy`
+- Wordcounter with score table (commands `!words`, `!messages`, `!fame`)
+- Create a polls via `!poll`
+- Aliases support - Create your command alias via `!alias`
+- Bot greetings newbies
+- Built-in commands: `!alias`, `!alias_remove`, `!uptime`, `!version`
+- and more ...
+
+### Features for admins and developers
+
+- Based on Discord.js (version 11.2)
+- Event logging to a secret discord channel (Yo can define it in config)
+- Event bus - Emit&Handle bot's events
+- Easy but sophisticated API for plugin development (WIP)
+- Data storage
+- Advanced configuration (YAML, file inclusion, config merge (WIP))
+- Writing own commands in plugins
+- User permissons and roles (ACL)
+- Docker ready
+- Supported architectures: x86_64, arm64
 
 ## Get PurrplingBot
 
