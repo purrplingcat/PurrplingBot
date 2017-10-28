@@ -10,7 +10,7 @@ var logger = LOGGER.createLogger("Commander");
 class Commander {
   constructor(core, cmdPrefix) {
     this.core = core;
-    this.cmdPrefix = cmdPrefix;
+    this.cmdPrefix = cmdPrefix || '!';
     this._commandsHandledCount = 0;
     this.aliases = {};
     this.cmds = new Discord.Collection();

@@ -39,6 +39,11 @@ class SimpleCommand extends Command {
     return this;
   }
 
+  setGuildOwnerOnly(val = true) {
+    this.guildOwnerOnly = val;
+    return this;
+  }
+
   setRestrictions(perms) {
     this.restrictions = perms;
     return this;

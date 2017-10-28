@@ -350,7 +350,7 @@ function execEditmsg(cmdMessage) {
   var announce = announces[name];
   var oldMessage = announce.message;
   announce.message = message;
-  cmdMessage.channel.send(`Message of announce '${announce.name} has changed from "${oldMessage}" to "${announce.message}`);
+  cmdMessage.channel.send(`Message of announce '${announce.name} has changed from "${oldMessage}" to "${announce.message}"`);
   logger.log("Message of announce '%s' has changed! User: %s Channel: #%s", announce.name, cmdMessage.caller.username, cmdMessage.channel.name);
 }
 
@@ -385,25 +385,6 @@ function createAnnounceCommand() {
 }
 
 exports.announce = createAnnounceCommand();
-/*exports.announce = {
-  "description": "Control an Announcer",
-  "usage": "<add|rm|list|resume|cancel|handle|help> [options/args]",
-  "exec": function(message, tail, authority) {
-    if (!authority.BotAdmin) {
-      message.reply("You are not permitted to use this command!")
-      .then(logger.info(`User '${message.author.username}' has no permissions for command 'announce'!`))
-      .catch(logger.error);
-      return;
-    }
-    if (!tail.length || tail == null) {
-      tail = "help";
-    }
-    var args = tail.split(" ");
-    var scmd = args.shift();
-    logger.log(`Handle subcommand: ${tail} on #${message.channel.name} by ${message.author.username}`);
-    execSubCommand(scmd, args, message);
-  }
-}*/
 
 // Avoid plugin run standalone
 if (require.main === module) {
