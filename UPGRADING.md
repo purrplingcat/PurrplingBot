@@ -23,10 +23,18 @@ Migrate your configs by steps in [Configuration migration](#configuration-migrat
 ### Migrate 1.3.x -> 1.4.0
 
 - Convert your JSON config files to YAML (recommended, but it's not required)
+- If you using original mumblebox, catsnack and/or catnature dataconf(s), then you change extension *.js* to *.yaml* in your `@imports` section.
+  ```yaml
+  "@imports":
+    mumblebox: extras/mumblebox.yaml   # from extras/mumblebox.json
+    catsnack: extras/catsnack.yaml     # from extras/catsnack.json
+    catnature: extras/catnature.yaml   # from extras/catnature.yaml
+  ```
 - If you want use cron plugin, then:
   - Add following line to your config file into `@imports` section:
-  ```
-  cron: config/cron.yaml
+  ```yaml
+  "@imports":
+    cron: config/cron.yaml
   ```
   - Rename *config/cron.example.yaml* to *config/cron.yaml*
   - Configure your cron jobs in *vonfig/cron.yaml*
