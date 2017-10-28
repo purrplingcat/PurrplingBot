@@ -40,7 +40,8 @@ A customizable discordbot written primary for server PurrplingCat
 ### Regular download
 
 * Latest stable version 1.3.4: [Release v1.3.4 'Carmilla'](https://github.com/EllenFawkes/PurrplingBot/releases/tag/1.3.4)
-* Develop version 1.4.0-dev: `git clone https://github.com/EllenFawkes/PurrplingBot.git`
+* Release candidate version 1.4.0: [Release v1.4.0-rc 'Carmilla'](https://github.com/EllenFawkes/PurrplingBot/releases/tag/1.4.0-rc)
+* Develop version: `git clone https://github.com/EllenFawkes/PurrplingBot.git`
 
 ### Get image from DockerHub
 
