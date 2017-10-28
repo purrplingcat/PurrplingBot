@@ -20,6 +20,17 @@ Migrate your configs by steps in [Configuration migration](#configuration-migrat
 
 ## Configuration migration
 
+### Migrate 1.3.x -> 1.4.0
+
+- Convert your JSON config files to YAML (recommended, but it's not required)
+- If you want use cron plugin, then:
+  - Add following line to your config file into `@imports` section:
+  ```
+  cron: config/cron.yaml
+  ```
+  - Rename *config/cron.example.yaml* to *config/cron.yaml*
+  - Configure your cron jobs in *vonfig/cron.yaml*
+
 ### Migrate: 1.2.3 -> 1.3.0
 
 - Move your _config.json_ to **config/config.json**
