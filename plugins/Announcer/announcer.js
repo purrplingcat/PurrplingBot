@@ -338,6 +338,22 @@ function execShow(cmdMessage) {
   .catch(logger.error);
 }
 
+function execEditmsg(cmdMessage) {
+  if (cmdMessage.args.length < 2) {
+    cmdMessage.reply("Invalid arguments!")
+    .then(logger.info(`Invalid arguments for edit announce message! User: ${cmdMessage.caller.username} in #${cmdMessage.channel.name}`))
+    .catch(logger.error);
+    return;
+  }
+  var name = cmdMessage.args.shift();
+  var message = cmdMessage.args.join(' ');
+  var announce = announces[name];
+  var oldMessage = announce.message;
+  announce.message = message;
+  cmdMessage.channel.send(`Message of announce '${announce.name} has changed from "${oldMessage}" to "${announce.message}`);
+  logger.log("Message of announce '%s' has changed! User: %s Channel: #%s", announce.name, cmdMessage.caller.username, cmdMessage.channel.name);
+}
+
 function createAnnounceCommand() {
   var announceCmd = new SimpleGroupCommand(PurrplingBot.Commander)
     .setDescription("Control an Announcer")
@@ -362,6 +378,9 @@ function createAnnounceCommand() {
   announceCmd.createSubcommand("show", execShow)
     .setDescription("Show announce information")
     .setUsage("<name>");
+  announceCmd.createSubcommand("editmsg", execEditmsg)
+    .setDescription("Edit a message of an announce")
+    .setUsage("<announceName> <newMessage>");
   return announceCmd;
 }
 

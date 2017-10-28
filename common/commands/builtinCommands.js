@@ -125,7 +125,7 @@ class PingBuiltin extends Command {
 
   __exec(cmdMessage) {
     cmdMessage.reply("pong")
-    .then(msg => PingBuiltin.LOGGER.info(`Pong sent to ${msg.caller.username} in #${msg.channel.name}`))
+    .then(PingBuiltin.LOGGER.info(`Pong sent to ${cmdMessage.caller.username} in #${cmdMessage.channel.name}`))
     .catch(PingBuiltin.LOGGER.error);
   }
 }

@@ -89,7 +89,8 @@ class Core extends EventEmmiter {
 
   connectBot() {
     logger.info("*** Trying to connect Discord");
-    this._client.login(this._config.discord.token);
+    this._client.login(this._config.discord.token)
+      .then(logger.info("*** Connected to Discord service!"));
   }
 
   _checkConf() {

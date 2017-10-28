@@ -60,7 +60,7 @@ class Command {
    * @magic
    */
   __exec(message, authority) {
-    throw new Error('You have to implement the method exec()!');
+    throw new Error('You have to implement the method __exec()!');
   }
 
   _isExecPermitted(authority) {
