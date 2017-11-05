@@ -3,6 +3,11 @@
 # Check https://circleci.com/docs/2.0/language-javascript/ for more details
 #
 version: 2
+branches:
+  ignore:
+    - v1.1.x
+    - v1.2.x
+    - v1.3.x
 jobs:
   build:
     docker:
