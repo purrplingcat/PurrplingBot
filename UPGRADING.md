@@ -23,6 +23,12 @@ Migrate your configs by steps in [Configuration migration](#configuration-migrat
 ### Migrate 1.3.x -> 1.4.0
 
 - Convert your JSON config files to YAML (recommended, but it's not required)
+- **IMPORTANT** Admin definition has changed! Now used user ids instead of usernames. Change usernames to user ids in section `admins`
+  ```yaml
+  admins:
+    - '300514265149058051' # PurrplingCat
+    - '165865106244517376' # CallMeFoxie
+  ```
 - If you using original mumblebox, catsnack and/or catnature dataconf(s), then you change extension *.js* to *.yaml* in your `@imports` section.
   ```yaml
   "@imports":
