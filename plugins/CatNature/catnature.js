@@ -50,40 +50,40 @@ exports.cuddle = {
   "exec": function(message) {
     var content = do_mischief(CAT_CUDDLES, message.author);
     message.channel.send(content)
-    .then(logger.info("Sent a cuddle: %s to #%s requested by: %s"), content, message.channel.name, message.author.username);
+    .then(logger.info("Sent a cuddle: %s to #%s requested by: %s", content, message.channel.name, message.author.username));
   }
 };
 
 exports.scratch = {
   "description": "Tell cat, what do scratching or who",
   "usage": "[<user/thing>]",
-  "exec": function(message) {
+  "exec": function(message, tail) {
     if (!tail) tail = message.author;
     var content = do_mischief(CAT_SCRATCHES, tail);
     message.channel.send(content)
-    .then(logger.info("Sent a cuddle: %s to #%s requested by: %s"), content, message.channel.name, message.author.username);
+    .then(logger.info("Sent a cuddle: %s to #%s requested by: %s", content, message.channel.name, message.author.username));
   }
 };
 
 exports.angrycat = {
   "description": "ARRRRRRGHHHHHH!!!!!",
   "usage": "[<user/thing>]",
-  "exec": function(message) {
+  "exec": function(message, tail) {
     if (!tail) tail = message.author;
     var content = do_mischief(CAT_ANGRYCAT, tail);
     message.channel.send(content)
-    .then(logger.info("Sent a cuddle: %s to #%s requested by: %s"), content, message.channel.name, message.author.username);
+    .then(logger.info("Sent a cuddle: %s to #%s requested by: %s", content, message.channel.name, message.author.username));
   }
 };
 
 exports.hunt = {
   "description": "Give a food to our cat",
   "usage": "[<user/thing>]",
-  "exec": function(message) {
+  "exec": function(message, tail) {
     if (!tail) tail = message.author;
     var content = do_mischief(CAT_HUNT, tail);
     message.channel.send(content)
-    .then(logger.info("Sent a cuddle: %s to #%s requested by: %s"), content, message.channel.name, message.author.username);
+    .then(logger.info("Sent a cuddle: %s to #%s requested by: %s", content, message.channel.name, message.author.username));
   }
 };
 
