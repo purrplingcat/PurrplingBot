@@ -44,7 +44,7 @@ function fetchAndSendUrbanDefinition(message, term, n = 1) {
 
 exports.urban = {
   "description": "Get a funny cat!",
-  "exec": function(message) {
+  "exec": function(message, tail) {
     if (!tail) {
       message.reply("Please tell me a word and I find their definition on Urban Dictionary");
       return;
