@@ -325,12 +325,17 @@ function execShow(cmdMessage) {
     .catch(logger.error);
     return;
   }
+  let current = new Date();
+  let lastHandle = new Date(announce.lastHandle);
+  let lastTry = new Date(announce.lastTry);
+  let lastHandleHumanized = moment.duration(current.getTime() - lastHandle.getTime()).humanize();
+  let lastTryHumanized = moment.duration(current.getTime() - lastTry.getTime()).humanize();
   var announce_print = "Announce: " + announce.name 
       + "\nInterval: " + announce.interval 
       + "\nChannel: <#" + announce.channel + ">" 
       + "\nStatus: " + (announce.active ? "ACTIVE" : "INACTIVE") + (announceRunners[announce.name] ? " [RUNNING]" : " [STOPPED]")
-      + "\nLast try: " + (announce.lastTry ? moment(announce.lastTry).format("DD.MM.YYYY HH:mm:ss") : "never")
-      + "\nLast handle: " + (announce.lastHandle ? moment(announce.lastHandle).format("DD.MM.YYYY HH:mm:ss") : "never")
+      + "\nLast try: " + (announce.lastTry ? moment(announce.lastTry).format("DD.MM.YYYY HH:mm:ss") + " (" + lastTryHumanized + " ago)" : "never")
+      + "\nLast handle: " + (announce.lastHandle ? moment(announce.lastHandle).format("DD.MM.YYYY HH:mm:ss") + " (" + lastHandleHumanized + " ago)" : "never")
       + "\nIn repeater queue: " + (repeater.isInQueue(announce.name) ? "yes" : "no")
       + "\nMessage: " + announce.message;
   cmdMessage.channel.send(announce_print)
@@ -352,6 +357,15 @@ function execEditmsg(cmdMessage) {
   announce.message = message;
   cmdMessage.channel.send(`Message of announce '${announce.name} has changed from "${oldMessage}" to "${announce.message}"`);
   logger.log("Message of announce '%s' has changed! User: %s Channel: #%s", announce.name, cmdMessage.caller.username, cmdMessage.channel.name);
+}
+
+function execQueue(cmdMessage) {
+  logger.info("Announces in queue: " + repeater.queue);
+  if (!repeater.queue.length) {
+    cmdMessage.channel.send("Nothing in repeater's queue!");
+    return;
+  }
+  cmdMessage.channel.send("Announces in repeater's queue: **" + repeater.queue.join(", ") + "**");
 }
 
 function createAnnounceCommand() {
@@ -381,6 +395,8 @@ function createAnnounceCommand() {
   announceCmd.createSubcommand("editmsg", execEditmsg)
     .setDescription("Edit a message of an announce")
     .setUsage("<announceName> <newMessage>");
+  announceCmd.createSubcommand("queue", execQueue)
+    .setDescription("Get announces in repeater's queue");
   return announceCmd;
 }
 
