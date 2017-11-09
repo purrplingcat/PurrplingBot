@@ -11,7 +11,6 @@ class Repeater extends EventEmiter {
     this._options = options || {};
     this._logger = logger;
     this._queue = [];
-    this._inProcess = {};
     if (this.options.enabled) {
       this.announces = announces;
       this._logger.info("Repeater is ENABLED!");
@@ -69,7 +68,6 @@ class Repeater extends EventEmiter {
        }
       this.emit('process', announce, queue);
     });
-    this._inProcess[channel] = queue;
     setTimeout(_repeatAnnounce, durationParse(this.options.handleWait || "5m"), queue, this);
     this._logger.info("Repeater started! Announces in queue: ", queue.length);
     return queue;
@@ -89,10 +87,6 @@ class Repeater extends EventEmiter {
 
   get queue() {
     return this._queue;
-  }
-
-  get inProcess() {
-    return this._inProcess;
   }
 
 }
