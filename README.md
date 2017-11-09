@@ -1,5 +1,6 @@
 # PurrplingBot
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/fb1bf86ff5334ab2a8b7c99c36347813)](https://www.codacy.com/app/ellenfawkes/PurrplingBot?utm_source=github.com&utm_medium=referral&utm_content=EllenFawkes/PurrplingBot&utm_campaign=badger)
 [![CircleCI](https://circleci.com/gh/EllenFawkes/PurrplingBot.svg?style=svg)](https://circleci.com/gh/EllenFawkes/PurrplingBot)
 
 A customizable discordbot written primary for server PurrplingCat
