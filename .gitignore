@@ -2,6 +2,7 @@ node_modules
 npm-debug.log
 purrplingbot.log
 package-lock.json
+Dockerfile.*
 config/*.json
 config/*.yaml
 config/*.yml

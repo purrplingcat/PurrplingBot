@@ -39,7 +39,8 @@ echo -e "Target image \e[32m$OUTPUT_IMAGE\e[0m \nBase image \e[31m$BASE_IMAGE\e[
 echo
 
 sleep 5
-docker build --build-arg baseimage=$BASE_IMAGE -t $OUTPUT_IMAGE .
+sed -e "s/FROM node:8.5.0-alpine/FROM $BASE_IMAGE/" Dockerfile > Dockerfile.$ARCH
+docker build -t $OUTPUT_IMAGE ./Dockerfile.$ARCH
 
 CODE=$?
 

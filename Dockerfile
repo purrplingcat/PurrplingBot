@@ -1,5 +1,4 @@
-ARG baseimage=node:8.5.0-alpine
-FROM $baseimage
+FROM node:8.5.0-alpine
 
 LABEL com.purrplingcat.name="PurrplingBot"
 LABEL com.purrplingcat.version="1.3.0"
