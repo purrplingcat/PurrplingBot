@@ -95,7 +95,7 @@ class PluginRegistry {
 
       if (this.plugins_disabled.length) {
         logger.info("Disabled plugins: %s", this.plugins_disabled);
-      }th
+      }
       for (var pluginName in pluginList) {
         logger.info("Trying to load plugin: %s", pluginName);
         const pluginPath = pluginList[pluginName];
