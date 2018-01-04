@@ -78,7 +78,7 @@ class PluginRegistry {
           this.core.emit("pluginPreloaded", pluginName, pluginPath);
           logger.info("Enabled plugin: %s", pluginName);
         } else {
-          plugins_disabled.push(pluginName);
+          this.plugins_disabled.push(pluginName);
           logger.error("Plugin '%s' is not valid! Entry file '%s' not found - Plugin DISABLED!", pluginName, pluginPath);
         }
       } else {
@@ -94,8 +94,8 @@ class PluginRegistry {
       logger.log("Loading plugins ...");
 
       if (this.plugins_disabled.length) {
-        logger.info("Disabled plugins: %s", plugins_disabled);
-      }
+        logger.info("Disabled plugins: %s", this.plugins_disabled);
+      }th
       for (var pluginName in pluginList) {
         logger.info("Trying to load plugin: %s", pluginName);
         const pluginPath = pluginList[pluginName];
