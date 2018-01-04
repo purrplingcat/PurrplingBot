@@ -40,18 +40,18 @@ class EventLogger extends EventEmiter {
       logger.log("Can't send log event - Unknown event logging channel: %s", channelID);
       return;
     }
-    if (level == LEVELS.DEBUG && DEBUG < 1) return;
-    if (level == LEVELS.ERROR || level == "FATAL" || level == LEVELS.WARN) {
-      client.user.setStatus("dnd");
+    if (level === LEVELS.DEBUG && DEBUG < 1) return;
+    if ([LEVELS.ERROR, LEVELS.WARN, LEVELS.FATAL].indexOf(level) >= 0) {
+      client.user.setStatus(level === LEVELS.WARN ? "away" : "dnd");
       client.user.setGame(`${type} - ${msg}`);
     }
     let timestamp = moment(new Date()).format("MM/DD HH:mm:ss");
     channel.send(`${timestamp}: _${level}_ - **${type}** - ${msg}`
-    + (level == LEVELS.ERROR ? " @here" : "")
-    + (level == LEVELS.FATAL ? " BOT ABORT! @here" : ""))
+    + (level === LEVELS.ERROR ? " @here" : "")
+    + (level === LEVELS.FATAL ? " BOT ABORT! @here" : ""))
     .then(logger.log(`Event log ${type} - "${msg}" sent to #${channel.name} level: ${level}`))
     .catch(logger.error);
-    if (level == LEVELS.FATAL) {
+    if (level === LEVELS.FATAL) {
       logger.error("Bot runtime aborted, because logged FATAL event: %s", msg);
       process.exit(100);
     }
