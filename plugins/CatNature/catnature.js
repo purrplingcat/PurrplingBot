@@ -29,7 +29,7 @@ function defaultCatNature() {
 
 function do_mischief(category, prey) {
   var malice = nature[category];
-  if (!malice) return null;
+  if (!malice || !Array.isArray(malice) || !malice.length) return null;
   var rand = Math.floor((Math.random() * malice.length-1) + 1);
   logger.log("Take a number: %s", rand);
   return malice[rand].replace("%prey%", prey);
