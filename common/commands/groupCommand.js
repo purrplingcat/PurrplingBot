@@ -32,7 +32,7 @@ class GroupCommand extends Command {
     }
     if (typeof cmdObject.exec !== "function") {
       this.logger.error("Subcommand %s has'nt valid exec() method!");
-      cmdMessage.reply(`An error occured while executing subcommand \`${argv.toString(true)}\``);
+      cmdMessage.reply(`An error occured while executing subcommand \`${cmdMessage.toString(true)}\``);
     }
     cmdObject.exec(cmdMessage.shift(), authority);
   }
