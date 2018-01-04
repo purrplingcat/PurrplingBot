@@ -23,7 +23,7 @@ class Command {
 
   exec(cmdMessage, authority) {
     if (!cmdMessage.member && this.guildChannelOnly === true) {
-      cmdMessage.reply(`I'm sorry, command \`${prefix}${cmd}\` can't be executed in this channel!`)
+      cmdMessage.reply(`I'm sorry, command \`${cmdMessage.prefix}${cmd}\` can't be executed in this channel!`)
       .then(logger.warn("This command is guild channel ONLY! Can't execute it in #%s", cmdMessage.channel.name))
       .catch(logger.error);
       return;
