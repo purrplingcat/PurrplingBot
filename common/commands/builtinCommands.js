@@ -145,8 +145,8 @@ class PluginsBuiltin extends Command {
       var [ pluginName ] = cmdMessage.args;
       var plugin = plugins[pluginName];
       if (!plugin) {
-        PluginsBuiltin.LOGGER.info(`Plugin '${tail}' not exists or disabled!`);
-        cmdMessage.channel.send(`Plugin '${tail}' not exists or disabled!`);
+        PluginsBuiltin.LOGGER.info(`Plugin '${pluginName}' not exists or disabled!`);
+        cmdMessage.channel.send(`Plugin '${pluginName}' not exists or disabled!`);
         return;
       }
       var info = "Plugin: " + pluginName + "\n";
