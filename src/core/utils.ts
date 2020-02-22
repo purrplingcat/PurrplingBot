@@ -11,5 +11,5 @@ export function parseArgs(commandLine: string, prefix = "!"): string[] {
     commandLine = commandLine.substring(prefix.length);
   }
 
-  return commandLine.split(" ").slice(1);
+  return commandLine.split(" ");
 }

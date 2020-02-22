@@ -1,5 +1,4 @@
 import { Message } from "discord.js";
-import { extractCommandName } from "./utils";
 
 export interface Command {
   name: string;
@@ -24,9 +23,7 @@ export class Commander {
     return Array.from(this.registry);
   }
 
-  fetch(message: Message): Command | null {
-    const commandName = extractCommandName(message.content, this.prefix);
-
+  fetch(commandName: string): Command | null {
     return this.registry.find(
       (command) => command.name === commandName || command.aliases?.includes(commandName)
     ) || null;

@@ -14,18 +14,22 @@ export default class HelpCommand implements Command {
   }
 
   execute(message: Message, args: string[] = []): void {
-    if (args.length > 0) {
-      this.printCommandInfo(args[0], message);
+    if (args.length > 1) {
+      this.printCommandInfo(args[1], message);
       return;
     }
 
     const embed = new MessageEmbed({title: "Need a help?"});
-    const commands = this.commander.getCommands();
+    const commands = this.commander
+      .getCommands()
+      .reduce<string[]>((acc, curr) => acc.concat(curr.name, curr.aliases || []), [])
+      .sort();
+
 
     embed.setDescription(`
     You can do \`${this.commander.prefix}<command>\` to run a command, or \`${this.commander.prefix}help <command>\` for information about a specific command.\n
     **List of commands**\n
-    ${commands.map(cmd => `\`${cmd.name}\``).sort().join(", ")}
+    ${commands.map(cmdName => `\`${cmdName}\``).join(", ")}
     `);
 
     embed.setFooter(`${commands.length} commands • PurrplingBot __BOT_VERSION__ '__BOT_CODENAME__'`);

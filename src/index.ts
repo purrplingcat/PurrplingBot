@@ -1,23 +1,26 @@
 import { Client, ClientOptions } from "discord.js"
-import { registerHooks } from "@purrplingbot/client"
+import PurrplingBot from "@purrplingbot/client"
 
 type Config = {
   token: string;
   discordClient?: ClientOptions;
 }
 
-interface PurrplingBot {
+interface BotRunner {
+  version: string;
+  codename: string;
   run(): void;
 }
 
-export function create(config: Config): PurrplingBot {
+export function create(config: Config): BotRunner {
   const client = new Client(config.discordClient)
-
-  registerHooks(client);
+  const purrplingBot = new PurrplingBot(client, config.token);
 
   return {
+    version: "__BOT_VERSION__",
+    codename: "__BOT_CODENAME__",
     run(): void {
-      client.login(config.token);
+      purrplingBot.run();
     }
   }
 }
