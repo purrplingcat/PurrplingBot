@@ -1,6 +1,0 @@
-{
-  "pluginName": "Misc",
-  "description": "Core expansion plugin",
-  "type": "plugin",
-  "main": "misc.js"
-}

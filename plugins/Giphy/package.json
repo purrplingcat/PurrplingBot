@@ -1,6 +1,0 @@
-{
-  "pluginName": "Giphy",
-  "description": "Find a gif and send it to a discord channel",
-  "type": "plugin",
-  "main": "giphy.js"
-}

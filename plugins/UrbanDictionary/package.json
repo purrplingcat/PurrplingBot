@@ -1,6 +1,0 @@
-{
-  "pluginName": "UrbanDictionary",
-  "description": "Be smarter with Urbandictionary quotes!",
-  "type": "plugin",
-  "main": "urbandictionary.js"
-}

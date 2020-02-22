@@ -1,6 +1,0 @@
-{
-  "pluginName": "Meowii",
-  "description": "Cat and Fox funny gifs",
-  "type": "plugin",
-  "main": "meowi.js"
-}

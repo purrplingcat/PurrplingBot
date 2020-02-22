@@ -1,9 +1,0 @@
-{
-  "pluginName": "Twitchcord",
-  "description": "Chat messages bridge betwen Discord and Twitch worlds",
-  "type": "plugin",
-  "main": "twitchcord.js",
-  "dependencies": {
-    "tmi.js": "^1.2.1"
-  }
-}

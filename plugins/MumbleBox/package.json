@@ -1,9 +1,0 @@
-{
-  "pluginName": "MumbleBox",
-  "description": "Mumbles and reactions to text messages on Discord channels",
-  "type": "plugin",
-  "main": "urbandictionary.js",
-  "dependencies": {
-    "url-regex": "^4.1.1"
-  }
-}
