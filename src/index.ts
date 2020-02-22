@@ -1,5 +1,5 @@
 import { Client, ClientOptions } from "discord.js"
-import PurrplingBot from "@purrplingbot/client"
+import PurrplingBot from "@purrplingbot/core/PurrplingBot"
 
 type Config = {
   token: string;

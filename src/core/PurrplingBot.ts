@@ -1,11 +1,11 @@
 import { Client, Message } from "discord.js";
-import { Commander } from "./core/Commander";
-import { parseArgs, extractCommandName } from "./core/utils";
-import FunfactCommand from "./commands/Funfact";
-import NpcAdventuresCommand from "./commands/NpcAdventures";
-import HelpCommand from "./commands/Help";
-import UptimeCommand from "./commands/Uptime";
-import SmapiCommand from "./commands/Smapi";
+import { Commander } from "@purrplingbot/core/Commander";
+import { parseArgs, extractCommandName } from "./utils";
+import FunfactCommand from "@purrplingbot/commands/Funfact";
+import NpcAdventuresCommand from "@purrplingbot/commands/NpcAdventures";
+import HelpCommand from "@purrplingbot/commands/Help";
+import UptimeCommand from "@purrplingbot/commands/Uptime";
+import SmapiCommand from "@purrplingbot/commands/Smapi";
 
 export default class PurrplingBot {
   readonly client: Client;
@@ -21,7 +21,7 @@ export default class PurrplingBot {
     this.client.on("message", this.onMessage.bind(this));
   }
 
-  private onReady(): void {
+  private async onReady(): Promise<void> {
     console.log(`Logged in as ${this.client.user?.tag}`);
 
     this.commander.register(new FunfactCommand());
