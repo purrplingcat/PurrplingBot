@@ -1,12 +1,12 @@
-import { ICommand } from "@purrplingbot/core/Commander";
+import { Command } from "@purrplingbot/core/Commander";
 import { Message } from "discord.js";
 
-export default class NpcAdventuresCommand implements ICommand {
-  name: string = "npcadventures";  
-  description: string = "Are you confused about NPC Adventures?";
+export default class NpcAdventuresCommand implements Command {
+  name = "npcadventures";  
+  description = "Are you confused about NPC Adventures?";
   aliases?: string[] = ["npcadventure", "na", "shitmod"];
   usage?: string | undefined;
-  subcommands?: ICommand[] | undefined;
+  subcommands?: Command[] | undefined;
 
   execute(message: Message): void {
     message.channel.send(

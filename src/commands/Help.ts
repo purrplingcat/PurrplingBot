@@ -1,12 +1,12 @@
-import { ICommand, Commander } from "@purrplingbot/core/Commander";
+import { Command, Commander } from "@purrplingbot/core/Commander";
 import { Message, MessageEmbed } from "discord.js";
 
-export default class HelpCommand implements ICommand {
-  name: string = "help";  
-  description: string = "Need a help?";
+export default class HelpCommand implements Command {
+  name = "help";  
+  description = "Need a help?";
   aliases?: string[] | undefined;
   usage?: string | undefined;
-  subcommands?: ICommand[] | undefined;
+  subcommands?: Command[] | undefined;
   private readonly commander: Commander;
 
   constructor(commander: Commander) {
@@ -28,12 +28,12 @@ export default class HelpCommand implements ICommand {
     ${commands.map(cmd => `\`${cmd.name}\``).sort().join(", ")}
     `);
 
-    embed.setFooter(`${commands.length} commands • PurrplingBot v2.0.0`);
+    embed.setFooter(`${commands.length} commands • PurrplingBot __BOT_VERSION__ '__BOT_CODENAME__'`);
 
     message.channel.send(embed);
   }
 
-  printCommandInfo(whichCommand: string, message: Message) {
+  printCommandInfo(whichCommand: string, message: Message): void {
     const command = this.commander.getCommands().find(cmd => cmd.name === whichCommand || cmd.aliases?.includes(whichCommand));
 
     if (command == null) {
@@ -48,7 +48,7 @@ export default class HelpCommand implements ICommand {
     :information_source: Usage: \`${command.usage || "-"}\`
     :label: Aliases: ${command.aliases ? command.aliases.map(a => `\`${a}\``).join(", ") : "none"}
     `);
-    embed.setFooter("PurrplingBot v2.0.0");
+    embed.setFooter(`PurrplingBot __BOT_VERSION__ '__BOT_CODENAME__'`);
 
     message.channel.send(embed);
   }

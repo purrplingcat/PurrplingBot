@@ -7,6 +7,7 @@
   "module": "dist/purrplingbot.es.js",
   "types": "types/index.d.ts",
   "scripts": {
+    "lint": "yarn eslint . --ext .js,.jsx,.ts,.tsx",
     "build": "rollup -c",
     "watch": "rollup -cw",
     "start": "node bin/run.js"
@@ -30,19 +31,18 @@
   },
   "homepage": "https://github.com/PurrplingCat/PurrplingBot#readme",
   "dependencies": {
-    "discord.js": "discordjs/discord.js"
+    "discord.js": "discordjs/discord.js",
+    "sqlite": "^3.0.3",
+    "typeorm": "^0.2.22"
   },
   "devDependencies": {
+    "@rollup/plugin-replace": "^2.3.1",
+    "@types/node": "^13.7.4",
+    "@typescript-eslint/eslint-plugin": "^2.20.0",
+    "@typescript-eslint/parser": "^2.20.0",
+    "eslint": "^6.8.0",
     "rollup": "^1.31.1",
     "rollup-plugin-typescript2": "^0.26.0",
     "typescript": "^3.8.2"
-  },
-  "nodemonConfig": {
-    "ignore": [
-      "config/*db.*",
-      "config/storage.*",
-      "config/*.bk"
-    ],
-    "ext": "js json yaml yml"
   }
 }

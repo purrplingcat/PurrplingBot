@@ -1,0 +1,6 @@
+bin/**/*
+config/**/*
+dist/**/*
+node_modules/**/*
+types/**/*
+rollup.config.js

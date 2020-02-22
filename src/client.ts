@@ -5,7 +5,7 @@ import FunfactCommand from "./commands/Funfact";
 import NpcAdventuresCommand from "./commands/NpcAdventures";
 import HelpCommand from "./commands/Help";
 
-export function registerHooks(client: Client) {
+export function registerHooks(client: Client): void {
   const commander = new Commander();
 
   client.on("ready", () => {

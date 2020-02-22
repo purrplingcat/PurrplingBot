@@ -6,7 +6,7 @@ export function extractCommandName(commandLine: string, prefix = "!"): string {
   return commandLine.split(" ")[0];
 }
 
-export function parseArgs(commandLine: string, prefix = "!") {
+export function parseArgs(commandLine: string, prefix = "!"): string[] {
   if (commandLine.startsWith(prefix)) {
     commandLine = commandLine.substring(prefix.length);
   }

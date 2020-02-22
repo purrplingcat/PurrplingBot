@@ -16,7 +16,7 @@ export function create(config: Config): PurrplingBot {
   registerHooks(client);
 
   return {
-    run() {
+    run(): void {
       client.login(config.token);
     }
   }

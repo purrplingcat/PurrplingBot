@@ -4,8 +4,21 @@
             {
                 "type": "node",
                 "request": "launch",
+                "name": "Launch via NPM",
+                "runtimeExecutable": "yarn",
+                "runtimeArgs": [
+                    "start",
+                ],
+                "port": 9229,
+                "skipFiles": [
+                    "<node_internals>/**"
+                ]
+            },
+            {
+                "type": "node",
+                "request": "launch",
                 "name": "Launch Program",
-                "program": "${workspaceRoot}\\purrplingbot.js"
+                "program": "${workspaceRoot}\\bin\\run.js"
             }
         ]
     }

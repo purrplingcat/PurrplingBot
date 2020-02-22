@@ -1,17 +1,17 @@
 import { Message } from "discord.js";
 import { extractCommandName } from "./utils";
 
-export interface ICommand {
+export interface Command {
   name: string;
   description?: string;
   aliases?: string[];
   usage?: string;
-  subcommands?: ICommand[];
+  subcommands?: Command[];
   execute(message: Message, args?: string[]): void;
 }
 
 export class Commander {
-  private readonly registry: ICommand[] = [];
+  private readonly registry: Command[] = [];
   public readonly prefix: string = "!";
 
   constructor(prefix?: string) {
@@ -20,11 +20,11 @@ export class Commander {
     }
   }
 
-  getCommands(): ICommand[] {
+  getCommands(): Command[] {
     return Array.from(this.registry);
   }
 
-  fetch(message: Message): ICommand | null {
+  fetch(message: Message): Command | null {
     const commandName = extractCommandName(message.content, this.prefix);
 
     return this.registry.find(
@@ -32,7 +32,7 @@ export class Commander {
     ) || null;
   }
 
-  register(command: ICommand): void {
+  register(command: Command): void {
     this.registry.push(command);
   }
 }
