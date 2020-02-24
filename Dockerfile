@@ -1,39 +1,36 @@
-ARG baseimage=node:8.5.0-alpine
-FROM $baseimage
+FROM node:12.16.1-buster-slim
 
 LABEL com.purrplingcat.name="PurrplingBot"
-LABEL com.purrplingcat.version="1.3.0"
+LABEL com.purrplingcat.version="2.0.0"
 LABEL com.purrplingcat.vendor="PurrplingCat"
 LABEL com.purrplingcat.email="dev@purrplingcat.com"
-LABEL com.purrplingcat.github="https://github.com/EllenFawkes/PurrplingBot"
+LABEL com.purrplingcat.github="https://github.com/PurrplingCat/PurrplingBot"
 
 ENV DEBUG=0
 ENV APP_DIR="/opt/PurrplingBot"
 ENV APP_CONFIG_DIR="/data/config"
-ENV APP_LOGS="/data/logs/purrplingbot.log"
 ENV PATH=$APP_DIR/bin:$PATH
+
+# Install binary dependencies
+RUN apt-get update &&\
+    apt-get install -y git --no-install-recommends &&\
+    rm -rf /var/lib/apt/lists/*
 
 # Create app place
 RUN mkdir -p $APP_DIR
 WORKDIR $APP_DIR
 
 # Copy bundle, install main&plugin deps
-COPY . .
-RUN npm install --only=production && \
-    npm run depmod
+COPY package.json .
+COPY yarn.lock .
+COPY dist/ dist/
+COPY bin/ bin/
+RUN yarn --production
 
 # Redirect configs to /data/config
-RUN mv config/config.example.yaml extras/config.example.yaml && \
-    rm -rf config && \
-    ln -s $APP_CONFIG_DIR config
-
-# Redirect logs to /data/logs
-RUN rm -rf purrplingbot.log && \
-    ln -s $APP_LOGS purrplingbot.log && \
-    ln -s $APP_LOGS /var/log/purrplingbot.log
+RUN ln -s $APP_CONFIG_DIR config
 
 VOLUME /data/config
-VOLUME /data/logs
 
 # Start PurrplingBot
-CMD ["npm", "start"]
+CMD ["yarn", "start"]

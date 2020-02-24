@@ -3,4 +3,5 @@ npm-debug.log
 yarn-error.log
 dist/*
 types/*
+temp/*
 config/config.js

@@ -1,6 +1,5 @@
 import { Client, Message } from "discord.js";
 import { Commander } from "@purrplingbot/core/Commander";
-import { parseArgs, extractCommandName } from "./utils";
 import FunfactCommand from "@purrplingbot/commands/Funfact";
 import NpcAdventuresCommand from "@purrplingbot/commands/NpcAdventures";
 import HelpCommand from "@purrplingbot/commands/Help";
