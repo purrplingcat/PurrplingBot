@@ -1,4 +1,5 @@
 import { Message } from "discord.js";
+import { extractCommandName, parseArgs } from "./utils";
 
 export interface Command {
   name: string;
@@ -15,7 +16,7 @@ export class Commander {
 
   constructor(prefix?: string) {
     if (prefix) {
-      this.prefix = prefix;
+      this.prefix = prefix ?? "!";
     }
   }
 
@@ -30,6 +31,26 @@ export class Commander {
   }
 
   register(command: Command): void {
+    if (this.registry.find(cmd => cmd.name === command.name)) {
+      throw new Error(`Command '${command.name}' was already registered`);
+    }
+
     this.registry.push(command);
+  }
+
+  isCommand(message: Message): boolean {
+    return message.content.startsWith(this.prefix);
+  }
+
+  process(message: Message): void {
+    const commandName = extractCommandName(message.content, this.prefix)
+    const command = this.fetch(commandName);
+
+    if (command == null) {
+      message.reply("Unknown command.");
+      return;
+    }
+
+    command.execute(message, parseArgs(message.content, this.prefix));
   }
 }

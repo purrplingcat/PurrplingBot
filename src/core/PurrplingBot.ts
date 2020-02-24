@@ -12,10 +12,10 @@ export default class PurrplingBot {
   readonly commander: Commander;
   private readonly token: string;
 
-  constructor(client: Client, token: string) {
+  constructor(client: Client, commander: Commander, token: string) {
     this.client = client;
     this.token = token;
-    this.commander = new Commander();
+    this.commander = commander;
 
     this.client.on("ready", this.onReady.bind(this));
     this.client.on("message", this.onMessage.bind(this));
@@ -34,19 +34,13 @@ export default class PurrplingBot {
   }
 
   private onMessage(message: Message): void {
-    if (message.author === this.client.user || !message.content.startsWith("!")) {
-      return;
+    if (message.author === this.client.user) {
+      return; // ignore own messages
     }
 
-    const commandName = extractCommandName(message.content, this.commander.prefix)
-    const command = this.commander.fetch(commandName);
-
-    if (command == null) {
-      message.reply("Unknown command.");
-      return;
-    }
-
-    command.execute(message, parseArgs(message.content, this.commander.prefix));
+    if (this.commander.isCommand(message)) {
+      this.commander.process(message);
+    }    
   }
 
   public run(): void {
