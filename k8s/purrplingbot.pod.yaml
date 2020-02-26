@@ -6,15 +6,25 @@ spec:
   containers:
   - name: purrplingbot
     image: purrplingcat/purrplingbot:2.0.0-dev.20200226
+    # env:
+      # - name: TZ
+      #  value: Europe/Prague
     volumeMounts:
     - name: config
       mountPath: /data/config
-    - name: tz
+    - name: localtime
+      readOnly: true
       mountPath: /etc/localtime
+    - name: timezone
+      readOnly: true
+      mountPath: /etc/timezone
   volumes:
   - name: config
     hostPath:
       path: /home/ellen/bot
-  - name: tz
+  - name: localtime
     hostPath:
       path: /etc/localtime
+  - name: timezone
+    hostPath:
+      path: /etc/timezone
