@@ -1,10 +1,5 @@
 import { Client, Message } from "discord.js";
 import { Commander } from "@purrplingbot/core/Commander";
-import FunfactCommand from "@purrplingbot/commands/Funfact";
-import NpcAdventuresCommand from "@purrplingbot/commands/NpcAdventures";
-import HelpCommand from "@purrplingbot/commands/Help";
-import UptimeCommand from "@purrplingbot/commands/Uptime";
-import SmapiCommand from "@purrplingbot/commands/Smapi";
 
 export default class PurrplingBot {
   readonly client: Client;
@@ -20,15 +15,8 @@ export default class PurrplingBot {
     this.client.on("message", this.onMessage.bind(this));
   }
 
-  private async onReady(): Promise<void> {
+  private onReady(): void {
     console.log(`Logged in as ${this.client.user?.tag}`);
-
-    this.commander.register(new FunfactCommand());
-    this.commander.register(new NpcAdventuresCommand());
-    this.commander.register(new HelpCommand(this.commander));
-    this.commander.register(new UptimeCommand(this.client));
-    this.commander.register(new SmapiCommand());
-
     this.client.user?.setActivity({name: "Meow"});
   }
 
@@ -43,6 +31,8 @@ export default class PurrplingBot {
   }
 
   public run(): void {
-    this.client.login(this.token);
+    this.client
+      .login(this.token)
+      .catch(console.error);
   }
 }

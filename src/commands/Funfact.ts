@@ -3,6 +3,7 @@ import { Message } from "discord.js";
 
 export default class FunfactCommand implements Command {
   name = "funfact";  
+  direct = true;
   description = "Get a funfact about PurrplingCat's modding, streaming or about something what she's doing.";
   aliases?: string[] = ["fact"];
   usage?: string | undefined;

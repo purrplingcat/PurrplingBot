@@ -4,6 +4,7 @@ import { formatDistanceToNow } from "date-fns";
 
 export default class UptimeCommand implements Command {
   name = "uptime";  
+  direct = true;
   description = "How long is PurrplingBot alive?";
   private readonly client: Client;
 

@@ -22,6 +22,7 @@ WORKDIR $APP_DIR
 
 # Copy bundle, install main&plugin deps
 COPY package.json .
+COPY .yarnrc .
 COPY yarn.lock .
 COPY dist/ dist/
 COPY bin/ bin/

@@ -3,6 +3,7 @@ import { extractCommandName, parseArgs } from "./utils";
 
 export interface Command {
   name: string;
+  direct: boolean;
   description?: string;
   aliases?: string[];
   usage?: string;
@@ -26,11 +27,11 @@ export class Commander {
 
   fetch(commandName: string): Command | null {
     return this.registry.find(
-      (command) => command.name === commandName || command.aliases?.includes(commandName)
+      (command) => (command.name === commandName && command.direct) || command.aliases?.includes(commandName)
     ) || null;
   }
 
-  register(command: Command): void {
+  addCommand(command: Command): void {
     if (this.registry.find(cmd => cmd.name === command.name)) {
       throw new Error(`Command '${command.name}' was already registered`);
     }

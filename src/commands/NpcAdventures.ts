@@ -3,6 +3,7 @@ import { Message } from "discord.js";
 
 export default class NpcAdventuresCommand implements Command {
   name = "npcadventures";  
+  direct = true;
   description = "Are you confused about NPC Adventures?";
   aliases?: string[] = ["npcadventure", "na", "shitmod"];
   usage?: string | undefined;
