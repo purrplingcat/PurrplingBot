@@ -26,6 +26,7 @@ COPY .yarnrc .
 COPY yarn.lock .
 COPY dist/ dist/
 COPY bin/ bin/
+COPY data/ data/
 RUN yarn --production
 
 # Redirect configs to /data/config
