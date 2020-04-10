@@ -1,13 +1,12 @@
 {
   "name": "purrplingbot",
-  "version": "2.0.0-dev",
+  "version": "2.0.0",
   "codename": "Miya",
   "description": "A discordbot written primary for server PurrplingCat",
   "main": "dist/purrplingbot.js",
   "module": "dist/purrplingbot.es.js",
-  "types": "types/index.d.ts",
+  "types": "lib/index.d.ts",
   "scripts": {
-    "apigen": "api-extractor run --local",
     "lint": "yarn eslint . --ext .js,.jsx,.ts,.tsx",
     "build": "rollup -c",
     "watch": "rollup -cw",
@@ -36,7 +35,6 @@
     "discord.js": "discordjs/discord.js"
   },
   "devDependencies": {
-    "@microsoft/api-extractor": "^7.7.8",
     "@rollup/plugin-replace": "^2.3.1",
     "@types/node": "^13.7.4",
     "@typescript-eslint/eslint-plugin": "^2.20.0",

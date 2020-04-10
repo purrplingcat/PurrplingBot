@@ -51,7 +51,7 @@ export default class HelpCommand implements Command {
 
     embed.setDescription(`
     ${command.description || ""}\n
-    :information_source: Usage: \`${command.usage || "-"}\`
+    :information_source: Usage: \`${command.usage || `${this.commander.prefix}${command.name}`}\`
     :label: Aliases: ${command.aliases ? command.aliases.map(a => `\`${a}\``).join(", ") : "none"}
     `);
     embed.setFooter(`PurrplingBot __BOT_VERSION__ '__BOT_CODENAME__'`);

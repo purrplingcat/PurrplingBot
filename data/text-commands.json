@@ -1,0 +1,16 @@
+[
+  {
+    "name": "log",
+    "content": "If you want report something or need a help, please upload your log here: https://smapi.io/log and share link on your uploaded log here."
+  },
+  {
+    "name": "npcadventures",
+    "aliases": ["npcadventure", "na", "shitmod"],
+    "content": "NPC Adventures (or NA or \"It's time to adventure\")is a SDV mod which allows villagers go to an adventure with you. Also adds adventuring with companions.\n\nhttps://www.nexusmods.com/stardewvalley/mods/4582"
+  },
+  {
+    "name": "docs",
+    "aliases": ["doc", "wiki"],
+    "content": "Read NPC Adventures documentation here: https://github.com/purrplingcat/PurrplingMod/blob/master/docs/index.md"
+  }
+]

@@ -2,17 +2,17 @@ import { Client, ClientOptions } from "discord.js"
 import PurrplingBot from "@purrplingbot/core/PurrplingBot"
 import { Commander } from "./core/Commander"
 import FunfactCommand from "./commands/Funfact"
-import NpcAdventuresCommand from "./commands/NpcAdventures"
 import HelpCommand from "./commands/Help"
 import UptimeCommand from "./commands/Uptime"
-import SmapiCommand from "./commands/Smapi"
 import TimeCommand from "./commands/Time"
+import TextCommandProvider, { TextCommand } from "@purrplingbot/providers/TextCommandProvider"
 
 export type Config = {
   token: string;
   prefix?: string;
   discordClient?: ClientOptions;
   catwomanUid?: string;
+  textCommands?: TextCommand[];
 }
 
 /**
@@ -26,11 +26,13 @@ export interface PurrplingBotDIC {
 
 function registerCommands(commander: Commander, client: Client, config: Config): void {
   commander.addCommand(new FunfactCommand());
-  commander.addCommand(new NpcAdventuresCommand());
   commander.addCommand(new HelpCommand(commander));
   commander.addCommand(new UptimeCommand(client));
-  commander.addCommand(new SmapiCommand());
   commander.addCommand(new TimeCommand(config.catwomanUid || ""));
+}
+
+function registerProviders(commander: Commander, config: Config): void {
+  commander.registerProvider(new TextCommandProvider(config.textCommands || []));
 }
 
 export function create(config: Config): PurrplingBotDIC {
@@ -38,6 +40,7 @@ export function create(config: Config): PurrplingBotDIC {
   const commander = new Commander(config.prefix);
   const purrplingBot = new PurrplingBot(client, commander, config.token);
 
+  registerProviders(commander, config);
   registerCommands(commander, client, config);
 
   return {
