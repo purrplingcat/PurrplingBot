@@ -7,6 +7,7 @@ import UptimeCommand from "./commands/Uptime"
 import TimeCommand from "./commands/Time"
 import TextCommandProvider, { TextCommand } from "@purrplingbot/providers/TextCommandProvider"
 import Auditor from "@purrplingbot/services/Auditor"
+import MetricsProvider from "@purrplingbot/providers/Metrics"
 
 export type Config = {
   token: string;
@@ -20,10 +21,10 @@ export type Config = {
 /**
  * Dependecy injection container definition
  */
-export interface PurrplingBotDIC {
+export interface BotRunner {
   version: string;
   codename: string;
-  purrplingBot: PurrplingBot;
+  run(): void;
 }
 
 function registerCommands(commander: Commander, client: Client, config: Config): void {
@@ -37,11 +38,12 @@ function registerProviders(commander: Commander, config: Config): void {
   commander.registerProvider(new TextCommandProvider(config.textCommands || []));
 }
 
-export function create(config: Config): PurrplingBotDIC {
+export function create(config: Config): BotRunner {
   const client = new Client(config.discordClient)
   const commander = new Commander(config.prefix);
   const auditor = new Auditor(client, config.auditChannelId || "");
   const purrplingBot = new PurrplingBot(client, commander, config.token);
+  const metrics = new MetricsProvider(purrplingBot);
 
   registerProviders(commander, config);
   registerCommands(commander, client, config);
@@ -51,6 +53,9 @@ export function create(config: Config): PurrplingBotDIC {
   return {
     version: "__BOT_VERSION__",
     codename: "__BOT_CODENAME__",
-    purrplingBot,
+    run() {
+      metrics.serve();
+      purrplingBot.run();
+    }
   }
 }

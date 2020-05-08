@@ -1,6 +1,7 @@
 import { Message } from "discord.js";
 import { extractCommandName, parseArgs } from "@purrplingbot/core/utils";
 import CommandProvider from "@purrplingbot/core/CommandProvider";
+import { Gauge } from "prom-client";
 
 export interface Command {
   name: string;
@@ -16,11 +17,17 @@ export class Commander {
   private readonly registry: Command[] = [];
   private readonly providers: CommandProvider[] = [];
   private readonly replyOnUnknown: boolean;
+  private readonly execCommandMetrics: Gauge<"type">;
   public readonly prefix: string;
 
   constructor(prefix?: string, replyOnUnknown = true) {
     this.prefix = prefix ?? "!";
     this.replyOnUnknown = replyOnUnknown;
+    this.execCommandMetrics = new Gauge({
+      name: "purrplingbot_commander_command_exec_count",
+      help: "Commander metrics",
+      labelNames: ["type"]
+    })
   }
 
   getCommands(): Command[] {
@@ -64,14 +71,18 @@ export class Commander {
     const commandName = extractCommandName(message.content, this.prefix)
     const command = this.fetch(commandName);
 
+    this.execCommandMetrics.inc({ type: "total" });
+
     if (command == null) {
       if (this.replyOnUnknown) {
         message.reply("Unknown command.");
       }
 
+      this.execCommandMetrics.inc({ type: "unknown" });
       return;
     }
 
+    this.execCommandMetrics.inc({ type: "executed" });
     command.execute(message, parseArgs(message.content, this.prefix));
   }
 }

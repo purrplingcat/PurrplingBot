@@ -1,6 +1,6 @@
 {
   "name": "purrplingbot",
-  "version": "2.0.0",
+  "version": "2.2.0",
   "codename": "Miya",
   "description": "A discordbot written primary for server PurrplingCat",
   "main": "dist/purrplingbot.js",
@@ -33,11 +33,14 @@
   "dependencies": {
     "core-decorators": "^0.20.0",
     "date-fns": "^2.10.0",
-    "discord.js": "discordjs/discord.js"
+    "discord.js": "discordjs/discord.js",
+    "http": "^0.0.1-security",
+    "prom-client": "^12.0.0"
   },
   "devDependencies": {
     "@rollup/plugin-replace": "^2.3.1",
     "@types/node": "^13.7.4",
+    "@types/ws": "^7.2.4",
     "@typescript-eslint/eslint-plugin": "^2.20.0",
     "@typescript-eslint/parser": "^2.20.0",
     "eslint": "^6.8.0",

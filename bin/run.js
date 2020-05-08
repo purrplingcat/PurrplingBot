@@ -1,7 +1,7 @@
 const config = require("../config/config.js");
 const purrplingbot = require("../dist/purrplingbot.js");
-const container = purrplingbot.create(config);
+const botRunner = purrplingbot.create(config);
 
-console.info(`PurrplingBot version ${container.version} '${container.codename}'`);
+console.info(`PurrplingBot version ${botRunner.version} '${botRunner.codename}'`);
 
-container.purrplingBot.run();
+botRunner.run();
