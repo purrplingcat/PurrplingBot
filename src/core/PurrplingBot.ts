@@ -71,7 +71,7 @@ export default class PurrplingBot {
   }
 
   @autobind
-  async watch() {
+  watch(): void {
     this.metrics.status.set(this.client.ws.status);
     this.metrics.presence.set( presenceStatusToNumber(this.client.user?.presence.status || "offline"));
     this.metrics.ping.set(this.client.ws.ping);
@@ -102,7 +102,7 @@ export default class PurrplingBot {
     }    
   }
 
-  private updateMessageCount(message: Message) {
+  private updateMessageCount(message: Message): void {
     const guildLabels = { guildId: message.guild?.id, guildName: message.guild?.name }
     
     this.metrics.messageCount.inc(guildLabels);
@@ -110,7 +110,7 @@ export default class PurrplingBot {
   }
 
   @autobind
-  private onError(error: Error) {
+  private onError(error: Error): void {
     console.log(error);
 
     this.metrics.errors.inc({ level: "error" });
@@ -118,7 +118,7 @@ export default class PurrplingBot {
   }
 
   @autobind
-  onWarning() {
+  onWarning(): void {
     this.metrics.errors.inc({level: "warning"})
   }
 

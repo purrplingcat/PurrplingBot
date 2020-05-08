@@ -13,12 +13,12 @@ export default class MetricsProvider {
   }
 
   @autobind
-  private handle(req: http.IncomingMessage, res: http.OutgoingMessage) {
+  private handle(req: http.IncomingMessage, res: http.OutgoingMessage): void {
     res.setHeader("Content-Type", register.contentType);
     res.end(register.metrics());
   }
 
-  serve() {
+  serve(): void {
     if (this.server.listening) {
       return;
     }

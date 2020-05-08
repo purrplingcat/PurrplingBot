@@ -16,7 +16,7 @@ export function parseArgs(commandLine: string, prefix = "!"): string[] {
   return commandLine.split(" ");
 }
 
-export function presenceStatusToNumber(presence: PresenceStatus) {
+export function presenceStatusToNumber(presence: PresenceStatus): number {
   switch (presence) {
     case "online":
       return 0;

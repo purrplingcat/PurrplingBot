@@ -3,4 +3,5 @@ config/**/*
 dist/**/*
 node_modules/**/*
 types/**/*
+tools/**/*
 rollup.config.js

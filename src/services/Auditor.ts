@@ -1,4 +1,4 @@
-import { Client, Message, MessageEmbed, MessageEmbedOptions, GuildMember, User } from "discord.js";
+import { Client, Message, MessageEmbed, MessageEmbedOptions, User } from "discord.js";
 import { autobind } from 'core-decorators';
 import { isValidTextChannel } from "@purrplingbot/utils/util";
 import { format } from "date-fns";
@@ -8,12 +8,12 @@ export default class Auditor {
     private readonly client: Client,
     private readonly auditChannelId: string) { }
 
-  init() {
+  init(): void {
     this.client.on("messageDelete", this.onDelete);
     this.client.on("messageUpdate", this.onEdit);
   }
 
-  async logAudit(message: Message | MessageEmbed) {
+  async logAudit(message: Message | MessageEmbed): Promise<void> {
     const auditChannel = await this.client.channels.fetch(this.auditChannelId);
 
     if (isValidTextChannel(auditChannel)) {
@@ -28,7 +28,7 @@ export default class Auditor {
       return message.author;
     }
 
-    const extra = entry.extra as any; // For message extra info doesn't exists any type
+    const extra = entry.extra as any; // eslint-disable-line
 
     if (
       extra != null && extra.channel.id === message.channel.id
@@ -43,7 +43,7 @@ export default class Auditor {
   }
 
   @autobind
-  private async onDelete(message: Message) {
+  private async onDelete(message: Message): Promise<void> {
     const who = await this.resolveWho(message);
     const logMessage: MessageEmbedOptions = {
       title: "Message deleted",
@@ -64,7 +64,7 @@ export default class Auditor {
   }
 
   @autobind
-  private async onEdit(oldMessage: Message, newMessage: Message) {
+  private async onEdit(oldMessage: Message, newMessage: Message): Promise<void> {
     if (newMessage.author.id === this.client.user?.id) {
       return;
     }

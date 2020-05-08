@@ -7,7 +7,7 @@ import UptimeCommand from "./commands/Uptime"
 import TimeCommand from "./commands/Time"
 import TextCommandProvider, { TextCommand } from "@purrplingbot/providers/TextCommandProvider"
 import Auditor from "@purrplingbot/services/Auditor"
-import MetricsProvider from "@purrplingbot/providers/Metrics"
+import MetricsProvider from "@purrplingbot/providers/MetricsProvider"
 
 export type Config = {
   token: string;
@@ -53,7 +53,7 @@ export function create(config: Config): BotRunner {
   return {
     version: "__BOT_VERSION__",
     codename: "__BOT_CODENAME__",
-    run() {
+    run(): void {
       metrics.serve();
       purrplingBot.run();
     }
