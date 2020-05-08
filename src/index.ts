@@ -6,6 +6,7 @@ import HelpCommand from "./commands/Help"
 import UptimeCommand from "./commands/Uptime"
 import TimeCommand from "./commands/Time"
 import TextCommandProvider, { TextCommand } from "@purrplingbot/providers/TextCommandProvider"
+import Auditor from "@purrplingbot/services/Auditor"
 
 export type Config = {
   token: string;
@@ -13,6 +14,7 @@ export type Config = {
   discordClient?: ClientOptions;
   catwomanUid?: string;
   textCommands?: TextCommand[];
+  auditChannelId?: string;
 }
 
 /**
@@ -38,10 +40,13 @@ function registerProviders(commander: Commander, config: Config): void {
 export function create(config: Config): PurrplingBotDIC {
   const client = new Client(config.discordClient)
   const commander = new Commander(config.prefix);
+  const auditor = new Auditor(client, config.auditChannelId || "");
   const purrplingBot = new PurrplingBot(client, commander, config.token);
 
   registerProviders(commander, config);
   registerCommands(commander, client, config);
+
+  auditor.init();
 
   return {
     version: "__BOT_VERSION__",

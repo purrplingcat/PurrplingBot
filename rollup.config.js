@@ -1,6 +1,9 @@
 import typescript from 'rollup-plugin-typescript2'
 import replace from '@rollup/plugin-replace';
 import pkg from './package.json'
+import run from "./tools/hotreload.roolup"
+
+const dev = process.env.ROLLUP_WATCH === 'true';
 
 export default {
   input: 'src/index.ts',
@@ -27,6 +30,9 @@ export default {
     replace({
       __BOT_VERSION__: pkg.version,
       __BOT_CODENAME__: pkg.codename
+    }),
+    dev && run({
+      execFile: __dirname + "/bin/run.js"
     }),
   ],
 }
