@@ -1,3 +1,17 @@
+FROM node:12.16.1-buster-slim AS builder
+
+RUN mkdir -p /build
+
+WORKDIR /build
+
+RUN apt-get update &&\
+    apt-get install -y git --no-install-recommends &&\
+    rm -rf /var/lib/apt/lists/*
+
+COPY . /build
+
+RUN yarn && yarn build
+
 FROM node:12.16.1-buster-slim
 
 LABEL com.purrplingcat.name="PurrplingBot"
@@ -21,12 +35,12 @@ RUN mkdir -p $APP_DIR
 WORKDIR $APP_DIR
 
 # Copy bundle, install main&plugin deps
-COPY package.json .
-COPY .yarnrc .
-COPY yarn.lock .
-COPY dist/ dist/
-COPY bin/ bin/
-COPY data/ data/
+COPY --from=builder /build/package.json .
+COPY --from=builder /build/.yarnrc .
+COPY --from=builder /build/yarn.lock .
+COPY --from=builder /build/dist/ dist/
+COPY --from=builder /build/bin/ bin/
+COPY --from=builder /build/data/ data/
 RUN yarn --production
 
 # Redirect configs to /data/config
