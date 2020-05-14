@@ -1,6 +1,8 @@
 import { Command } from "@purrplingbot/core/Commander";
 import { Message } from "discord.js";
+import { injectable } from "inversify";
 
+@injectable()
 export default class FunfactCommand implements Command {
   name = "funfact";  
   direct = true;

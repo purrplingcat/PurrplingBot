@@ -1,7 +1,7 @@
+require("dotenv/config");
 const config = require("../config/config.js");
-const purrplingbot = require("../dist/purrplingbot.js");
-const botRunner = purrplingbot.create(config);
+const purrplingbot = require("../dist/purrplingbot.js").default;
 
-console.info(`PurrplingBot version ${botRunner.version} '${botRunner.codename}'`);
+console.info(`PurrplingBot version ${purrplingbot.version} '${purrplingbot.codename}'`);
 
-botRunner.run();
+purrplingbot.run();

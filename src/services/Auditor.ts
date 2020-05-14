@@ -2,11 +2,16 @@ import { Client, Message, MessageEmbed, MessageEmbedOptions, User } from "discor
 import { autobind } from 'core-decorators';
 import { isValidTextChannel } from "@purrplingbot/utils/util";
 import { format } from "date-fns";
+import { injectable, inject } from "inversify";
+import types from "@purrplingbot/types";
 
+@injectable()
 export default class Auditor {
+  public static TYPE = Symbol.for("Auditor");
+
   constructor(
-    private readonly client: Client,
-    private readonly auditChannelId: string) { }
+    @inject(types.DiscordClient) private readonly client: Client,
+    @inject(types.AuditChannelId) private readonly auditChannelId: string) { }
 
   init(): void {
     this.client.on("messageDelete", this.onDelete);

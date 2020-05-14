@@ -1,15 +1,20 @@
 import http from "http";
+import PurrplingBot from "@purrplingbot/core/PurrplingBot";
 import prometheus, { register } from "prom-client";
 import { AddressInfo } from "net";
-import PurrplingBot from "@purrplingbot/core/PurrplingBot";
+import { injectable, inject } from "inversify";
 import { autobind } from "core-decorators";
 
+@injectable()
 export default class MetricsProvider {
   private readonly server: http.Server;
-  
-  constructor(private readonly purrplingBot: PurrplingBot) {
-    this.server = http.createServer(this.handle);
+  private readonly purrplingBot: PurrplingBot
 
+  public static TYPE = Symbol.for("MetricsProvider");
+  
+  constructor(@inject(PurrplingBot.TYPE) purrplingBot: PurrplingBot) {
+    this.server = http.createServer(this.handle);
+    this.purrplingBot = purrplingBot;
   }
 
   @autobind

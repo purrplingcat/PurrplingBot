@@ -1,15 +1,18 @@
 import { Command } from "@purrplingbot/core/Commander";
 import { Message } from "discord.js";
 import { format, isWeekend, getHours } from "date-fns";
+import { injectable, inject } from "inversify";
+import types from "@purrplingbot/types";
 
+@injectable()
 export default class TimeCommand implements Command {
   name = "time";  
   direct = true;
   description = "What is current time in our Ms. Catwoman's country?";
   private readonly uid: string;
 
-  constructor(catwomanUid: string) {
-      this.uid = catwomanUid;
+  constructor(@inject(types.CatWomanId) catwomanUid: string) {
+    this.uid = catwomanUid;
   }
 
   async execute(message: Message): Promise<void> {

@@ -1,6 +1,8 @@
 import { Command, Commander } from "@purrplingbot/core/Commander";
 import { Message, MessageEmbed } from "discord.js";
+import { injectable, inject } from "inversify";
 
+@injectable()
 export default class HelpCommand implements Command {
   name = "help";  
   direct = true;
@@ -10,19 +12,21 @@ export default class HelpCommand implements Command {
   subcommands?: Command[] | undefined;
   private readonly commander: Commander;
 
-  constructor(commander: Commander) {
+  constructor(
+    @inject(Commander.TYPE) commander: Commander
+  ) {
     this.commander = commander;
   }
 
-  execute(message: Message, args: string[] = []): void {
+  async execute(message: Message, args: string[] = []): Promise<void> {
     if (args.length > 1) {
       this.printCommandInfo(args[1], message);
       return;
     }
 
     const embed = new MessageEmbed({title: "Need a help?"});
-    const commands = this.commander
-      .getCommands()
+    const commands = (await this.commander
+      .getCommands())
       .filter(command => command.direct)
       .reduce<string[]>((acc, curr) => acc.concat(curr.name, curr.aliases || []), [])
       .sort();
@@ -39,8 +43,8 @@ export default class HelpCommand implements Command {
     message.channel.send(embed);
   }
 
-  printCommandInfo(whichCommand: string, message: Message): void {
-    const command = this.commander.getCommands().find(cmd => cmd.name === whichCommand || cmd.aliases?.includes(whichCommand));
+  async printCommandInfo(whichCommand: string, message: Message): Promise<void> {
+    const command = (await this.commander.getCommands()).find(cmd => cmd.name === whichCommand || cmd.aliases?.includes(whichCommand));
 
     if (command == null) {
       message.reply(`\`${whichCommand}\` is not a known valid command!`);

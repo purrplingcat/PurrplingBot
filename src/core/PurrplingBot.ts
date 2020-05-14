@@ -3,6 +3,9 @@ import { Commander } from "@purrplingbot/core/Commander";
 import { Gauge } from "prom-client";
 import { autobind } from "core-decorators";
 import { presenceStatusToNumber } from "@purrplingbot/core/utils";
+import { injectable, inject, multiInject } from "inversify";
+import types from "@purrplingbot/types";
+import CommandProvider from "@purrplingbot/core/CommandProvider";
 
 type Metrics = {
   status: Gauge<never>;
@@ -14,13 +17,20 @@ type Metrics = {
   messageCount: Gauge<"channelId" | "channelName" | "guildName" | "guildId">;
 };
 
+@injectable()
 export default class PurrplingBot {
   readonly client: Client;
   readonly commander: Commander;
   private readonly token: string;
-  metrics: Metrics;
+  private metrics: Metrics;
 
-  constructor(client: Client, commander: Commander, token: string) {
+  public static TYPE = Symbol.for("PurrplingBot");
+
+  constructor(
+    @inject(types.DiscordClient) client: Client,
+    @inject(Commander.TYPE) commander: Commander,
+    @inject(types.Token) token: string
+  ) {
     this.client = client;
     this.token = token;
     this.commander = commander;
@@ -122,8 +132,8 @@ export default class PurrplingBot {
     this.metrics.errors.inc({level: "warning"})
   }
 
-  public run(): void {
-    this.client
+  public async run(): Promise<string | void> {
+    return await this.client
       .login(this.token)
       .catch(this.onError);
   }
