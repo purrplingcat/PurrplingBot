@@ -34,7 +34,7 @@ export default {
       __BOT_CODENAME__: pkg.codename
     }),
     dev && run({
-      execFile: __dirname + "/bin/run.js",
+      execFile: __dirname + "/dist/purrplingbot.js",
     }),
   ],
 }

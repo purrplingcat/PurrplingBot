@@ -10,13 +10,14 @@ import types from "@purrplingbot/types";
 import { createCommandsContainer } from "@purrplingbot/commands";
 import CoreCommandProvider from "@purrplingbot/providers/CoreCommandProvider";
 import Database from "@purrplingbot/services/Database";
+import { EagerBinder } from "@purrplingbot/core/Configurator";
 
-const botContainer = new Container({defaultScope: "Singleton"});
+const botContainer = new Container({ defaultScope: "Singleton" });
+const configBinder = new EagerBinder({
+  prefix: 'cfg',
+});
 
-botContainer.bind<string>(types.Token).toConstantValue(process.env.TOKEN!);
-botContainer.bind<string>(types.Prefix).toConstantValue(process.env.PREFIX || "!");
-botContainer.bind<string>(types.AuditChannelId).toConstantValue(process.env.AUDIT_CHANNEL!);
-botContainer.bind<string>(types.CatWomanId).toConstantValue(process.env.CATWOMAN_ID!);
+botContainer.load(configBinder.getModule());
 
 // Commander
 botContainer.bind<Commander>(Commander.TYPE)

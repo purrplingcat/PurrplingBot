@@ -1,0 +1,7 @@
+discord:
+  token: ""
+  catwomanid: "300514235149058051"
+commander:
+  prefix: "!"
+auditor:
+  channelId: "680516498514772165"

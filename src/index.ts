@@ -1,4 +1,8 @@
-import run from "@purrplingbot/bootstrap";
+import run from "@purrplingbot/app/bootstrap";
+
+if (require.main === module) {
+  run();
+}
 
 export { default as types } from "@purrplingbot/types";
 

@@ -25,7 +25,7 @@ export class Commander {
   public static TYPE = Symbol.for("Commander");
 
   constructor(
-    @inject(types.Prefix) prefix: string
+    @inject("cfg.commander.prefix") prefix: string
   ) {
     this.prefix = prefix ?? "!";
     this.replyOnUnknown = true;

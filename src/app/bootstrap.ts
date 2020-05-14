@@ -1,6 +1,6 @@
 import PurrplingBot from "@purrplingbot/core/PurrplingBot"
 import MetricsProvider from "@purrplingbot/providers/MetricsProvider"
-import botContainer from "@purrplingbot/inversify.config"
+import botContainer from "@purrplingbot/app/ioc"
 import Auditor from "@purrplingbot/services/Auditor";
 import Database from "@purrplingbot/services/Database";
 import { Commander } from "@purrplingbot/core/Commander";
@@ -8,8 +8,7 @@ import types from "@purrplingbot/types";
 import CommandProvider from "@purrplingbot/core/CommandProvider";
 
 export default async function run() {
-  // First connect to database
-  await botContainer.get<Database>(Database).connect();
+  console.info(`PurrplingBot version __BOT_VERSION__ '__BOT_CODENAME__'`);
   
   // Initialize commands
   botContainer.get<Commander>(Commander.TYPE).registerProviders(

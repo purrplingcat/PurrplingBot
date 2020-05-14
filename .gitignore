@@ -4,6 +4,6 @@ yarn-error.log
 dist/*
 lib/*
 temp/*
-config/config.js
+config/local*
 data/*.db
 .env

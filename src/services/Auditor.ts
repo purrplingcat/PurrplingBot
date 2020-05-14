@@ -1,4 +1,4 @@
-import { Client, Message, MessageEmbed, MessageEmbedOptions, User } from "discord.js";
+import { Client, Message, MessageEmbed, MessageEmbedOptions, User, PartialMessage } from "discord.js";
 import { autobind } from 'core-decorators';
 import { isValidTextChannel } from "@purrplingbot/utils/util";
 import { format } from "date-fns";
@@ -11,7 +11,7 @@ export default class Auditor {
 
   constructor(
     @inject(types.DiscordClient) private readonly client: Client,
-    @inject(types.AuditChannelId) private readonly auditChannelId: string) { }
+    @inject("cfg.auditor.channelId") private readonly auditChannelId: string) { }
 
   init(): void {
     this.client.on("messageDelete", this.onDelete);
@@ -26,7 +26,7 @@ export default class Auditor {
     }
   }
 
-  private async resolveWho(message: Message): Promise<User> {
+  private async resolveWho(message: Message | PartialMessage): Promise<User | null> {
     const entry = await message.guild?.fetchAuditLogs({ type: 'MESSAGE_DELETE' }).then(audit => audit.entries.first())
 
     if (entry == null) {
@@ -37,7 +37,7 @@ export default class Auditor {
 
     if (
       extra != null && extra.channel.id === message.channel.id
-      && (entry.target instanceof User && entry.target.id === message.author.id)
+      && (entry.target instanceof User && entry.target.id === message.author?.id)
       && (entry.createdTimestamp > (Date.now() - 5000)
       && extra.count >= 1)
     ) {
@@ -48,20 +48,35 @@ export default class Auditor {
   }
 
   @autobind
-  private async onDelete(message: Message): Promise<void> {
+  private async onDelete(message: Message | PartialMessage): Promise<void> {
     const who = await this.resolveWho(message);
     const logMessage: MessageEmbedOptions = {
       title: "Message deleted",
       color: 15158332,
       author: {
-        name: `${who.username}#${who.discriminator}`,
-        iconURL: who.avatarURL() || ""
+        name: who ? `${who.username}#${who.discriminator}` : "unknown",
+        iconURL: who?.avatarURL() || ""
       },
       fields: [
-        { name: "Original message", value: message.cleanContent || "*No plaintext message*" },
-        { name: "Message author", value: `${message.author.username}#${message.author.discriminator}`, inline: true },
-        { name: "Count of embeds", value: String(message.embeds.length), inline: true },
-        { name: "Deleted at", value: format(Date.now(), "d.M.yyyy h:m:s a (O)"), inline: true }
+        {
+          name: "Original message",
+          value: message.cleanContent || "*No message content*"
+        },
+        {
+          name: "Message author",
+          value: message.author ? `${message.author.username}#${message.author.discriminator}` : "unknown",
+          inline: true
+        },
+        {
+          name: "Count of embeds",
+          value: String(message.embeds?.length),
+          inline: true
+        },
+        {
+          name: "Deleted at",
+          value: format(Date.now(), "d.M.yyyy h:m:s a (O)"),
+          inline: true
+        }
       ]
     }
 
@@ -69,8 +84,8 @@ export default class Auditor {
   }
 
   @autobind
-  private async onEdit(oldMessage: Message, newMessage: Message): Promise<void> {
-    if (newMessage.author.id === this.client.user?.id) {
+  private async onEdit(oldMessage: Message | PartialMessage, newMessage: Message | PartialMessage): Promise<void> {
+    if (newMessage.author?.id === this.client.user?.id) {
       return;
     }
 
@@ -78,13 +93,13 @@ export default class Auditor {
       title: "Message edited",
       color: 15105570,
       author: {
-        name: `${newMessage.author.username}#${newMessage.author.discriminator}`,
-        iconURL: newMessage.author.avatarURL() || ""
+        name: `${newMessage.author?.username}#${newMessage.author?.discriminator}`,
+        iconURL: newMessage.author?.avatarURL() || ""
       },
       fields: [
         { name: "Original message", value: oldMessage.cleanContent || "*No plaintext message*" },
         { name: "Changed message", value: newMessage.cleanContent || "*No plaintext message*" },
-        { name: "Message author", value: `${oldMessage.author.username}#${oldMessage.author.discriminator}`, inline: true },
+        { name: "Message author", value: `${oldMessage.author?.username}#${oldMessage.author?.discriminator}`, inline: true },
         { name: "Edited at", value: format(Date.now(), "d.M.yyyy h:m:s a (O)"), inline: true }
       ]
     }

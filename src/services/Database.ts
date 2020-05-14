@@ -7,33 +7,37 @@ export default class Database {
   private connection: Connection | null = null;
 
   async connect() {
-    this.connection = await createConnection({
+    const connection = await createConnection({
       type: "sqlite",
       database: "data/storage.db",
       synchronize: true,
       entities,
     });
 
-    this.connection.synchronize();
+    connection.synchronize();
 
     console.log("Connection to database established!");
 
-    return this;
+    return connection;
   }
 
-  getConnection(): Connection {
+  async getConnection(): Promise<Connection> {
     if (this.connection == null) {
-      throw new Error("Database connection is not created!");
+      this.connection = await this.connect();
     }
 
     return this.connection;
   }
 
-  getRepositoryFor<E>(entity: new() => E): Repository<E> {
-    return this.getConnection().getRepository<E>(entity);
+  async getRepositoryFor<E>(entity: new() => E): Promise<Repository<E>> {
+    const conn = await this.getConnection();
+
+    return conn.getRepository<E>(entity);
   }
 
-  getRepository<R>(repo: ObjectType<R>): R {
-    return this.getConnection().getCustomRepository(repo);
+  async getRepository<R>(repo: ObjectType<R>): Promise<R> {
+    const conn = await this.getConnection();
+
+    return conn.getCustomRepository(repo);
   }
 }

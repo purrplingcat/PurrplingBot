@@ -5,7 +5,6 @@ import { autobind } from "core-decorators";
 import { presenceStatusToNumber } from "@purrplingbot/core/utils";
 import { injectable, inject, multiInject } from "inversify";
 import types from "@purrplingbot/types";
-import CommandProvider from "@purrplingbot/core/CommandProvider";
 
 type Metrics = {
   status: Gauge<never>;
@@ -29,7 +28,7 @@ export default class PurrplingBot {
   constructor(
     @inject(types.DiscordClient) client: Client,
     @inject(Commander.TYPE) commander: Commander,
-    @inject(types.Token) token: string
+    @inject("cfg.discord.token") token: string
   ) {
     this.client = client;
     this.token = token;

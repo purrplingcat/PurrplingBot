@@ -8,14 +8,24 @@ import { Repository, SelectQueryBuilder } from "typeorm";
 @injectable()
 export default class TextCommandProvider implements CommandProvider {
   name = "TextCommandProvider";
-  commandSource: Repository<TextCommand>;
+  private _commandSource?: Repository<TextCommand>;
+  private database: Database;
   
   constructor(database: Database) {
-    this.commandSource = database.getRepositoryFor(TextCommand);
+    this.database = database;
+  }
+
+  private async getCommandSource(): Promise<Repository<TextCommand>> {
+    if (this._commandSource == null) {
+      this._commandSource = await this.database.getRepositoryFor(TextCommand);
+    }
+
+    return this._commandSource;
   }
 
   async getCommands(): Promise<Command[]> {
-    const textCommands = await this.commandSource.find({ relations: ["aliases"] });
+    const source = await this.getCommandSource();
+    const textCommands = await source.find({ relations: ["aliases"] });
     
     return textCommands.map(this.createCommand);
   }
@@ -32,7 +42,8 @@ export default class TextCommandProvider implements CommandProvider {
   }
 
   async provide(commandName: string): Promise<Command | null> {
-    const textCmd = await this.commandSource.createQueryBuilder("command")
+    const source = await this.getCommandSource();
+    const textCmd = await source.createQueryBuilder("command")
       .leftJoinAndSelect("command.aliases", "alias")
       .where("command.name = :commandName OR alias.name = :commandName", { commandName })
       .getOne();

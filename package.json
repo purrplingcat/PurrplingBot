@@ -10,7 +10,7 @@
     "lint": "yarn eslint . --ext .js,.jsx,.ts,.tsx",
     "build": "rollup -c",
     "watch": "rollup -cw",
-    "start": "node -r dotenv/config bin/run.js"
+    "start": "node -r dotenv/config dist/purrplingbot.js"
   },
   "repository": {
     "type": "git",
@@ -31,10 +31,10 @@
   },
   "homepage": "https://github.com/PurrplingCat/PurrplingBot#readme",
   "dependencies": {
+    "config": "^3.3.1",
     "core-decorators": "^0.20.0",
     "date-fns": "^2.10.0",
-    "discord.js": "discordjs/discord.js",
-    "dotenv": "^8.2.0",
+    "discord.js": "^12.2.0",
     "http": "^0.0.1-security",
     "inversify": "^5.0.1",
     "inversify-inject-decorators": "^3.1.0",
@@ -45,6 +45,7 @@
   },
   "devDependencies": {
     "@rollup/plugin-replace": "^2.3.1",
+    "@types/config": "^0.0.36",
     "@types/node": "^13.7.4",
     "@types/ws": "^7.2.4",
     "@typescript-eslint/eslint-plugin": "^2.20.0",

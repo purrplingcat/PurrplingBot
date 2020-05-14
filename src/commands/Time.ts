@@ -11,7 +11,7 @@ export default class TimeCommand implements Command {
   description = "What is current time in our Ms. Catwoman's country?";
   private readonly uid: string;
 
-  constructor(@inject(types.CatWomanId) catwomanUid: string) {
+  constructor(@inject("cfg.discord.catwomanId") catwomanUid: string) {
     this.uid = catwomanUid;
   }
 
