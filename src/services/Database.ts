@@ -18,12 +18,12 @@ export default class Database {
 
     console.log("Connection to database established!");
 
-    return connection;
+    return this.connection = connection;
   }
 
   async getConnection(): Promise<Connection> {
     if (this.connection == null) {
-      this.connection = await this.connect();
+      return await this.connect();
     }
 
     return this.connection;

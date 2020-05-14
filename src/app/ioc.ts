@@ -1,12 +1,12 @@
 import "reflect-metadata";
-import { Container, interfaces } from "inversify";
+import { Container } from "inversify";
 import PurrplingBot from "@purrplingbot/core/PurrplingBot";
 import { Client } from "discord.js";
 import { Commander } from "@purrplingbot/core/Commander";
 import Auditor from "@purrplingbot/services/Auditor";
 import MetricsProvider from "@purrplingbot/providers/MetricsProvider";
 import TextCommandProvider from "@purrplingbot/providers/TextCommandProvider";
-import types from "@purrplingbot/types";
+import TYPES from "@purrplingbot/types";
 import { createCommandsContainer } from "@purrplingbot/commands";
 import CoreCommandProvider from "@purrplingbot/providers/CoreCommandProvider";
 import Database from "@purrplingbot/services/Database";
@@ -28,7 +28,7 @@ botContainer.bind<PurrplingBot>(PurrplingBot.TYPE)
   .to(PurrplingBot);
 
 // Discord client
-botContainer.bind<Client>(types.DiscordClient)
+botContainer.bind<Client>(TYPES.DiscordClient)
   .toConstantValue(new Client());
 
 // Database
@@ -43,8 +43,8 @@ botContainer.bind<MetricsProvider>(MetricsProvider.TYPE)
   .to(MetricsProvider);
 
 // Command providers
-botContainer.bind<CoreCommandProvider>(types.CommandProvider).to(CoreCommandProvider);
-botContainer.bind<TextCommandProvider>(types.CommandProvider).to(TextCommandProvider);
+botContainer.bind<CoreCommandProvider>(TYPES.CommandProvider).to(CoreCommandProvider);
+botContainer.bind<TextCommandProvider>(TYPES.CommandProvider).to(TextCommandProvider);
 
 // Create commands
 botContainer.load(createCommandsContainer());
