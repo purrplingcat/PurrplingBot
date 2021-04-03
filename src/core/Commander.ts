@@ -5,7 +5,7 @@ import { Gauge } from "prom-client";
 
 export interface Command {
   name: string;
-  direct: boolean;
+  visible: boolean;
   description?: string;
   aliases?: string[];
   usage?: string;
@@ -47,7 +47,7 @@ export class Commander {
 
     // If no command provided, then try to find them in default registry
     return this.registry.find(
-      (command) => (command.name === commandName && command.direct) || command.aliases?.includes(commandName)
+      (command) => (command.name === commandName && command.visible) || command.aliases?.includes(commandName)
     ) || null;
   }
 
@@ -75,7 +75,7 @@ export class Commander {
 
     if (command == null) {
       if (this.replyOnUnknown) {
-        message.reply("Unknown command.");
+        message.reply(`Unknown command: ${message.cleanContent}`);
       }
 
       this.execCommandMetrics.inc({ type: "unknown" });

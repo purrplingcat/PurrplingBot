@@ -3,13 +3,13 @@ import prometheus, { register } from "prom-client";
 import { AddressInfo } from "net";
 import PurrplingBot from "@purrplingbot/core/PurrplingBot";
 import { autobind } from "core-decorators";
+import { info } from "@purrplingbot/utils/logger";
 
 export default class MetricsProvider {
   private readonly server: http.Server;
   
   constructor(private readonly purrplingBot: PurrplingBot) {
     this.server = http.createServer(this.handle);
-
   }
 
   @autobind
@@ -29,7 +29,7 @@ export default class MetricsProvider {
     this.server.on("listening", () => {
       const address: AddressInfo = this.server.address() as AddressInfo;
 
-      console.log(`Prometheus metrics are served on http://${address.address}:${address.port})}`)
+      info(`Prometheus metrics are served on http://${address.address}:${address.port})}`)
     })
     this.server.listen(9120);
   }

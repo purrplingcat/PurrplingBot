@@ -3,7 +3,7 @@ import { Message, MessageEmbed } from "discord.js";
 
 export default class HelpCommand implements Command {
   name = "help";  
-  direct = true;
+  visible = true;
   description = "Need a help?";
   aliases?: string[] | undefined;
   usage?: string | undefined;
@@ -23,7 +23,7 @@ export default class HelpCommand implements Command {
     const embed = new MessageEmbed({title: "Need a help?"});
     const commands = this.commander
       .getCommands()
-      .filter(command => command.direct)
+      .filter(command => command.visible)
       .reduce<string[]>((acc, curr) => acc.concat(curr.name, curr.aliases || []), [])
       .sort();
 

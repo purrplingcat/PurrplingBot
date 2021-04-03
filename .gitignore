@@ -5,3 +5,6 @@ dist/*
 lib/*
 temp/*
 config/config.js
+.env
+config/*.yaml
+data/*.db

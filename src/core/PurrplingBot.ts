@@ -1,8 +1,9 @@
-import { Client, Message, TextChannel } from "discord.js";
+import { Client, Message, TextChannel, User } from "discord.js";
 import { Commander } from "@purrplingbot/core/Commander";
 import { Gauge } from "prom-client";
 import { autobind } from "core-decorators";
 import { presenceStatusToNumber } from "@purrplingbot/core/utils";
+import * as logger from '@purrplingbot/utils/logger';
 
 type Metrics = {
   status: Gauge<never>;
@@ -85,7 +86,7 @@ export default class PurrplingBot {
   }
 
   private onReady(): void {
-    console.log(`Logged in as ${this.client.user?.tag}`);
+    logger.ready(`Logged in as ${this.client.user?.tag}`);
     this.metrics.readyAt.set(this.client.readyTimestamp ?? 0);
     this.client.user?.setActivity({name: "Meow"});
   }
@@ -93,8 +94,8 @@ export default class PurrplingBot {
   private onMessage(message: Message): void {
     this.updateMessageCount(message);
 
-    if (message.author === this.client.user) {
-      return; // ignore own messages
+    if (message.author.bot || message.author === this.client.user) {
+      return; // ignore own or bot messages
     }
 
     if (this.commander.isCommand(message)) {
@@ -111,7 +112,7 @@ export default class PurrplingBot {
 
   @autobind
   private onError(error: Error): void {
-    console.log(error);
+    logger.error(error as unknown as string);
 
     this.metrics.errors.inc({ level: "error" });
     this.metrics.errors.inc({ type: error.name, level: "error" });
@@ -126,5 +127,19 @@ export default class PurrplingBot {
     this.client
       .login(this.token)
       .catch(this.onError);
+  }
+
+  public getUserFromMention(mention: string) : User | null {  
+    if (mention != null && mention.startsWith('<@') && mention.endsWith('>')) {
+      mention = mention.slice(2, -1);
+  
+      if (mention.startsWith('!')) {
+        mention = mention.slice(1);
+      }
+  
+      return this.client.users.cache.get(mention) || null;
+    }
+
+    return null;
   }
 }

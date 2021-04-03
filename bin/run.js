@@ -1,7 +1,7 @@
+const chalk = require("chalk");
 const config = require("../config/config.js");
 const purrplingbot = require("../dist/purrplingbot.js");
-const botRunner = purrplingbot.create(config);
 
-console.info(`PurrplingBot version ${botRunner.version} '${botRunner.codename}'`);
+console.info(chalk.hex("#FF00FF").bold(`PurrplingBot version ${purrplingbot.VERSION} '${purrplingbot.CODENAME}'`));
 
-botRunner.run();
+purrplingbot.create(config).run();

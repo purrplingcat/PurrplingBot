@@ -41,7 +41,7 @@ export default class TextCommandProvider implements CommandProvider {
     
     return {
       name: textCmd.name,
-      direct: true,
+      visible: true,
       description: textCmd.description,
       aliases: textCmd.aliases,
       // eslint-disable-next-line @typescript-eslint/explicit-function-return-type

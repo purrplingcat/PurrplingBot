@@ -1,4 +1,4 @@
-import { Client, Message, MessageEmbed, MessageEmbedOptions, User } from "discord.js";
+import { Client, Message, MessageEmbed, MessageEmbedOptions, User, PartialMessage, GuildMember, PartialGuildMember } from "discord.js";
 import { autobind } from 'core-decorators';
 import { isValidTextChannel } from "@purrplingbot/utils/util";
 import { format } from "date-fns";
@@ -11,9 +11,46 @@ export default class Auditor {
   init(): void {
     this.client.on("messageDelete", this.onDelete);
     this.client.on("messageUpdate", this.onEdit);
+    this.client.on("guildMemberAdd", this.onMemberJoined)
+    this.client.on("guildMemberRemove", this.onMemberRemoved)
+  }
+  
+  private async onMemberJoined(member: GuildMember | PartialGuildMember) {
+    const logMessage: MessageEmbedOptions = {
+      title: "Member joined",
+      color: "AQUA",
+      author: {
+        name: `${member.user?.username}#${member.user?.discriminator}`,
+        iconURL: member.user?.avatarURL() || ""
+      },
+      fields: [
+        { name: "UID", value: member.id },
+        { name: "Joined at", value: format(member.joinedAt ?? Date.now(), "d.M.yyyy h:m:s a (O)") },
+      ]
+    }
+
+    await this.logAudit(new MessageEmbed(logMessage));
   }
 
-  async logAudit(message: Message | MessageEmbed): Promise<void> {
+  private async onMemberRemoved(member: GuildMember | PartialGuildMember) {
+    const logMessage: MessageEmbedOptions = {
+      title: "Member left",
+      color: "GREY",
+      author: {
+        name: `${member.user?.username}#${member.user?.discriminator}`,
+        iconURL: member.user?.avatarURL() || ""
+      },
+      fields: [
+        { name: "UID", value: member.id },
+        { name: "Joined at", value: format(member.joinedAt ?? Date.now(), "d.M.yyyy h:m:s a (O)") },
+        { name: "Left at", value: format(Date.now(), "d.M.yyyy h:m:s a (O)") },
+      ]
+    }
+
+    await this.logAudit(new MessageEmbed(logMessage));
+  }
+
+  async logAudit(message: MessageEmbed): Promise<void> {
     const auditChannel = await this.client.channels.fetch(this.auditChannelId);
 
     if (isValidTextChannel(auditChannel)) {
@@ -43,8 +80,8 @@ export default class Auditor {
   }
 
   @autobind
-  private async onDelete(message: Message): Promise<void> {
-    const who = await this.resolveWho(message);
+  private async onDelete(message: Message | PartialMessage): Promise<void> {
+    const who = await this.resolveWho(message as Message);
     const logMessage: MessageEmbedOptions = {
       title: "Message deleted",
       color: 15158332,
@@ -54,8 +91,9 @@ export default class Auditor {
       },
       fields: [
         { name: "Original message", value: message.cleanContent || "*No plaintext message*" },
-        { name: "Message author", value: `${message.author.username}#${message.author.discriminator}`, inline: true },
-        { name: "Count of embeds", value: String(message.embeds.length), inline: true },
+        { name: "Message author", value: `${message.author?.username}#${message.author?.discriminator}`, inline: true },
+        { name: "Channel", value: `<#${message.channel.id}>`, inline: true},
+        { name: "Embeds", value: String(message.embeds?.length), inline: true},
         { name: "Deleted at", value: format(Date.now(), "d.M.yyyy h:m:s a (O)"), inline: true }
       ]
     }
@@ -64,10 +102,12 @@ export default class Auditor {
   }
 
   @autobind
-  private async onEdit(oldMessage: Message, newMessage: Message): Promise<void> {
-    if (newMessage.author.id === this.client.user?.id) {
+  private async onEdit(oldMessage: Message | PartialMessage, newMessage: Message | PartialMessage): Promise<void> {
+    if (!(newMessage instanceof Message) || newMessage.author.id === this.client.user?.id) {
       return;
     }
+    
+    newMessage = newMessage as Message;
 
     const logMessage: MessageEmbedOptions = {
       title: "Message edited",
@@ -79,7 +119,8 @@ export default class Auditor {
       fields: [
         { name: "Original message", value: oldMessage.cleanContent || "*No plaintext message*" },
         { name: "Changed message", value: newMessage.cleanContent || "*No plaintext message*" },
-        { name: "Message author", value: `${oldMessage.author.username}#${oldMessage.author.discriminator}`, inline: true },
+        { name: "Channel", value: `<#${newMessage.channel.id}>`, inline: true},
+        { name: "Message author", value: `${oldMessage.author?.username}#${oldMessage.author?.discriminator}`, inline: true },
         { name: "Edited at", value: format(Date.now(), "d.M.yyyy h:m:s a (O)"), inline: true }
       ]
     }

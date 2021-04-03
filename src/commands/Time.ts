@@ -1,10 +1,11 @@
 import { Command } from "@purrplingbot/core/Commander";
 import { Message } from "discord.js";
 import { format, isWeekend, getHours } from "date-fns";
+import { error } from "@purrplingbot/utils/logger";
 
 export default class TimeCommand implements Command {
   name = "time";  
-  direct = true;
+  visible = true;
   description = "What is current time in our Ms. Catwoman's country?";
   private readonly uid: string;
 
@@ -50,7 +51,7 @@ export default class TimeCommand implements Command {
             }
         }
     } catch (e) {
-        console.error(`An error occured while fetching catwoman: ${e}`);
+        error(`An error occured while fetching catwoman: ${e}`);
     }
 
     message.channel.send(
