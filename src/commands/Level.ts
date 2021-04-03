@@ -3,11 +3,13 @@ import { Message, MessageEmbed, Guild, User, TextChannel } from "discord.js";
 import { debug } from "@purrplingbot/utils/logger";
 import RankSystem from "@purrplingbot/services/RankSystem";
 import PurrplingBot from "@purrplingbot/core/PurrplingBot";
+import rankRole from "@purrplingbot/models/rankRole";
 
 export default class LevelCommand implements Command {
   name = "level";  
   visible = true;
-  description = "How long is PurrplingBot alive?";
+  description = "What is my level rank?";
+  aliases = ["lvl", "rank"];
   private readonly _ranks: RankSystem;
   private readonly _bot: PurrplingBot;
 
@@ -74,11 +76,15 @@ export default class LevelCommand implements Command {
       return;
     }
 
+    const member = message.guild.member(user);
     const rankOrder = await this._ranks.GetRankOrder(rank);
     const rankEarnings = (await this._ranks.fetchEarnedRankRoles(message.guild.member(user))).array();
+    const highestRewardedRole = await rankRole.findHighestRole(message.guild, rank.level);
+    const highestDiscordRole = message.guild.roles.resolve(highestRewardedRole?.roleID || "");
     const remainingXpToLevelUp = this._ranks.computeXpNeededToLevelUp(rank.level) - rank.xp;
     const rankMessage = new MessageEmbed({
       color: "PURPLE",
+      description: highestRewardedRole?.description || "",
       author: {
         name: user.tag,
         iconURL: user.avatarURL() || ""
@@ -87,8 +93,9 @@ export default class LevelCommand implements Command {
         { name: "Rank", value: `${rankOrder.index + 1}/${rankOrder.count}`, inline: true },
         { name: "Level", value: rank.level, inline: true },
         { name: "Experience", value: `${rank.xp} (\`${remainingXpToLevelUp}\` remains to level up)`, inline: true },
-        { name: "Power", value: this._ranks.getPower(rank).toFixed(2) },
-        { name: "Rank earnings", value: rankEarnings.length > 0 ? rankEarnings : "*No earnings yet*" }
+        { name: "Power", value: this._ranks.getPower(rank, member).toFixed(2), inline: true },
+        { name: "Highest earned reward", value: highestDiscordRole || "*none*", inline: true },
+        { name: "Earned rewards", value: rankEarnings.length > 0 ? rankEarnings : "*No earnings yet*" }
       ],
     });
 

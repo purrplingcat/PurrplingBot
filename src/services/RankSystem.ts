@@ -1,4 +1,4 @@
-import { Client, Message, MessageEmbed, User, Guild, GuildMember, Collection } from "discord.js";
+import { Client, Message, MessageEmbed, User, Guild, GuildMember, Collection, Role } from "discord.js";
 import Rank, { IRank } from "@purrplingbot/models/rank";
 import { CallbackError } from "mongoose";
 import { error, debug, info } from "@purrplingbot/utils/logger";
@@ -7,12 +7,19 @@ import PurrplingBot from "@purrplingbot/core/PurrplingBot";
 import LevelCommand from "@purrplingbot/commands/Level";
 import RankRole from "@purrplingbot/models/rankRole";
 import { isWeekend, isEqual, startOfDay } from "date-fns";
+import RewardsCommand from "@purrplingbot/commands/Rewards";
 
 export type RankConfig = {
   levelUpModifier?: number;
   levelUpOffset?: number;
   wordThres?: number;
   powerDiscriminator?: number;
+  minimumLevelXp?: number,
+  reproductionNumber?: number;
+  announceLevelup?: boolean;
+  announceReward?: boolean;
+  announceFirstLevel?: boolean;
+  extraPowerRoles?: { [role: string]: number };
 }
 
 export default class RankSystem {
@@ -27,21 +34,30 @@ export default class RankSystem {
   public init() {
     this._bot.client.on("message", this.onMessage)
     this._bot.commander.addCommand(new LevelCommand(this, this._bot));
+    this._bot.commander.addCommand(new RewardsCommand());
     info("Rank system initialized!");
   }
 
   public computeXpNeededToLevelUp(currentLevel: number): number {
     const levelupModifier = this._config.levelUpModifier ?? 250;
     const levelUpOffset = this._config.levelUpOffset ?? 0;
+    const minimumLevelXp = this._config.minimumLevelXp ?? 120;
+    const R = this._config.reproductionNumber ?? 1.4;
 
-    return currentLevel > 0
-      ? currentLevel * levelupModifier + levelUpOffset
-      : levelupModifier / 2 + levelUpOffset
+    if (currentLevel <= 0) {
+      return minimumLevelXp + levelUpOffset;
+    }
+
+    const neededXp = (2 * minimumLevelXp * currentLevel)
+      + Math.pow(currentLevel, R) * levelupModifier
+      + levelUpOffset;
+    
+    return Math.round(neededXp);
   }
 
   public async fetchEarnedRankRoles(member: GuildMember | undefined | null) {
     if (member == null) {
-      return new Collection();
+      return new Collection<string, Role>();
     }
 
     const guildRankRoles = await RankRole.findByGuild(member.guild);
@@ -57,14 +73,8 @@ export default class RankSystem {
       .filter(r => guildRankRoles.some(gr => gr.roleID === r.id));
   }
 
-  public async fetchRoleRewardForLevel(level: number, guild: Guild) {
-    const reward = await RankRole.findOneByGuildAndLevel(guild, level);
-
-    if (!reward) {
-      return null;
-    }
-
-    return guild.roles.fetch(reward.roleID);
+  public fetchRoleRewardForLevel(level: number, guild: Guild) {
+    return RankRole.findOneByGuildAndLevel(guild, level);
   }
 
   public GetRankFor(user: User, guild: Guild): Promise<IRank | null> {
@@ -99,19 +109,28 @@ export default class RankSystem {
       extraXp += 4;
     }
 
-    console.log(extraXp);
-
     return extraXp;
   }
 
-  public getPower(rank: IRank | null) {
+  public getPower(rank: IRank | null, member: GuildMember | null) {
     const powerDiscriminator = this._config.powerDiscriminator ?? 10000;
+    const extraPower = this._config.extraPowerRoles ?? {};
 
     if (rank == null) {
       return 1;
     }
 
-    return 1 + (rank.messages / powerDiscriminator) + ((rank.words / 4) / powerDiscriminator);
+    const power = 1 + (rank.messages / powerDiscriminator) + ((rank.words / 6) / powerDiscriminator);
+
+    for (const roleId of Object.keys(extraPower)) {
+      const role = member?.roles.cache.find(r => r.id == roleId);
+
+      if (role) {
+        return power * (extraPower[roleId] + 1);
+      }
+    }
+
+    return power;
   }
 
   @autobind
@@ -121,6 +140,9 @@ export default class RankSystem {
       return;
     }
 
+    const announceLevelUp = this._config.announceLevelup ?? false;
+    const announceReward = this._config.announceReward ?? true;
+    const announceFirstLevel = this._config.announceFirstLevel ?? true;
     const query = { userID: message.author.id, guildID: message.guild?.id };
     Rank.findOne(query, async (err: CallbackError, rank: IRank | null) => {
       if (err) {
@@ -131,7 +153,7 @@ export default class RankSystem {
       const wordThres = this._config.wordThres ?? 6;
       const words = message.cleanContent.split(" ").length;
       const addedXp = Math.round(
-        (message.cleanContent.length / 2 + words + this.getExtraXp(message)) * this.getPower(rank)
+        (message.cleanContent.length / 2 + words + this.getExtraXp(message)) * this.getPower(rank, message.member)
       );
 
       if (!rank) {
@@ -155,23 +177,32 @@ export default class RankSystem {
         ++rank.messages;
       }
 
-      const availableRoles = await this.fetchAvailableRolesForLevel(rank.level, message.guild!);
-      for (const role of availableRoles) {
-        message.member?.roles.add(role);
-      }
+      const xpNeeded = this.computeXpNeededToLevelUp(rank.level);
+      if (rank.xp >= xpNeeded) {
+        rank.xp = xpNeeded;
+        rank.level++;
 
-      if (rank.xp >= this.computeXpNeededToLevelUp(rank.level)) {
-        ++rank.level;
         const roleReward = await this.fetchRoleRewardForLevel(rank.level, message.guild!);
-
-        if (roleReward) {
-          message.channel.send(`Meow, ${message.author} just advanced to **level ${rank.level}** and earned **${roleReward.name}** role!`);
-          debug(`User ${message.author.tag} earned role reward ${roleReward.name}`);
-        } else {
+        const discordRole = message.guild?.roles.resolve(roleReward?.roleID || "")
+        if (announceReward && roleReward && discordRole) {
+          message.channel.send(
+            `Meow, ${message.author} just advanced to **level ${rank.level}**`
+            + ` and earned **${discordRole.name}** role! ${roleReward.description}`
+          );
+          debug(`User ${message.author.tag} earned role reward ${discordRole.name}`);
+        } else if (announceFirstLevel && rank.level === 1) {
+          message.channel.send(`Purrr purrrrr, ${message.author} begun their journey! They just advanced to **level ${rank.level}**!`);
+        } else if (announceLevelUp) {
           message.channel.send(`Meow, ${message.author} just advanced to **level ${rank.level}**!`);
         }
+
         debug(`User ${message.author.tag} leveled up to level ${rank.level}` 
         + ` in guild ${message.guild?.id} aka '${message.guild?.name}'`);
+      }
+
+      if (message.member != null) {
+        const availableRoles = await this.fetchAvailableRolesForLevel(rank.level, message.guild!);
+        message.member.roles.add(availableRoles);
       }
 
       rank.save().catch((e: any) => error(e.message));
