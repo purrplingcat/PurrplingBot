@@ -137,6 +137,7 @@ export default class RankSystem {
     }
 
     const wordsPerMessageAvg = rank.words / (rank.messages || 1);
+    const wordsRatio = 1 / wordsPerMessageAvg;
     const lvlMsgRatio = rank.level / Math.max(1, rank.messages);
     const supressor = (supressorEnabled && lvlMsgRatio < 0.01 ? (rank.messages / (rank.words || 1)) : 0)
       / (rank.level >= minimalPowerPenaltyLevel ? 1 : 4);
@@ -151,6 +152,11 @@ export default class RankSystem {
       // Penalize too low words/msg average
       if (wordsPerMessageAvg < loPenaltyAvgThres) {
         power -= (supressor + (1 / Math.max(1, wordsPerMessageAvg))) * (bonusEnabled ? 2 : 1);
+      }
+
+      // Penalize too high messageword ratio
+      if (wordsRatio > 0.5) {
+        power -= Math.min(0.5, lvlMsgRatio / 2)
       }
     }
 
