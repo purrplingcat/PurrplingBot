@@ -50,7 +50,11 @@ export default class Auditor {
     await this.logAudit(new MessageEmbed(logMessage));
   }
 
-  async logAudit(message: MessageEmbed): Promise<void> {
+  public async logAudit(message: MessageEmbed): Promise<void> {
+    if (this.auditChannelId == null || this.auditChannelId == "") {
+      return;
+    }
+    
     const auditChannel = await this.client.channels.fetch(this.auditChannelId);
 
     if (isValidTextChannel(auditChannel)) {

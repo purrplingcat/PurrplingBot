@@ -1,4 +1,4 @@
-import { Message, User, Guild, GuildMember, Collection, Role } from "discord.js";
+import { Message, User, Guild, GuildMember, Collection, Role, MessageEmbed } from "discord.js";
 import Rank, { IRank } from "@purrplingbot/models/rank";
 import { CallbackError } from "mongoose";
 import { error, debug, info } from "@purrplingbot/utils/logger";
@@ -8,6 +8,7 @@ import LevelCommand from "@purrplingbot/commands/Level";
 import RankRole from "@purrplingbot/models/rankRole";
 import { isWeekend, isEqual, startOfDay, differenceInCalendarDays } from "date-fns";
 import RewardsCommand from "@purrplingbot/commands/Rewards";
+import Auditor from "@purrplingbot/services/Auditor";
 
 export type RankConfig = {
   levelUpModifier?: number;
@@ -31,11 +32,13 @@ export type RankConfig = {
 export default class RankSystem {
   private _bot: PurrplingBot
   private _config: RankConfig
+  private _auditor?: Auditor;
   private _coldownHolds = new Set<string>();
 
-  constructor(bot: PurrplingBot, config: RankConfig) {
+  constructor(bot: PurrplingBot, config: RankConfig, auditor?: Auditor) {
     this._bot = bot
     this._config = config ?? {};
+    this._auditor = auditor;
   }
 
   public init() {
@@ -142,12 +145,12 @@ export default class RankSystem {
     if (supressorEnabled && rank.level >= minimalPowerPenaltyLevel) {
       // Penalize too high words/msg average
       if (wordsPerMessageAvg >= penaltyAvgThres) {
-        power -= (1 + wordsPerMessageAvg - penaltyAvgThres) / powerDiscriminator;
+        power -= ((1 + wordsPerMessageAvg - penaltyAvgThres) / powerDiscriminator) * (bonusEnabled ? 2 : 1);
       }
 
       // Penalize too low words/msg average
       if (wordsPerMessageAvg < loPenaltyAvgThres) {
-        power -= supressor + (1 / Math.max(1, wordsPerMessageAvg))
+        power -= (supressor + (1 / Math.max(1, wordsPerMessageAvg))) * (bonusEnabled ? 2 : 1);
       }
     }
 
@@ -157,8 +160,8 @@ export default class RankSystem {
       power += (rank.xp * (wordsPerMessageAvg * 2)) / (rank.messages || 1) / powerDiscriminator - supressor / 2;
       power += wordsPerMessageAvg > loPenaltyAvgThres && wordsPerMessageAvg < penaltyAvgThres
         ? (wordsPerMessageAvg * 4) / powerDiscriminator - supressor / 2 : 0;
-      power += (1 / Math.max(1, rank.level)) - (rank.level / powerDiscriminator)
-        - (daysSinceJoin * 0.25 / powerDiscriminator);
+      power += Math.max((1 / Math.max(1, rank.level)) - (rank.level / powerDiscriminator)
+        - (daysSinceJoin * 0.25 / powerDiscriminator), 0);
     }
 
     for (const roleId of Object.keys(extraPower)) {
@@ -263,7 +266,8 @@ export default class RankSystem {
         }
 
         debug(`User ${message.author.tag} leveled up to level ${rank.level}` 
-        + ` in guild ${message.guild?.id} aka '${message.guild?.name}'`);
+          + ` in guild ${message.guild?.id} aka '${message.guild?.name}'`);
+        this.auditLevelUp(message.author, rank, discordRole);
       }
 
       if (message.member != null) {
@@ -273,5 +277,27 @@ export default class RankSystem {
 
       rank.save().catch((e: any) => error(e.message));
     });
+  }
+
+  private auditLevelUp(user: User, rank: IRank, rewardRole: Role | null | undefined) {
+    if (this._auditor == null) {
+      return;
+    }
+
+    const auditLevelUpMsg = new MessageEmbed({
+      title: "Level up!",
+      color: "AQUA",
+      description: `${user} leveled up to **level ${rank.level}**!`,
+      author: {
+        name: user.tag,
+        iconURL: user.avatarURL() || ""
+      },
+      fields: [
+        { name: "New level", value: rank.level, inline: true },
+        { name: "Reward", value: rewardRole || "*no reward*", inline: true },
+      ],
+    });
+
+    this._auditor.logAudit(auditLevelUpMsg);
   }
 }

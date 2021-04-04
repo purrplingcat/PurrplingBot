@@ -51,7 +51,7 @@ export function create(config: Config): Bootstrap {
   const auditor = new Auditor(client, config.auditChannelId || "");
   const purrplingBot = new PurrplingBot(client, commander, config.token);
   const metrics = new MetricsProvider(purrplingBot);
-  const ranks = new RankSystem(purrplingBot, config.ranks);
+  const ranks = new RankSystem(purrplingBot, config.ranks, auditor);
 
   mongoose.connection.on('connected', () => {
     logger.ready('Mongoose connection successfully opened');
