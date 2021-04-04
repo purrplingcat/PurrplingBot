@@ -6,7 +6,7 @@ import { autobind } from "core-decorators";
 import PurrplingBot from "@purrplingbot/core/PurrplingBot";
 import LevelCommand from "@purrplingbot/commands/Level";
 import RankRole from "@purrplingbot/models/rankRole";
-import { isWeekend, isEqual, startOfDay } from "date-fns";
+import { isWeekend, isEqual, startOfDay, differenceInCalendarDays } from "date-fns";
 import RewardsCommand from "@purrplingbot/commands/Rewards";
 
 export type RankConfig = {
@@ -16,6 +16,7 @@ export type RankConfig = {
   powerDiscriminator?: number;
   minimumLevelXp?: number,
   reproductionNumber?: number;
+  penaltyWordsPerMessageAvgThres?: number;
   announceLevelup?: boolean;
   announceReward?: boolean;
   announceFirstLevel?: boolean;
@@ -115,19 +116,34 @@ export default class RankSystem {
   public getPower(rank: IRank | null, member: GuildMember | null) {
     const powerDiscriminator = this._config.powerDiscriminator ?? 10000;
     const extraPower = this._config.extraPowerRoles ?? {};
+    const penaltyAvgThres = this._config.penaltyWordsPerMessageAvgThres ?? 50;
 
-    if (rank == null) {
+    if (rank == null || member == null) {
       return 1;
     }
 
-    const power = 1 + (rank.messages / powerDiscriminator) + ((rank.words / 6) / powerDiscriminator);
+    const supressor = rank.messages / (rank.words || 1);
+    const wordsPerMessageAvg = rank.words / (rank.messages || 1);
+    let power = 1 + (wordsPerMessageAvg / powerDiscriminator) + (rank.messages / powerDiscriminator) - supressor;
+
+    if (wordsPerMessageAvg >= penaltyAvgThres) {
+      power -= (1 + wordsPerMessageAvg - penaltyAvgThres) / powerDiscriminator;
+    }
+
+    power += (differenceInCalendarDays(new Date(), member.joinedAt!) / 2) / powerDiscriminator;
+    power += (rank.xp * wordsPerMessageAvg) / (rank.messages || 1) / powerDiscriminator - supressor / 2;
 
     for (const roleId of Object.keys(extraPower)) {
-      const role = member?.roles.cache.find(r => r.id == roleId);
+      const role = member.roles.cache.find(r => r.id == roleId);
 
       if (role) {
-        return power * (extraPower[roleId] + 1);
+        power *= (extraPower[roleId] + 1);
+        break;
       }
+    }
+
+    if (power < 0) {
+      return 1;
     }
 
     return power;
@@ -152,8 +168,9 @@ export default class RankSystem {
 
       const wordThres = this._config.wordThres ?? 6;
       const words = message.cleanContent.split(" ").length;
+      const power = this.getPower(rank, message.member);
       const addedXp = Math.round(
-        (message.cleanContent.length / 2 + words + this.getExtraXp(message)) * this.getPower(rank, message.member)
+        (message.cleanContent.length / 2 + words + this.getExtraXp(message)) * power
       );
 
       if (!rank) {
@@ -171,10 +188,13 @@ export default class RankSystem {
       }
 
       rank.xp += addedXp;
-      rank.words += words;
 
       if (words > wordThres) {
+        rank.words += words;
         ++rank.messages;
+      } else {
+        const decrease = Math.round((addedXp * 0.1) + power) + (wordThres - words);
+        rank.xp -= decrease < addedXp ? decrease : Math.max(0, addedXp - 1);
       }
 
       const xpNeeded = this.computeXpNeededToLevelUp(rank.level);
