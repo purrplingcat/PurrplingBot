@@ -152,10 +152,13 @@ export default class RankSystem {
     }
 
     if (bonusEnabled && rank.level >= minimalPowerBonusLevel) {
-      power += (differenceInCalendarDays(new Date(), member.joinedAt!) / 4) / powerDiscriminator;
-      power += (rank.xp * wordsPerMessageAvg) / (rank.messages || 1) / powerDiscriminator - supressor / 2;
-      power += loPenaltyAvgThres > wordsPerMessageAvg && wordsPerMessageAvg < penaltyAvgThres
-        ? (wordsPerMessageAvg * 2) / powerDiscriminator : 0;
+      const daysSinceJoin = differenceInCalendarDays(new Date(), member.joinedAt!);
+      power += (daysSinceJoin / 10) / powerDiscriminator;
+      power += (rank.xp * (wordsPerMessageAvg * 2)) / (rank.messages || 1) / powerDiscriminator - supressor / 2;
+      power += wordsPerMessageAvg > loPenaltyAvgThres && wordsPerMessageAvg < penaltyAvgThres
+        ? (wordsPerMessageAvg * 4) / powerDiscriminator - supressor / 2 : 0;
+      power += (1 / Math.max(1, rank.level)) - (rank.level / powerDiscriminator)
+        - (daysSinceJoin * 0.25 / powerDiscriminator);
     }
 
     for (const roleId of Object.keys(extraPower)) {
