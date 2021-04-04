@@ -1,4 +1,4 @@
-import { Client, Message, MessageEmbed, User, Guild, GuildMember, Collection, Role } from "discord.js";
+import { Message, User, Guild, GuildMember, Collection, Role } from "discord.js";
 import Rank, { IRank } from "@purrplingbot/models/rank";
 import { CallbackError } from "mongoose";
 import { error, debug, info } from "@purrplingbot/utils/logger";
@@ -17,15 +17,21 @@ export type RankConfig = {
   minimumLevelXp?: number,
   reproductionNumber?: number;
   penaltyWordsPerMessageAvgThres?: number;
+  powerSupressorEnabled?: boolean;
+  powerBonusEnabled?: boolean;
   announceLevelup?: boolean;
   announceReward?: boolean;
   announceFirstLevel?: boolean;
   extraPowerRoles?: { [role: string]: number };
+  cooldown?: number;
+  minimalPowerPenaltyLevel?: number;
+  minimalPowerBonusLevel?: number;
 }
 
 export default class RankSystem {
   private _bot: PurrplingBot
   private _config: RankConfig
+  private _coldownHolds = new Set<string>();
 
   constructor(bot: PurrplingBot, config: RankConfig) {
     this._bot = bot
@@ -43,7 +49,7 @@ export default class RankSystem {
     const levelupModifier = this._config.levelUpModifier ?? 250;
     const levelUpOffset = this._config.levelUpOffset ?? 0;
     const minimumLevelXp = this._config.minimumLevelXp ?? 120;
-    const R = this._config.reproductionNumber ?? 1.4;
+    const R = this._config.reproductionNumber ?? 1.2;
 
     if (currentLevel <= 0) {
       return minimumLevelXp + levelUpOffset;
@@ -117,21 +123,40 @@ export default class RankSystem {
     const powerDiscriminator = this._config.powerDiscriminator ?? 10000;
     const extraPower = this._config.extraPowerRoles ?? {};
     const penaltyAvgThres = this._config.penaltyWordsPerMessageAvgThres ?? 50;
+    const loPenaltyAvgThres = (penaltyAvgThres * 0.4);
+    const minimalPowerPenaltyLevel = this._config.minimalPowerPenaltyLevel ?? 10;
+    const minimalPowerBonusLevel = this._config.minimalPowerBonusLevel ?? 10;
+    const supressorEnabled = this._config.powerSupressorEnabled ?? false;
+    const bonusEnabled = this._config.powerBonusEnabled ?? false;
 
-    if (rank == null || member == null) {
+    if (rank == null || member == null || rank.level <= 0) {
       return 1;
     }
 
-    const supressor = rank.messages / (rank.words || 1);
     const wordsPerMessageAvg = rank.words / (rank.messages || 1);
+    const lvlMsgRatio = rank.level / Math.max(1, rank.messages);
+    const supressor = (supressorEnabled && lvlMsgRatio < 0.01 ? (rank.messages / (rank.words || 1)) : 0)
+      / (rank.level >= minimalPowerPenaltyLevel ? 1 : 4);
     let power = 1 + (wordsPerMessageAvg / powerDiscriminator) + (rank.messages / powerDiscriminator) - supressor;
 
-    if (wordsPerMessageAvg >= penaltyAvgThres) {
-      power -= (1 + wordsPerMessageAvg - penaltyAvgThres) / powerDiscriminator;
+    if (supressorEnabled && rank.level >= minimalPowerPenaltyLevel) {
+      // Penalize too high words/msg average
+      if (wordsPerMessageAvg >= penaltyAvgThres) {
+        power -= (1 + wordsPerMessageAvg - penaltyAvgThres) / powerDiscriminator;
+      }
+
+      // Penalize too low words/msg average
+      if (wordsPerMessageAvg < loPenaltyAvgThres) {
+        power -= supressor + (1 / Math.max(1, wordsPerMessageAvg))
+      }
     }
 
-    power += (differenceInCalendarDays(new Date(), member.joinedAt!) / 2) / powerDiscriminator;
-    power += (rank.xp * wordsPerMessageAvg) / (rank.messages || 1) / powerDiscriminator - supressor / 2;
+    if (bonusEnabled && rank.level >= minimalPowerBonusLevel) {
+      power += (differenceInCalendarDays(new Date(), member.joinedAt!) / 4) / powerDiscriminator;
+      power += (rank.xp * wordsPerMessageAvg) / (rank.messages || 1) / powerDiscriminator - supressor / 2;
+      power += loPenaltyAvgThres > wordsPerMessageAvg && wordsPerMessageAvg < penaltyAvgThres
+        ? (wordsPerMessageAvg * 2) / powerDiscriminator : 0;
+    }
 
     for (const roleId of Object.keys(extraPower)) {
       const role = member.roles.cache.find(r => r.id == roleId);
@@ -156,6 +181,24 @@ export default class RankSystem {
       return;
     }
 
+    const cid = `${message.guild.id}/${message.author.id}`;
+    const cooldown = this._config.cooldown ?? 800;
+
+    // cooldown spam limiter
+    if (this._coldownHolds.has(cid)) {
+      info(`${message.author.tag}'s rank computing was limited by cooldown lock in guild ${message.guild}`);
+      return;
+    }
+    
+    // Set cooldown limiter with release timeout
+    if (cooldown > 0) {
+      this._coldownHolds.add(cid);
+      setTimeout(() => {
+        this._coldownHolds.delete(cid)
+        debug(`Cooldown lock '${cid}' was released.`);
+      }, cooldown);
+    }
+
     const announceLevelUp = this._config.announceLevelup ?? false;
     const announceReward = this._config.announceReward ?? true;
     const announceFirstLevel = this._config.announceFirstLevel ?? true;
@@ -166,7 +209,7 @@ export default class RankSystem {
         return;
       }
 
-      const wordThres = this._config.wordThres ?? 6;
+      const wordThres = this._config.wordThres ?? 4;
       const words = message.cleanContent.split(" ").length;
       const power = this.getPower(rank, message.member);
       const addedXp = Math.round(
@@ -188,11 +231,11 @@ export default class RankSystem {
       }
 
       rank.xp += addedXp;
-
       if (words > wordThres) {
         rank.words += words;
         ++rank.messages;
       } else {
+        // Penalize too low words per message
         const decrease = Math.round((addedXp * 0.1) + power) + (wordThres - words);
         rank.xp -= decrease < addedXp ? decrease : Math.max(0, addedXp - 1);
       }

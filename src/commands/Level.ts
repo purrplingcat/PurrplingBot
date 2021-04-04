@@ -95,7 +95,7 @@ export default class LevelCommand implements Command {
         { name: "Level", value: rank.level, inline: true },
         { name: "Experience", value: `${rank.xp} (\`${remainingXpToLevelUp}\` remains to level up)`, inline: true },
         { name: "Power", value: this._ranks.getPower(rank, member).toFixed(2), inline: true },
-        { name: "Words avg.", value: wordsPerMessageAvg.toFixed(2), inline: true },
+        { name: "Words/Msg avg.", value: wordsPerMessageAvg.toFixed(2), inline: true },
         { name: "Highest earned reward", value: highestDiscordRole || "*none*", inline: true },
         { name: "Earned rewards", value: rankEarnings.length > 0 ? rankEarnings : "*No earnings yet*" }
       ],
