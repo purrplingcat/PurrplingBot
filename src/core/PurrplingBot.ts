@@ -19,12 +19,14 @@ export default class PurrplingBot {
   readonly client: Client;
   readonly commander: Commander;
   private readonly token: string;
+  private readonly memberRoleId: string;
   metrics: Metrics;
 
-  constructor(client: Client, commander: Commander, token: string) {
+  constructor(client: Client, commander: Commander, token: string, memberRoleId: string) {
     this.client = client;
     this.token = token;
     this.commander = commander;
+    this.memberRoleId = memberRoleId;
 
     this.client.setInterval(this.watch, 5000);
     this.client.on("ready", this.onReady.bind(this));
@@ -98,6 +100,10 @@ export default class PurrplingBot {
       return; // ignore own or bot messages
     }
 
+    if (message.member != null && !message.member.roles.cache.some(r => r.id === this.memberRoleId)) {
+      message.member.roles.add(this.memberRoleId); // Add member role if it's necessary
+    }
+
     if (this.commander.isCommand(message)) {
       this.commander.process(message);
     }    
@@ -129,7 +135,7 @@ export default class PurrplingBot {
       .catch(this.onError);
   }
 
-  public getUserFromMention(mention: string) : User | null {  
+  public getUserFromMention(mention: string): User | null {  
     if (mention != null && mention.startsWith('<@') && mention.endsWith('>')) {
       mention = mention.slice(2, -1);
   

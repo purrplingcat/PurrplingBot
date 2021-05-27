@@ -1,6 +1,6 @@
 {
   "name": "purrplingbot",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "codename": "Miya",
   "description": "A discordbot written primary for server PurrplingCat",
   "main": "dist/purrplingbot.js",

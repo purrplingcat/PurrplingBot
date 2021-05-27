@@ -11,7 +11,6 @@ import Auditor from "@purrplingbot/services/Auditor"
 import MetricsProvider from "@purrplingbot/providers/MetricsProvider"
 import * as logger from "@purrplingbot/utils/logger";
 import RankSystem, { RankConfig } from "@purrplingbot/services/RankSystem";
-import RankRole from "@purrplingbot/models/rankRole";
 
 export type Config = {
   token: string;
@@ -22,6 +21,7 @@ export type Config = {
   textCommands?: TextCommand[];
   auditChannelId?: string;
   ranks: RankConfig;
+  memberRole: string;
 }
 
 /**
@@ -33,7 +33,8 @@ export interface Bootstrap {
 
 const intents = new Intents([
   Intents.NON_PRIVILEGED,
-  "GUILD_MEMBERS"
+  "GUILD_MEMBERS",
+  "GUILD_PRESENCES",
 ]);
 
 function registerCommands(commander: Commander, client: Client, config: Config): void {
@@ -49,7 +50,7 @@ export function create(config: Config): Bootstrap {
   const client = new Client({ ...config.discordClient, ws: { intents }})
   const commander = new Commander(config.prefix);
   const auditor = new Auditor(client, config.auditChannelId || "");
-  const purrplingBot = new PurrplingBot(client, commander, config.token);
+  const purrplingBot = new PurrplingBot(client, commander, config.token, config.memberRole);
   const metrics = new MetricsProvider(purrplingBot);
   const ranks = new RankSystem(purrplingBot, config.ranks, auditor);
 

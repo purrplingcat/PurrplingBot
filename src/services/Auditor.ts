@@ -15,6 +15,7 @@ export default class Auditor {
     this.client.on("guildMemberRemove", this.onMemberRemoved)
   }
   
+  @autobind
   private async onMemberJoined(member: GuildMember | PartialGuildMember) {
     const logMessage: MessageEmbedOptions = {
       title: "Member joined",
@@ -32,6 +33,7 @@ export default class Auditor {
     await this.logAudit(new MessageEmbed(logMessage));
   }
 
+  @autobind
   private async onMemberRemoved(member: GuildMember | PartialGuildMember) {
     const logMessage: MessageEmbedOptions = {
       title: "Member left",
@@ -109,6 +111,10 @@ export default class Auditor {
   private async onEdit(oldMessage: Message | PartialMessage, newMessage: Message | PartialMessage): Promise<void> {
     if (!(newMessage instanceof Message) || newMessage.author.id === this.client.user?.id) {
       return;
+    }
+
+    if (newMessage.content === oldMessage.content) {
+      return; // Don't log if message text has no change
     }
     
     newMessage = newMessage as Message;

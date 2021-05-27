@@ -15,7 +15,7 @@ export type RankConfig = {
   levelUpOffset?: number;
   wordThres?: number;
   powerDiscriminator?: number;
-  minimumLevelXp?: number,
+  minimumLevelXp?: number;
   reproductionNumber?: number;
   penaltyWordsPerMessageAvgThres?: number;
   powerSupressorEnabled?: boolean;
@@ -91,7 +91,7 @@ export default class RankSystem {
     return Rank.findOne({ userID: user.id, guildID: guild.id }).exec();
   }
 
-  public async GetRankOrder(rank: IRank) : Promise<{ index: number, count: number }> {
+  public async GetRankOrder(rank: IRank): Promise<{ index: number; count: number }> {
     const sortedRanks = await Rank.find({ guildID: rank.guildID }).sort({ xp: "desc" }).exec();
 
     return {
